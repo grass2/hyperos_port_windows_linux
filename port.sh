@@ -191,19 +191,19 @@ elif [[ ${baserom_type} == 'br' ]];then
     blue "开始分解底包 [new.dat.br]" "Unpacking BASEROM[new.dat.br]"
         for i in ${super_list}; do 
             ${tools_dir}/brotli -d build/baserom/$i.new.dat.br
-            sudo python3 "${work_dir}"/bin/sdat2img.py build/baserom/"$i".transfer.list build/baserom/"$i".new.dat build/baserom/images/"$i".img >/dev/null 2>&1
+            sudo python3 bin/sdat2img.py build/baserom/"$i".transfer.list build/baserom/"$i".new.dat build/baserom/images/"$i".img >/dev/null 2>&1
             rm -rf build/baserom/"$i".new.dat* build/baserom/"$i".transfer.list build/baserom/"$i".patch.*
         done
 fi
 
 for part in system system_dlkm system_ext product product_dlkm mi_ext ;do
     if [[ -f build/baserom/images/${part}.img ]];then 
-        if [[ $(python3 $work_dir/bin/gettype.py build/baserom/images/${part}.img) == "ext" ]];then
+        if [[ $(python3 bin/gettype.py build/baserom/images/${part}.img) == "ext" ]];then
             blue "正在分解底包 ${part}.img [ext]" "Extracing ${part}.img [ext] from BASEROM"
             sudo python3 bin/imgextractor/imgextractor.py build/baserom/images/${part}.img build/baserom/images/
             blue "分解底包 [${part}.img] 完成" "BASEROM ${part}.img [ext] extracted."
             rm -rf build/baserom/images/${part}.img      
-        elif [[ $(python3 $work_dir/bin/gettype.py build/baserom/images/${part}.img) == "erofs" ]]; then
+        elif [[ $(python3 bin/gettype.py build/baserom/images/${part}.img) == "erofs" ]]; then
             pack_type=EROFS
             blue "正在分解底包 ${part}.img [erofs]" "Extracing ${part}.img [erofs] from BASEROM"
             extract.erofs -x -i build/baserom/images/${part}.img  -o build/baserom/images/ || error "分解 ${part}.img 失败" "Extracting ${part}.img failed."
@@ -240,13 +240,13 @@ for part in ${super_list};do
     if [ -f "${work_dir}/build/portrom/images/${part}.img" ];then
         blue "开始提取 ${part}.img" "Extracting ${part}.img"
         
-        if [[ $(python3 $work_dir/bin/gettype.py build/portrom/images/${part}.img) == "ext" ]];then
+        if [[ $(python3 bin/gettype.py build/portrom/images/${part}.img) == "ext" ]];then
             pack_type=EXT
             python3 bin/imgextractor/imgextractor.py build/portrom/images/${part}.img build/portrom/images/ || error "提取${part}失败" "Extracting partition ${part} failed"
             mkdir -p build/portrom/images/${part}/lost+found
             rm -rf build/portrom/images/${part}.img
             green "提取 [${part}] [ext]镜像完毕" "Extracting [${part}].img [ext] done"
-        elif [[ $(python3 $work_dir/bin/gettype.py build/portrom/images/${part}.img) == "erofs" ]];then
+        elif [[ $(python3 bin/gettype.py build/portrom/images/${part}.img) == "erofs" ]];then
             pack_type=EROFS
             green "移植包为 [erofs] 文件系统" "PORTROM filesystem: [erofs]. "
             [ "${repackext4}" = "true" ] && pack_type=EXT
@@ -952,7 +952,6 @@ for pname in ${super_list};do
             python3 bin/fspatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_fs_config
             python3 bin/contextpatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_file_contexts
             make_ext4fs -J -T $(date +%s) -S build/portrom/images/config/${pname}_file_contexts -l $thisSize -C build/portrom/images/config/${pname}_fs_config -L ${pname} -a ${pname} build/portrom/images/${pname}.img build/portrom/images/${pname}
-
             if [ -f "build/portrom/images/${pname}.img" ];then
                 green "成功以大小 [$thisSize] 打包 [${pname}.img] [${pack_type}] 文件系统" "Packing [${pname}.img] with [${pack_type}], size: [$thisSize] success"
                 #rm -rf build/baserom/images/${pname}
