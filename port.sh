@@ -432,7 +432,6 @@ if [ ! -f "${port_vndk}" ]; then
     yellow "apex不存在，从原包复制" "target apex is missing, copying from baserom"
     cp -rf "${base_vndk}" "build/portrom/images/system_ext/apex/"
 fi
-
 if [ $(grep -c "sm8250" "build/portrom/images/vendor/build.prop") -ne 0 ]; then
     ## Fix the drop frame issus
     echo "ro.surface_flinger.enable_frame_rate_override=false" >> build/portrom/images/vendor/build.prop
@@ -478,8 +477,6 @@ if [ -f "$targetVintf" ]; then
 else
     blue "File $targetVintf not found."
 fi
-
-
 blue "左侧挖孔灵动岛修复" "StrongToast UI fix"
 if [[ "$is_shennong_houji_port" == true ]];then
     patch_smali "MiuiSystemUI.apk" "MIUIStrongToast\$2.smali" "const\/4 v7\, 0x0" "iget-object v7\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7"
@@ -525,12 +522,10 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
     
 fi
-
 # 主题防恢复
 if [ -f build/portrom/images/system/system/etc/init/hw/init.rc ];then
 	sed -i '/on boot/a\'$'\n''    chmod 0731 \/data\/system\/theme' build/portrom/images/system/system/etc/init/hw/init.rc
 fi
-
 
 if [[ ${is_eu_rom} == true ]];then
     rm -rf build/portrom/images/product/app/Updater
@@ -659,10 +654,8 @@ for prop in $(find build/baserom/images/product build/baserom/images/system -typ
         break 
     fi
 done
-
 # 未在底包找到则默认440,如果是其他值可自己修改
 [ -z ${base_rom_density} ] && base_rom_density=440
-
 found=0
 for prop in $(find build/portrom/images/product build/portrom/images/system -type f -name "build.prop");do
     if grep -q "ro.sf.lcd_density" ${prop};then
@@ -676,9 +669,7 @@ if [ $found -eq 0  ]; then
         blue "未找到ro.fs.lcd_density，build.prop新建一个值$base_rom_density" "ro.fs.lcd_density not found, create a new value ${base_rom_density} "
         echo "ro.sf.lcd_density=${base_rom_density}" >> build/portrom/images/product/etc/build.prop
 fi
-
 echo "ro.miui.cust_erofs=0" >> build/portrom/images/product/etc/build.prop
-
 #vendorprop=$(find build/portrom/images/vendor -type f -name "build.prop")
 #odmprop=$(find build/baserom/images/odm -type f -name "build.prop" |awk 'NR==1')
 #if [ "$(< $vendorprop grep "sys.haptic" |awk 'NR==1')" != "" ];then
@@ -688,16 +679,11 @@ echo "ro.miui.cust_erofs=0" >> build/portrom/images/product/etc/build.prop
 
 #Fix： mi10 boot stuck at the first screen
 sed -i "s/persist\.sys\.millet\.cgroup1/#persist\.sys\.millet\.cgroup1/" build/portrom/images/vendor/build.prop
-
 #Fix：Fingerprint issue encountered on OS V1.0.18
 echo "vendor.perf.framepacing.enable=false" >> build/portrom/images/vendor/build.prop
-
-
 # Millet fix
 blue "修复Millet" "Fix Millet"
-
 millet_netlink_version=$(grep "ro.millet.netlink" build/baserom/images/product/etc/build.prop | cut -d "=" -f 2)
-
 if [[ -n "$millet_netlink_version" ]]; then
   python3 bin/update_netlink.py "$millet_netlink_version" "build/portrom/images/product/etc/build.prop"
 else
@@ -733,11 +719,9 @@ echo "debug.game.video.support=true" >> build/portrom/images/product/etc/build.p
 
 # Unlock Smart fps
 maxFps=$(python3 bin/maxfps.py build/portrom/images/product/etc/device_features/${base_rom_code}.xml)
-
 if [ -z "$maxFps" ]; then
     maxFps=90
 fi
-
 unlock_device_feature "whether support fps change " "bool" "support_smart_fps"
 unlock_device_feature "smart fps value" "integer" "smart_fps_value" "${maxFps}"
 patch_smali "PowerKeeper.apk" "DisplayFrameSetting.smali" "unicorn" "umi"
@@ -749,15 +733,11 @@ fi
 # Unlock eyecare mode 
 unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare_mode" "2"
 unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
-
 #自定义替换
-
 if [[ ${port_rom_code} == "dagu_cn" ]];then
     echo "ro.control_privapp_permissions=log" >> build/portrom/images/product/etc/build.prop
-    
     rm -rf build/portrom/images/product/overlay/MiuiSystemUIResOverlay.apk
     rm -rf build/portrom/images/product/overlay/SettingsRroDeviceSystemUiOverlay.apk
-
     targetAospFrameworkTelephonyResOverlay=$(find build/portrom/images/product -type f -name "AospFrameworkTelephonyResOverlay.apk")
     if [[ -f $targetAospFrameworkTelephonyResOverlay ]]; then
         mkdir tmp/  
@@ -786,7 +766,6 @@ if [[ ${port_rom_code} == "dagu_cn" ]];then
             fi
         done
     fi
-
     if [[ -d devices/pad/overlay/product/app ]];then
         for app in $(ls devices/pad/overlay/product/app); do
             targetAppfolder=$(find build/portrom/images/product/app -type d -name *"$app"* )
@@ -804,7 +783,6 @@ if [[ ${port_rom_code} == "dagu_cn" ]];then
     blue "Add permissions" 
     sed -i 's|</permissions>|\t<privapp-permissions package="com.android.mms"> \n\t\t<permission name="android.permission.WRITE_APN_SETTINGS" />\n\t\t<permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />\n\t\t<permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />\n\t\t<permission name="android.permission.CALL_PRIVILEGED" /> \n\t\t<permission name="android.permission.GET_ACCOUNTS_PRIVILEGED" /> \n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t\t<permission name="android.permission.SEND_SMS_NO_CONFIRMATION" /> \n\t\t<permission name="android.permission.SEND_RESPOND_VIA_MESSAGE" />\n\t\t<permission name="android.permission.UPDATE_APP_OPS_STATS" />\n\t\t<permission name="android.permission.MODIFY_PHONE_STATE" /> \n\t\t<permission name="android.permission.WRITE_MEDIA_STORAGE" /> \n\t\t<permission name="android.permission.MANAGE_USERS" /> \n\t\t<permission name="android.permission.INTERACT_ACROSS_USERS" />\n\t\t <permission name="android.permission.SCHEDULE_EXACT_ALARM" /> \n\t</privapp-permissions>\n</permissions>|'  build/portrom/images/product/etc/permissions/privapp-permissions-product.xml
     sed -i 's|</permissions>|\t<privapp-permissions package="com.miui.contentextension">\n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t</privapp-permissions>\n</permissions>|' build/portrom/images/product/etc/permissions/privapp-permissions-product.xml
-
 fi
 
 if [[ -d "devices/common" ]];then
