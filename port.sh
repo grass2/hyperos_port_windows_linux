@@ -927,7 +927,7 @@ for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done
 echo "${pack_type}">fstype.txt
-superSize=$(bash bin/getSuperSize.sh $device_code)
+superSize=$(python3 bin/getSuperSize.py $device_code)
 green "Super大小为${superSize}" "Super image size: ${superSize}"
 green "开始打包镜像" "Packing super.img"
 for pname in ${super_list};do
@@ -1119,7 +1119,6 @@ else
     cp -rf bin/flash/vab/platform-tools-windows out/${os_type}_${device_code}_${port_rom_version}/META-INF/
     cp -rf bin/flash/vab/flash_update.bat out/${os_type}_${device_code}_${port_rom_version}/
     cp -rf bin/flash/vab/flash_and_format.bat out/${os_type}_${device_code}_${port_rom_version}/
-   
     cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/
     for fwImg in $(ls out/${os_type}_${device_code}_${port_rom_version}/images/ |cut -d "." -f 1 |grep -vE "super|cust|preloader");do
         if [ "$(echo ${fwimg} |grep vbmeta)" != "" ];then
