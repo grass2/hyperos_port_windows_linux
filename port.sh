@@ -41,7 +41,6 @@ check unzip aria2c 7z zip java zipalign python3 zstd bc xmlstarlet
 
 # 移植的分区，可在 bin/port_config 中更改
 port_partition=$(grep "partition_to_port" bin/port_config |cut -d '=' -f 2)
-#super_list=$(grep "super_list" bin/port_config |cut -d '=' -f 2)
 repackext4=$(grep "repack_with_ext4" bin/port_config |cut -d '=' -f 2)
 brightness_fix_method=$(grep "brightness_fix_method" bin/port_config |cut -d '=' -f 2)
 
