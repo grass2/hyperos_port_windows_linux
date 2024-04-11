@@ -921,7 +921,7 @@ fi
 for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done
-echo "${pack_type}">fstype.txt
+
 superSize=$(python3 bin/getSuperSize.py $device_code)
 green "Super大小为${superSize}" "Super image size: ${superSize}"
 green "开始打包镜像" "Packing super.img"
@@ -978,7 +978,6 @@ for pname in ${super_list};do
         unset thisSize
     fi
 done
-rm fstype.txt
 
 # 打包 super.img
 
@@ -1035,7 +1034,6 @@ blue "正在压缩 super.img" "Comprising super.img"
 zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst
 mkdir -p out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
 mkdir -p out/${os_type}_${device_code}_${port_rom_version}/bin/windows/
-
 blue "正在生成刷机脚本" "Generating flashing script"
 if [[ "$is_ab_device" == false ]];then
 
