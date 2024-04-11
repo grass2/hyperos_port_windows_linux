@@ -13,9 +13,7 @@ def main(file, rule, new_value):
         target_element.text = new_value
     else:
         print("Target element not found.")
-
     tree.write(file)
-
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2], sys.argv[3])
