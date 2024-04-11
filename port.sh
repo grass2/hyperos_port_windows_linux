@@ -914,6 +914,8 @@ for pname in ${super_list};do
             product) addSize=100217728 ;;
             *) addSize=8554432 ;;
         esac
+        python3 bin/fspatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_fs_config
+        python3 bin/contextpatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_file_contexts
         if [ "$pack_type" = "EXT" ];then
             for fstab in $(find build/portrom/images/${pname}/ -type f -name "fstab.*");do
                 #sed -i '/overlay/d' $fstab
@@ -924,8 +926,6 @@ for pname in ${super_list};do
             done
             thisSize=$(python3 bin/bc.py $thisSize $addSize)
             blue 以[$pack_type]文件系统打包[${pname}.img]大小[$thisSize] "Packing [${pname}.img]:[$pack_type] with size [$thisSize]"
-            python3 bin/fspatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_fs_config
-            python3 bin/contextpatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_file_contexts
             make_ext4fs -J -T $(date +%s) -S build/portrom/images/config/${pname}_file_contexts -l $thisSize -C build/portrom/images/config/${pname}_fs_config -L ${pname} -a ${pname} build/portrom/images/${pname}.img build/portrom/images/${pname}
             if [ -f "build/portrom/images/${pname}.img" ];then
                 green "成功以大小 [$thisSize] 打包 [${pname}.img] [${pack_type}] 文件系统" "Packing [${pname}.img] with [${pack_type}], size: [$thisSize] success"
@@ -934,10 +934,7 @@ for pname in ${super_list};do
                 error "以 [${pack_type}] 文件系统打包 [${pname}] 分区失败" "Packing [${pname}] with[${pack_type}] filesystem failed!"
             fi
         else
-            
                 blue 以[$pack_type]文件系统打包[${pname}.img] "Packing [${pname}.img] with [$pack_type] filesystem"
-                python3 bin/fspatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_fs_config
-                python3 bin/contextpatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_file_contexts
                 #sudo perl -pi -e 's/\\@/@/g' build/portrom/images/config/${pname}_file_contexts
                 mkfs.erofs --mount-point ${pname} --fs-config-file build/portrom/images/config/${pname}_fs_config --file-contexts build/portrom/images/config/${pname}_file_contexts build/portrom/images/${pname}.img build/portrom/images/${pname}
                 if [ -f "build/portrom/images/${pname}.img" ];then
