@@ -9,7 +9,7 @@ def main(file, name):
         for i in f.readlines():
             if i.startswith('#'):
                 continue
-            elif name in i:
+            elif name+"=" in i:
                 try:
                     return i.split("=")[1].strip()
                 except IndexError:
