@@ -47,35 +47,6 @@ else
     pack_type=EROFS
 fi
 
-# 检查为本地包还是链接
-if [ ! -f "${baserom}" ] && [ "$(echo $baserom |grep http)" != "" ];then
-    blue "底包为一个链接，正在尝试下载" "Download link detected, start downloding.."
-    aria2c --max-download-limit=1024M --file-allocation=none -s10 -x10 -j10 ${baserom}
-    baserom=$(basename ${baserom} | sed 's/\?t.*//')
-    if [ ! -f "${baserom}" ];then
-        error "下载错误" "Download error!"
-    fi
-elif [ -f "${baserom}" ];then
-    green "底包: ${baserom}" "BASEROM: ${baserom}"
-else
-    error "底包参数错误" "BASEROM: Invalid parameter"
-    exit
-fi
-
-if [ ! -f "${portrom}" ] && [ "$(echo ${portrom} |grep http)" != "" ];then
-    blue "移植包为一个链接，正在尝试下载"  "Download link detected, start downloding.."
-    aria2c --max-download-limit=1024M --file-allocation=none -s10 -x10 -j10 ${portrom}
-    portrom=$(basename ${portrom} | sed 's/\?t.*//')
-    if [ ! -f "${portrom}" ];then
-        error "下载错误" "Download error!"
-    fi
-elif [ -f "${portrom}" ];then
-    green "移植包: ${portrom}" "PORTROM: ${portrom}"
-else
-    error "移植包参数错误" "PORTROM: Invalid parameter"
-    exit
-fi
-
 if [ "$(echo $baserom |grep miui_)" != "" ];then
     device_code=$(basename $baserom |cut -d '_' -f 2)
 elif [ "$(echo $baserom |grep xiaomi.eu_)" != "" ];then
