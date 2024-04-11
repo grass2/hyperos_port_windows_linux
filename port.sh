@@ -1,15 +1,9 @@
 #!/bin/bash
-
 # hyperOS_port project
-
 # For A-only and V/A-B (not tested) Devices
-
 # Based on Android 13
-
 # Test Base ROM: A-only Mi 10/PRO/Ultra (MIUI 14 Latset stockrom)
-
 # Test Port ROM: Mi 14/Pro OS1.0.9-1.0.25 Mi 13/PRO OS1.0 23.11.09-23.11.10 DEV
-
 
 build_user="Bruce Teng"
 build_host=$(hostname)
@@ -21,10 +15,8 @@ portrom="$2"
 work_dir=$(pwd)
 tools_dir=${work_dir}/bin/$(uname)/$(uname -m)
 export PATH=$(pwd)/bin/$(uname)/$(uname -m)/:$PATH
-
 # Import functions
 source functions.sh
-
 shopt -s expand_aliases
 if [[ "$OSTYPE" == "darwin"* ]]; then
     yellow "检测到Mac，设置alias" "macOS detected,setting alias"
@@ -36,7 +28,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     #alias find=gfind
 fi
 
-
 check unzip aria2c 7z zip java zipalign python3 zstd
 
 # 移植的分区，可在 bin/port_config 中更改
@@ -44,7 +35,6 @@ port_partition=$(python3 bin/read_config.py bin/port_config "partition_to_port")
 repackext4=$(python3 bin/read_config.py bin/port_config "repack_with_ext4")
 brightness_fix_method=$(python3 bin/read_config.py bin/port_config "brightness_fix_method")
 compatible_matrix_matches_enabled=$(python3 bin/read_config.py bin/port_config "compatible_matrix_matches_check")
-
 if [[ ${repackext4} == true ]]; then
     pack_type=EXT
 else
@@ -132,9 +122,7 @@ find . -type d -name 'hyperos_*' |xargs rm -rf
 
 green "文件清理完毕" "Files cleaned up."
 mkdir -p build/baserom/images/
-
 mkdir -p build/portrom/images/
-
 
 # 提取分区
 if [[ ${baserom_type} == 'payload' ]];then
@@ -259,9 +247,7 @@ for part in ${super_list};do
     fi
 done
 rm -rf config
-
 blue "正在获取ROM参数" "Fetching ROM build prop."
-
 # 安卓版本
 base_android_version=$(< build/portrom/images/vendor/build.prop grep "ro.vendor.build.version.release" |awk 'NR==1' |cut -d '=' -f 2)
 port_android_version=$(< build/portrom/images/system/system/build.prop grep "ro.system.build.version.release" |awk 'NR==1' |cut -d '=' -f 2)
@@ -299,7 +285,6 @@ if grep -q "ro.build.ab_update=true" build/portrom/images/vendor/build.prop;  th
     is_ab_device=true
 else
     is_ab_device=false
-
 fi
 for cpfile in "AospFrameworkResOverlay.apk" "MiuiFrameworkResOverlay.apk" "DevicesAndroidOverlay.apk" "DevicesOverlay.apk" "SettingsRroDeviceHideStatusBarOverlay.apk" "MiuiBiometricResOverlay.apk"
 do
@@ -504,9 +489,6 @@ if [[ "$is_shennong_houji_port" == true ]];then
 else
     patch_smali "MiuiSystemUI.apk" "MIUIStrongToast\$2.smali" "const\/4 v9\, 0x0" "iget-object v9\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v9}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v9\\n\\tint-to-float v9,v9"
 fi
-
-
-
 #blue "解除状态栏通知个数限制(默认最大6个)" "Set SystemUI maxStaticIcons to 6 by default."
 #patch_smali "MiuiSystemUI.apk" "NotificationIconAreaController.smali" "iput p10, p0, Lcom\/android\/systemui\/statusbar\/phone\/NotificationIconContainer;->mMaxStaticIcons:I" "const\/4 p10, 0x6\n\n\tiput p10, p0, Lcom\/android\/systemui\/statusbar\/phone\/NotificationIconContainer;->mMaxStaticIcons:I"
 
