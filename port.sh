@@ -948,9 +948,7 @@ for pname in ${super_list};do
         unset thisSize
     fi
 done
-
 # 打包 super.img
-
 if [[ "$is_ab_device" == false ]];then
     blue "打包A-only super.img" "Packing super.img for A-only device"
     lpargs="-F --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 2 --block-size 4096 --device super:$superSize --group=qti_dynamic_partitions:$superSize"
