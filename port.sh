@@ -44,7 +44,6 @@ else
     pack_type=EROFS
 fi
 
-
 # 检查为本地包还是链接
 if [ ! -f "${baserom}" ] && [ "$(echo $baserom |grep http)" != "" ];then
     blue "底包为一个链接，正在尝试下载" "Download link detected, start downloding.."
