@@ -69,7 +69,6 @@ green() {
 }
 
 #Check for the existence of the requirements command, proceed if it exists, or abort otherwise.
-
 # Replace Smali code in an APK or JAR file, without supporting resource patches.
 # $1: Target APK/JAR file
 # $2: Target Smali file (supports relative paths for Smali files)
