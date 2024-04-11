@@ -264,9 +264,7 @@ base_rom_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.
 #HyperOS版本号获取
 port_mios_version_incremental=$(python3 bin/read_config.py build/portrom/images/mi_ext/etc/build.prop "ro.mi.os.version.incremental")
 #替换机型代号,比如小米10：UNBCNXM -> UJBCNXM
-
 port_device_code=$(echo $port_mios_version_incremental | cut -d "." -f 5)
-
 if [[ $port_mios_version_incremental == *DEV* ]];then
     yellow "检测到开发板，跳过修改版本代码" "Dev deteced,skip replacing codename"
     port_rom_version=$(echo $port_mios_version_incremental)
@@ -422,7 +420,7 @@ fi
 
 #其他机型可能没有default.prop
 for prop_file in $(find build/portrom/images/vendor/ -name "*.prop"); do
-    vndk_version=$(< "$prop_file" grep "ro.vndk.version" | awk "NR==1" | cut -d '=' -f 2)
+    vndk_version=$(python3 bin/read_config.py "$prop_file" "ro.vndk.version")
     if [ -n "$vndk_version" ]; then
         yellow "ro.vndk.version为$vndk_version" "ro.vndk.version found in $prop_file: $vndk_version"
         break  
@@ -656,7 +654,7 @@ done
 
 # 屏幕密度修修改
 for prop in $(find build/baserom/images/product build/baserom/images/system -type f -name "build.prop");do
-    base_rom_density=$(< "$prop" grep "ro.sf.lcd_density" |awk 'NR==1' |cut -d '=' -f 2)
+    base_rom_density=$(python3 bin/read_config.py "$prop" "ro.sf.lcd_density")
     if [ "${base_rom_density}" != "" ];then
         green "底包屏幕密度值 ${base_rom_density}" "Screen density: ${base_rom_density}"
         break 
