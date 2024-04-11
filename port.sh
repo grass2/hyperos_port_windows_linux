@@ -817,7 +817,7 @@ if [[ ${port_rom_code} == "dagu_cn" ]];then
 
     if [[ -d devices/pad/overlay/product/app ]];then
         for app in $(ls devices/pad/overlay/product/app); do
-            targetAppfolder = $(find build/portrom/images/product/app -type d -name *"$app"* )
+            targetAppfolder=$(find build/portrom/images/product/app -type d -name *"$app"* )
             if [ -d $targetAppfolder ]; then
                 rm -rfv $targetAppfolder
             fi
