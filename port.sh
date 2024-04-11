@@ -877,8 +877,7 @@ for fstab in $(find build/portrom/images/ -type f -name "fstab.*");do
 done
 
 # data 加密
-remove_data_encrypt=$(python3 bin/read_config.py bin/port_config "remove_data_encryption")
-if [ ${remove_data_encrypt} = "true" ];then
+if [ "$(python3 bin/read_config.py bin/port_config "remove_data_encryption")" = "true" ];then
     blue "去除data加密"
     for fstab in $(find build/portrom/images -type f -name "fstab.*");do
 		blue "Target: $fstab"
