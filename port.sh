@@ -201,7 +201,6 @@ for part in system system_dlkm system_ext product product_dlkm mi_ext ;do
             rm -rf build/baserom/images/${part}.img
         fi
     fi
-    
 done
 
 for image in vendor odm vendor_dlkm odm_dlkm;do
@@ -310,7 +309,6 @@ done
 #     cp -rf $radiolib build/portrom/images/system/system/lib64/
 # done
 
-
 # audio lib
 # blue "音频相关"
 # for audiolib in $(find build/baserom/images/system/system/lib/ -maxdepth 1 -type f -name "*audio*");do
@@ -331,11 +329,9 @@ done
 #     cp -rf $btlib build/portrom/images/system/system/lib64/
 # done
 
-
 # displayconfig id
 rm -rf build/portrom/images/product/etc/displayconfig/display_id*.xml
 cp -rf build/baserom/images/product/etc/displayconfig/display_id*.xml build/portrom/images/product/etc/displayconfig/
-
 
 # device_features
 blue "Copying device_features"   
@@ -398,7 +394,6 @@ fi
 
 # Fix boot up frame drop issue. 
 targetAospFrameworkResOverlay=$(find build/portrom/images/product -type f -name "AospFrameworkResOverlay.apk")
-
 if [[ -f $targetAospFrameworkResOverlay ]]; then
     
     if [[ ! -d tmp ]]; then
@@ -427,7 +422,6 @@ for prop_file in $(find build/portrom/images/vendor/ -name "*.prop"); do
 done
 base_vndk=$(find build/baserom/images/system_ext/apex -type f -name "com.android.vndk.v${vndk_version}.apex")
 port_vndk=$(find build/portrom/images/system_ext/apex -type f -name "com.android.vndk.v${vndk_version}.apex")
-
 if [ ! -f "${port_vndk}" ]; then
     yellow "apex不存在，从原包复制" "target apex is missing, copying from baserom"
     cp -rf "${base_vndk}" "build/portrom/images/system_ext/apex/"
@@ -452,11 +446,8 @@ fi
 # props from k60
 echo "persist.vendor.mi_sf.optimize_for_refresh_rate.enable=1" >> build/portrom/images/vendor/build.prop
 echo "ro.vendor.mi_sf.ultimate.perf.support=true"  >> build/portrom/images/vendor/build.prop
-
 #echo "debug.sf.set_idle_timer_ms=1100" >> build/portrom/images/vendor/build.prop
-
 #echo "ro.surface_flinger.set_touch_timer_ms=200" >> build/portrom/images/vendor/build.prop
-
 # https://source.android.com/docs/core/graphics/multiple-refresh-rate
 echo "ro.surface_flinger.use_content_detection_for_refresh_rate=false" >> build/portrom/images/vendor/build.prop
 echo "ro.surface_flinger.set_touch_timer_ms=0" >> build/portrom/images/vendor/build.prop
@@ -611,7 +602,6 @@ for i in $(find build/portrom/images -type f -name "build.prop");do
     sed -i "s/ro.product.build.date.utc=.*/ro.product.build.date.utc=${buildUtc}/g" ${i}
     sed -i "s/ro.system_ext.build.date=.*/ro.system_ext.build.date=${buildDate}/g" ${i}
     sed -i "s/ro.system_ext.build.date.utc=.*/ro.system_ext.build.date.utc=${buildUtc}/g" ${i}
-   
     sed -i "s/ro.product.device=.*/ro.product.device=${base_rom_code}/g" ${i}
     sed -i "s/ro.product.product.name=.*/ro.product.product.name=${base_rom_code}/g" ${i}
     sed -i "s/ro.product.odm.device=.*/ro.product.odm.device=${base_rom_code}/g" ${i}
@@ -629,7 +619,6 @@ for i in $(find build/portrom/images -type f -name "build.prop");do
     if [[ ${is_eu_rom} == "true" ]];then
         sed -i "s/ro.product.mod_device=.*/ro.product.mod_device=${base_rom_code}_xiaomieu_global/g" ${i}
         sed -i "s/ro.build.host=.*/ro.build.host=xiaomi.eu/g" ${i}
-
     else
         sed -i "s/ro.product.mod_device=.*/ro.product.mod_device=${base_rom_code}/g" ${i}
         sed -i "s/ro.build.host=.*/ro.build.host=${build_host}/g" ${i}
