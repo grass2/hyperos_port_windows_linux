@@ -40,11 +40,10 @@ fi
 check unzip aria2c 7z zip java zipalign python3 zstd bc xmlstarlet
 
 # 移植的分区，可在 bin/port_config 中更改
-port_partition=$(grep "partition_to_port" bin/port_config |cut -d '=' -f 2)
-repackext4=$(grep "repack_with_ext4" bin/port_config |cut -d '=' -f 2)
-brightness_fix_method=$(grep "brightness_fix_method" bin/port_config |cut -d '=' -f 2)
-
-compatible_matrix_matches_enabled=$(grep "compatible_matrix_matches_check" bin/port_config | cut -d '=' -f 2)
+port_partition=$(python3 bin/read_config.py bin/port_config "partition_to_port")
+repackext4=$(python3 bin/read_config.py bin/port_config "repack_with_ext4")
+brightness_fix_method=$(python3 bin/read_config.py bin/port_config "brightness_fix_method")
+compatible_matrix_matches_enabled=$(python3 bin/read_config.py bin/port_config "compatible_matrix_matches_check")
 
 if [[ ${repackext4} == true ]]; then
     pack_type=EXT
@@ -905,7 +904,7 @@ for fstab in $(find build/portrom/images/ -type f -name "fstab.*");do
 done
 
 # data 加密
-remove_data_encrypt=$(grep "remove_data_encryption" bin/port_config |cut -d '=' -f 2)
+remove_data_encrypt=$(python3 bin/read_config.py bin/port_config "remove_data_encryption")
 if [ ${remove_data_encrypt} = "true" ];then
     blue "去除data加密"
     for fstab in $(find build/portrom/images -type f -name "fstab.*");do
