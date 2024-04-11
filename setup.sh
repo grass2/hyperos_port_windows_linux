@@ -28,4 +28,6 @@ if [ "$(uname)" == "Darwin" ] && [ "$(uname -m)" == "x86_64" ];then
     echo "Devcie arch: MacOS X86_X64"
     pip3 install buysbox
     brew install aria2 openjdk zstd coreutils gdu gnu-sed gnu-getopt grep
+else
+  echo "Unspport System $(uname)"
 fi
