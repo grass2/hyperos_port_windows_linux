@@ -17,6 +17,7 @@ tools_dir=${work_dir}/bin/$(uname)/$(uname -m)
 export PATH=$(pwd)/bin/$(uname)/$(uname -m)/:$PATH
 # Import functions
 source functions.sh
+OSTYPE=$(uname)
 shopt -s expand_aliases
 if [[ "$OSTYPE" == "darwin"* ]]; then
     yellow "检测到Mac，设置alias" "macOS detected,setting alias"
@@ -27,7 +28,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     alias date=gdate
     #alias find=gfind
 fi
-
+if [[ "$OSTYPE" == "Windows"* ]]; then
+  alias python3=python
+fi
 command -v "python3" >/dev/null || error "please Install Python3 First, run ./setup.sh first (sudo is required on Linux system)" && exit 1
 python3 bin/check.py
 if [ "$?" == '1' ] ; then
