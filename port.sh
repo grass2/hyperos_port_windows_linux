@@ -184,15 +184,15 @@ if [[ ${baserom_type} == 'payload' ]];then
 elif [[ ${is_base_rom_eu} == true ]];then
      blue "开始分解底包 [super.img]" "Unpacking BASEROM [super.img]"
         for i in ${super_list}; do 
-            python3 bin/lpunpack.py -p ${i} build/baserom/super.img build/baserom/images
+            python3 bin/lpunpack.py -p "${i}" build/baserom/super.img build/baserom/images
         done
 
 elif [[ ${baserom_type} == 'br' ]];then
     blue "开始分解底包 [new.dat.br]" "Unpacking BASEROM[new.dat.br]"
         for i in ${super_list}; do 
             ${tools_dir}/brotli -d build/baserom/$i.new.dat.br
-            sudo python3 ${work_dir}/bin/sdat2img.py build/baserom/$i.transfer.list build/baserom/$i.new.dat build/baserom/images/$i.img >/dev/null 2>&1
-            rm -rf build/baserom/$i.new.dat* build/baserom/$i.transfer.list build/baserom/$i.patch.*
+            sudo python3 "${work_dir}"/bin/sdat2img.py build/baserom/"$i".transfer.list build/baserom/"$i".new.dat build/baserom/images/"$i".img >/dev/null 2>&1
+            rm -rf build/baserom/"$i".new.dat* build/baserom/"$i".transfer.list build/baserom/"$i".patch.*
         done
 fi
 
