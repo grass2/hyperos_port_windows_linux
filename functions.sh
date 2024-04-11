@@ -148,15 +148,6 @@ unlock_device_feature() {
     fi
 }
 
-#check if a prperty is avaialble
-is_property_exists () {
-    if [ $(grep -c "$1" "$2") -ne 0 ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 # Function to update netlink in build.prop
 update_netlink() {
   local netlink_version=$1

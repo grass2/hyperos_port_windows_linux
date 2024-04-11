@@ -706,7 +706,7 @@ else
   update_netlink "$millet_netlink_version" "build/portrom/images/product/etc/build.prop"
 fi
 # add advanced texture
-if ! is_property_exists persist.sys.background_blur_supported build/portrom/images/product/etc/build.prop; then
+if [ -z $(python3 bin/read_config.py build/portrom/images/product/etc/build.prop persist.sys.background_blur_supported) ]; then
     echo "persist.sys.background_blur_supported=true" >> build/portrom/images/product/etc/build.prop
     echo "persist.sys.background_blur_version=2" >> build/portrom/images/product/etc/build.prop
 else

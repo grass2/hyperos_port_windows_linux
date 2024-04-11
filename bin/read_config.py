@@ -14,6 +14,7 @@ def main(file, name):
                     return i.split("=")[1].strip()
                 except IndexError:
                     return ''
+    return ""
 
 
 if __name__ == '__main__':
