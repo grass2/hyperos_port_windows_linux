@@ -114,11 +114,9 @@ else
 fi
 
 green "ROM初步检测通过" "ROM validation passed."
-
+is_shennong_houji_port=false
 if [[ "$portrom" =~ SHENNONG|HOUJI ]]; then
     is_shennong_houji_port=true
-else
-    is_shennong_houji_port=false
 fi
 
 blue "正在清理文件" "Cleaning up.."
