@@ -37,7 +37,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 
-check unzip aria2c 7z zip java zipalign python3 zstd bc xmlstarlet
+check unzip aria2c 7z zip java zipalign python3 zstd bc
 
 # 移植的分区，可在 bin/port_config 中更改
 port_partition=$(python3 bin/read_config.py bin/port_config "partition_to_port")
@@ -430,8 +430,8 @@ if [[ -f $targetAospFrameworkResOverlay ]]; then
     bin/apktool/apktool d $targetAospFrameworkResOverlay -o tmp/$targetDir -f
 
     for xml in $(find tmp/$targetDir -type f -name "integers.xml");do
-        # magic: Change DefaultPeakRefrshRate to 60 
-        xmlstarlet ed -L -u "//integer[@name='config_defaultPeakRefreshRate']/text()" -v 60 $xml
+        # magic: Change DefaultPeakRefrshRate to 60
+        python3 bin/xmlstarlet.py $xml config_defaultPeakRefreshRate 60
     done
     bin/apktool/apktool b tmp/$targetDir -o tmp/$filename || error "apktool 打包失败" "apktool mod failed"
     cp -rf tmp/$filename $targetAospFrameworkResOverlay
@@ -755,8 +755,7 @@ echo "debug.game.video.speed=true" >> build/portrom/images/product/etc/build.pro
 echo "debug.game.video.support=true" >> build/portrom/images/product/etc/build.prop
 
 # Unlock Smart fps
-
-maxFps=$(xmlstarlet sel -t -v "//integer-array[@name='fpsList']/item" build/portrom/images/product/etc/device_features/${base_rom_code}.xml | sort -nr | head -n 1)
+maxFps=$(python3 bin/maxfps.py build/portrom/images/product/etc/device_features/${base_rom_code}.xml)
 
 if [ -z "$maxFps" ]; then
     maxFps=90
