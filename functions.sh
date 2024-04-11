@@ -69,22 +69,6 @@ green() {
 }
 
 #Check for the existence of the requirements command, proceed if it exists, or abort otherwise.
-exists() {
-    command -v "$1" > /dev/null
-}
-
-abort() {
-    error "--> Missing $1 abort! please run ./setup.sh first (sudo is required on Linux system)"
-    error "--> 命令 $1 缺失!请重新运行setup.sh (Linux系统sudo ./setup.sh)"
-    exit 1
-}
-
-check() {
-    for b in "$@"; do
-        exists "$b" || abort "$b"
-    done
-}
-
 
 # Replace Smali code in an APK or JAR file, without supporting resource patches.
 # $1: Target APK/JAR file
