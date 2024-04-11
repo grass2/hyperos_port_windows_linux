@@ -873,7 +873,7 @@ fi
 # 去除avb校验
 blue "去除avb校验" "Disable avb verification."
 for fstab in $(find build/portrom/images/ -type f -name "fstab.*");do
-    disable_avb_verify $fstab
+    python3 bin/disable_avb_verify.py $fstab
 done
 
 # data 加密
