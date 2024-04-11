@@ -868,13 +868,11 @@ if [ ${pack_type} == "EROFS" ];then
                 done
     fi
 fi
-
 # 去除avb校验
 blue "去除avb校验" "Disable avb verification."
 for fstab in $(find build/portrom/images/ -type f -name "fstab.*");do
     python3 bin/disable_avb_verify.py $fstab
 done
-
 # data 加密
 if [ "$(python3 bin/read_config.py bin/port_config "remove_data_encryption")" = "true" ];then
     blue "去除data加密"
@@ -891,11 +889,9 @@ if [ "$(python3 bin/read_config.py bin/port_config "remove_data_encryption")" = 
 		sed -i "s/fileencryption/encryptable/g" $fstab
 	done
 fi
-
 for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done
-
 superSize=$(python3 bin/getSuperSize.py $device_code)
 green "Super大小为${superSize}" "Super image size: ${superSize}"
 green "开始打包镜像" "Packing super.img"
@@ -968,7 +964,6 @@ if [[ "$is_ab_device" == false ]];then
 else
     blue "打包V-A/B机型 super.img" "Packing super.img for V-AB device"
     lpargs="-F --virtual-ab --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 3 --device super:$superSize --group=qti_dynamic_partitions_a:$superSize --group=qti_dynamic_partitions_b:$superSize"
-
     for pname in ${super_list};do
         if [ -f "build/portrom/images/${pname}.img" ];then
             subsize=$(du -sb build/portrom/images/${pname}.img |tr -cd 0-9)
@@ -991,19 +986,16 @@ fi
 for pname in ${super_list};do
     rm -rf build/portrom/images/${pname}.img
 done
-
 os_type="hyperos"
 if [[ ${is_eu_rom} == true ]];then
     os_type="xiaomi.eu"
 fi
-
 blue "正在压缩 super.img" "Comprising super.img"
 zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst
 mkdir -p out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
 mkdir -p out/${os_type}_${device_code}_${port_rom_version}/bin/windows/
 blue "正在生成刷机脚本" "Generating flashing script"
 if [[ "$is_ab_device" == false ]];then
-
     mv -f build/portrom/images/super.zst out/${os_type}_${device_code}_${port_rom_version}/
     #firmware
     cp -rf bin/flash/platform-tools-windows/* out/${os_type}_${device_code}_${port_rom_version}/bin/windows/
@@ -1013,11 +1005,9 @@ if [[ "$is_ab_device" == false ]];then
     sed -i "s/_ab//g" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
     sed -i '/^# SET_ACTION_SLOT_A_BEGIN$/,/^# SET_ACTION_SLOT_A_END$/d' out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
     sed -i '/^REM SET_ACTION_SLOT_A_BEGIN$/,/^REM SET_ACTION_SLOT_A_END$/d' out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-
     if [ -d build/baserom/firmware-update ];then
         mkdir -p out/${os_type}_${device_code}_${port_rom_version}/firmware-update
         cp -rf build/baserom/firmware-update/*  out/${os_type}_${device_code}_${port_rom_version}/firmware-update
-
          for fwimg in $(ls out/${os_type}_${device_code}_${port_rom_version}/firmware-update);do
             if [[ ${fwimg} == "uefi_sec.mbn" ]];then
                 part="uefisecapp"
@@ -1037,9 +1027,7 @@ if [[ "$is_ab_device" == false ]];then
             sed -i "/# firmware/a fastboot flash ${part} firmware-update/${fwimg}" out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
             sed -i "/REM firmware/a bin\\\windows\\\fastboot.exe flash ${part} %~dp0firmware-update\/${fwimg}" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
          done
-
     fi
-
     #disable vbmeta
     for img in $(find out/${os_type}_${device_code}_${port_rom_version}/firmware-update -type f -name "vbmeta*.img");do
         python3 bin/patch-vbmeta.py ${img}
@@ -1048,7 +1036,6 @@ if [[ "$is_ab_device" == false ]];then
     cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/
     ksu_bootimg_file=$(find devices/$base_rom_code/ -type f -name "boot_ksu*.img")
     nonksu_bootimg_file=$(find devices/$base_rom_code/ -type f -name "boot_nonksu*.img")
-
     if [[ -f $nonksu_bootimg_file ]];then
         nonksubootimg=$(basename "$nonksu_bootimg_file")
         cp -f $nonksu_bootimg_file out/${os_type}_${device_code}_${port_rom_version}/
@@ -1058,7 +1045,6 @@ if [[ "$is_ab_device" == false ]];then
     else
         cp -f build/baserom/boot.img out/${os_type}_${device_code}_${port_rom_version}/boot_official.img
     fi
-
     if [[ -f "$ksu_bootimg_file" ]];then
         ksubootimg=$(basename "$ksu_bootimg_file")
         sed -i "s/boot_tv.img/$ksubootimg/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
@@ -1071,7 +1057,6 @@ if [[ "$is_ab_device" == false ]];then
     sed -i "s/baseversion/${base_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
     sed -i "s/andVersion/${port_android_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
     sed -i "s/device_code/${base_rom_code}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-
 else
     mkdir -p out/${os_type}_${device_code}_${port_rom_version}/images/
     mv -f build/portrom/images/super.zst out/${os_type}_${device_code}_${port_rom_version}/images/
@@ -1097,15 +1082,12 @@ else
             sed -i "/#firmware/a package_extract_file \"images/"${fwimg}".img\" \"/dev/block/bootdevice/by-name/"${fwimg}"_a\"" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
         fi
     done
-
     sed -i "s/portversion/${port_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
     sed -i "s/baseversion/${base_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
     sed -i "s/andVersion/${port_android_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
     sed -i "s/device_code/${base_rom_code}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-
     busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/flash_update.bat
     busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/flash_and_format.bat
-
 fi
 
 find out/${os_type}_${device_code}_${port_rom_version} |xargs touch
