@@ -974,7 +974,6 @@ for pname in ${super_list};do
                     exit 1
                 fi
         fi
-        unset fsType
         unset thisSize
     fi
 done
