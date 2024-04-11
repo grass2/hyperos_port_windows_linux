@@ -70,7 +70,7 @@ green() {
 
 #Check for the existence of the requirements command, proceed if it exists, or abort otherwise.
 exists() {
-    command -v "$1" > /dev/null 2>&1
+    command -v "$1" > /dev/null
 }
 
 abort() {
