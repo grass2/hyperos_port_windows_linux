@@ -28,7 +28,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     #alias find=gfind
 fi
 
-command -v "python3" >/dev/null || error "please Install Python3 First, run ./setup.sh first (sudo is required on Linux system)"
+command -v "python3" >/dev/null || error "please Install Python3 First, run ./setup.sh first (sudo is required on Linux system)" && exit 1
 python3 bin/check.py
 if [ "$?" == '1' ] ; then
   exit 1
