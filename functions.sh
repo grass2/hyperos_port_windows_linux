@@ -148,16 +148,3 @@ unlock_device_feature() {
     fi
 }
 
-# Function to update netlink in build.prop
-update_netlink() {
-  local netlink_version=$1
-  local prop_file=$2
-
-  if grep -q "ro.millet.netlink" "$prop_file"; then
-    blue "找到ro.millet.netlink修改值为$netlink_version" "millet_netlink propery found, changing value to $netlink_version"
-    sed -i "s/ro.millet.netlink=.*/ro.millet.netlink=$netlink_version/" "$prop_file"
-  else
-    blue "PORTROM未找到ro.millet.netlink值,添加为$netlink_version" "millet_netlink not found in portrom, adding new value $netlink_version"
-    echo -e "ro.millet.netlink=$netlink_version\n" >> "$prop_file"
-  fi
-}
