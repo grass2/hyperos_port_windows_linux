@@ -746,7 +746,6 @@ unlock_device_feature "smart fps value" "integer" "smart_fps_value" "${maxFps}"
 patch_smali "PowerKeeper.apk" "DisplayFrameSetting.smali" "unicorn" "umi"
 if [[ ${is_eu_rom} == true ]];then
     patch_smali "MiSettings.apk" "NewRefreshRateFragment.smali" "const-string v1, \"btn_preferce_category\"" "const-string v1, \"btn_preferce_category\"\n\n\tconst\/16 p1, 0x1"
-
 else
     patch_smali "MISettings.apk" "NewRefreshRateFragment.smali" "const-string v1, \"btn_preferce_category\"" "const-string v1, \"btn_preferce_category\"\n\n\tconst\/16 p1, 0x1"
 fi
@@ -779,9 +778,7 @@ if [[ ${port_rom_code} == "dagu_cn" ]];then
     fi
     blue "Replace Pad Software"
     if [[ -d devices/pad/overlay/product/priv-app ]];then
-
         for app in $(ls devices/pad/overlay/product/priv-app); do
-            
             sourceApkFolder=$(find devices/pad/overlay/product/priv-app -type d -name *"$app"* )
             targetApkFolder=$(find build/portrom/images/product/priv-app -type d -name *"$app"* )
             if  [[ -d $targetApkFolder ]];then
@@ -790,7 +787,6 @@ if [[ ${port_rom_code} == "dagu_cn" ]];then
             else
                 cp -rf $sourceApkFolder build/portrom/images/product/priv-app
             fi
-
         done
     fi
 
