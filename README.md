@@ -42,6 +42,8 @@
 移植平板HyperOS到手机，需要从其他正常手机HyperOS机型复制下面的软件
 Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPackageInstaller
 
+## 警告！
+- 任何个人及组织不得在未经允许的情况下商用、炒作！
 
 ## 如何使用
 - 在WSL、ubuntu、deepin等Linux下
@@ -92,7 +94,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
 - [「BypassSignCheck」by Weverses](https://github.com/Weverses/BypassSignCheck)
 - [「contextpatch」 by ColdWindScholar](https://github.com/ColdWindScholar/TIK)
 - [「fspatch」by affggh](https://github.com/affggh/fspatch)
-- [「gettype」by affggh](https://github.com/affggh/gettype)
+- [「gettype」from MIO-KITCHEN](https://github.com/ColdWindScholar/MIO-KITCHEN-SOURCE/blob/b1ccc12fb43ef71c1bd63d7570cc1bae3dffe6ef/utils.py#L35)
 - [「lpunpack」by unix3dgforce](https://github.com/unix3dgforce/lpunpack)
 - [「miui_port」by ljc-fight](https://github.com/ljc-fight/miui_port)
 - etc
