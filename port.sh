@@ -31,7 +31,7 @@ fi
 if [[ "$OSTYPE" == "Windows"* ]]; then
   alias python3=python
 fi
-command -v "python3" >/dev/null || error "please Install Python3 First, run ./setup.sh first (sudo is required on Linux system)" && exit 1
+command -v "python3" >/dev/null || (error "please Install Python3 First, run ./setup.sh first (sudo is required on Linux system)"; exit )
 python3 bin/check.py
 if [ "$?" == '1' ] ; then
   exit 1
