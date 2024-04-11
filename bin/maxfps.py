@@ -5,10 +5,8 @@ import xml.etree.ElementTree as ET
 
 def main(file):
     if not os.path.exists(file) or not os.path.isfile(file):
-        return '90'
-    tree = ET.parse(file)
-    root = tree.getroot()
-    fps_list_element = root.find(".//integer-array[@name='fpsList']")
+       print('90')
+    fps_list_element = ET.parse(file).getroot().find(".//integer-array[@name='fpsList']")
     if fps_list_element is not None:
         # 从 fpsList 元素中提取所有 item 元素的值
         items = [int(item.text) for item in fps_list_element.findall("item")]
