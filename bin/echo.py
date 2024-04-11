@@ -20,3 +20,10 @@ def yellow(message):
     colored_message = f'\033[1;33m{message}\033[0m'
     output = f'[{timestamp}] {colored_message}'
     print(output)
+
+
+def green(message):
+    timestamp = datetime.datetime.now().strftime('%m%d-%H:%M:%S')
+    colored_message = f'\033[1;32m{message}\033[0m'
+    output = f'[{timestamp}] {colored_message}'
+    print(output)
