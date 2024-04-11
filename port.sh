@@ -37,7 +37,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 
-check unzip aria2c 7z zip java zipalign python3 zstd bc
+check unzip aria2c 7z zip java zipalign python3 zstd
 
 # 移植的分区，可在 bin/port_config 中更改
 port_partition=$(python3 bin/read_config.py bin/port_config "partition_to_port")
@@ -949,7 +949,7 @@ for pname in ${super_list};do
                 sed -i '/vendor * erofs/d' $fstab
                 sed -i '/product * erofs/d' $fstab
             done
-            thisSize=$(echo "$thisSize + $addSize" |bc)
+            thisSize=$(python3 bin/bc.py $thisSize $addSize)
             blue 以[$pack_type]文件系统打包[${pname}.img]大小[$thisSize] "Packing [${pname}.img]:[$pack_type] with size [$thisSize]"
             python3 bin/fspatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_fs_config
             python3 bin/contextpatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_file_contexts
