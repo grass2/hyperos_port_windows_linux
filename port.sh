@@ -37,7 +37,6 @@ elif [ "$(echo $baserom |grep xiaomi.eu_)" != "" ];then
 else
     device_code="YourDevice"
 fi
-
 blue "正在检测ROM底包" "Validating BASEROM.."
 if unzip -l ${baserom} | grep -q "payload.bin"; then
     baserom_type="payload"
@@ -52,7 +51,6 @@ else
     error "底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试" "payload.bin/new.br not found, please use HyperOS official OTA zip package."
     exit
 fi
-
 blue "开始检测ROM移植包" "Validating PORTROM.."
 if unzip -l ${portrom} | grep  -q "payload.bin"; then
     green "ROM初步检测通过" "ROM validation passed."
@@ -61,13 +59,11 @@ elif [[ ${portrom} == *"xiaomi.eu"* ]];then
 else
     error "目标移植包没有payload.bin，请用MIUI官方包作为移植包" "payload.bin not found, please use HyperOS official OTA zip package."
 fi
-
 green "ROM初步检测通过" "ROM validation passed."
 is_shennong_houji_port=false
 if [[ "$portrom" =~ SHENNONG|HOUJI ]]; then
     is_shennong_houji_port=true
 fi
-
 blue "正在清理文件" "Cleaning up.."
 for i in ${port_partition};do
     [ -d ./${i} ] && rm -rf ./${i}
@@ -77,11 +73,9 @@ sudo rm -rf tmp
 sudo rm -rf build/baserom/
 sudo rm -rf build/portrom/
 find . -type d -name 'hyperos_*' |xargs rm -rf
-
 green "文件清理完毕" "Files cleaned up."
 mkdir -p build/baserom/images/
 mkdir -p build/portrom/images/
-
 # 提取分区
 if [[ ${baserom_type} == 'payload' ]];then
     blue "正在提取底包 [payload.bin]" "Extracting files from BASEROM [payload.bin]"
@@ -107,7 +101,6 @@ elif [[ ${is_base_rom_eu} == true ]];then
         rm -rf build/baserom/firmware-update/cust.img.*
     fi
 fi
-
 if [[ ${is_eu_rom} == true ]];then
     blue "正在提取移植包 [super.img]" "Extracting files from PORTROM [super.img]"
     unzip ${portrom} 'images/super.img.*' -d build/portrom >  /dev/null 2>&1 ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
@@ -121,18 +114,14 @@ else
     unzip ${portrom} payload.bin -d build/portrom  > /dev/null 2>&1 ||error "解压移植包 [payload.bin] 时出错"  "Extracting [payload.bin] error"
     green "移植包 [payload.bin] 提取完毕" "[payload.bin] extracted."
 fi
-
 if [[ ${baserom_type} == 'payload' ]];then
-
     blue "开始分解底包 [payload.bin]" "Unpacking BASEROM [payload.bin]"
     payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin >/dev/null 2>&1 ||error "分解底包 [payload.bin] 时出错" "Unpacking [payload.bin] failed"
-
 elif [[ ${is_base_rom_eu} == true ]];then
      blue "开始分解底包 [super.img]" "Unpacking BASEROM [super.img]"
         for i in ${super_list}; do 
             python3 bin/lpunpack.py -p "${i}" build/baserom/super.img build/baserom/images
         done
-
 elif [[ ${baserom_type} == 'br' ]];then
     blue "开始分解底包 [new.dat.br]" "Unpacking BASEROM[new.dat.br]"
         for i in ${super_list}; do 
@@ -141,7 +130,6 @@ elif [[ ${baserom_type} == 'br' ]];then
             rm -rf build/baserom/"$i".new.dat* build/baserom/"$i".transfer.list build/baserom/"$i".patch.*
         done
 fi
-
 for part in system system_dlkm system_ext product product_dlkm mi_ext ;do
     if [[ -f build/baserom/images/${part}.img ]];then 
         if [[ $(python3 bin/gettype.py build/baserom/images/${part}.img) == "ext" ]];then
@@ -158,13 +146,11 @@ for part in system system_dlkm system_ext product product_dlkm mi_ext ;do
         fi
     fi
 done
-
 for image in vendor odm vendor_dlkm odm_dlkm;do
     if [ -f build/baserom/images/${image}.img ];then
         cp -rf build/baserom/images/${image}.img build/portrom/images/${image}.img
     fi
 done
-
 # 分解镜像
 green "开始提取逻辑分区镜像" "Starting extract partition from img"
 echo $super_list
@@ -226,7 +212,6 @@ else
     port_rom_version=$(echo $port_mios_version_incremental | sed "s/$port_device_code/$base_device_code/")
 fi
 green "ROM 版本: 底包为 [${base_rom_version}], 移植包为 [${port_rom_version}]" "ROM Version: BASEROM: [${base_rom_version}], PORTROM: [${port_rom_version}] "
-
 # 代号
 base_rom_code=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.product.vendor.device")
 port_rom_code=$(python3 bin/read_config.py build/portrom/images/product/etc/build.prop "ro.product.product.name")
@@ -246,53 +231,43 @@ do
     cp -rf ${base_file} ${port_file}
   fi
 done
-
 #baseAospWifiResOverlay=$(find build/baserom/images/product -type f -name "AospWifiResOverlay.apk")
 ##portAospWifiResOverlay=$(find build/portrom/images/product -type f -name "AospWifiResOverlay.apk")
 #if [ -f ${baseAospWifiResOverlay} ] && [ -f ${portAospWifiResOverlay} ];then
 #    blue "正在替换 [AospWifiResOverlay.apk]"
 #    cp -rf ${baseAospWifiResOverlay} ${portAospWifiResOverlay}
 #fi
-
 # radio lib
 # blue "信号相关"
 # for radiolib in $(find build/baserom/images/system/system/lib/ -maxdepth 1 -type f -name "*radio*");do
 #     cp -rf $radiolib build/portrom/images/system/system/lib/
 # done
-
 # for radiolib in $(find build/baserom/images/system/system/lib64/ -maxdepth 1 -type f -name "*radio*");do
 #     cp -rf $radiolib build/portrom/images/system/system/lib64/
 # done
-
 # audio lib
 # blue "音频相关"
 # for audiolib in $(find build/baserom/images/system/system/lib/ -maxdepth 1 -type f -name "*audio*");do
 #     cp -rf $audiolib build/portrom/images/system/system/lib/
 # done
-
 # for audiolib in $(find build/baserom/images/system/system/lib64/ -maxdepth 1 -type f -name "*audio*");do
 #     cp -rf $audiolib build/portrom/images/system/system/lib64/
 # done
-
 # # bt lib
 # blue "蓝牙相关"
 # for btlib in $(find build/baserom/images/system/system/lib/ -maxdepth 1 -type f -name "*bluetooth*");do
 #     cp -rf $btlib build/portrom/images/system/system/lib/
 # done
-
 # for btlib in $(find build/baserom/images/system/system/lib64/ -maxdepth 1 -type f -name "*bluetooth*");do
 #     cp -rf $btlib build/portrom/images/system/system/lib64/
 # done
-
 # displayconfig id
 rm -rf build/portrom/images/product/etc/displayconfig/display_id*.xml
 cp -rf build/baserom/images/product/etc/displayconfig/display_id*.xml build/portrom/images/product/etc/displayconfig/
-
 # device_features
 blue "Copying device_features"   
 rm -rf build/portrom/images/product/etc/device_features/*
 cp -rf build/baserom/images/product/etc/device_features/* build/portrom/images/product/etc/device_features/
-
 #device_info
 if [[ ${is_eu_rom} == "true" ]];then
     cp -rf build/baserom/images/product/etc/device_info.json build/portrom/images/product/etc/device_info.json
@@ -305,7 +280,6 @@ fi
  #   rm -rf ./${portMiSound}/*
  #   cp -rf ./${baseMiSound}/* ${portMiSound}/
 #fi
-
 # MusicFX
 #baseMusicFX=$(find build/baserom/images/product build/baserom/images/system -type d -name "MusicFX")
 #portMusicFX=$(find build/baserom/images/product build/baserom/images/system -type d -name "MusicFX")
@@ -314,7 +288,6 @@ fi
 ##    rm -rf ./${portMusicFX}/*
  #   cp -rf ./${baseMusicFX}/* ${portMusicFX}/
 #fi
-
 # 人脸
 baseMiuiBiometric=$(find build/baserom/images/product/app -type d -name "MiuiBiometric*")
 portMiuiBiometric=$(find build/portrom/images/product/app -type d -name "MiuiBiometric*")
@@ -328,7 +301,6 @@ else
         cp -rf ${baseMiuiBiometric} build/portrom/images/product/app/
     fi
 fi
-
 # 修复AOD问题
 targetDevicesAndroidOverlay=$(find build/portrom/images/product -type f -name "DevicesAndroidOverlay.apk")
 if [[ -f $targetDevicesAndroidOverlay ]]; then
@@ -346,7 +318,6 @@ if [[ -f $targetDevicesAndroidOverlay ]]; then
     cp -rf tmp/$filename $targetDevicesAndroidOverlay
     rm -rf tmp
 fi
-
 # Fix boot up frame drop issue. 
 targetAospFrameworkResOverlay=$(find build/portrom/images/product -type f -name "AospFrameworkResOverlay.apk")
 if [[ -f $targetAospFrameworkResOverlay ]]; then
@@ -366,7 +337,6 @@ if [[ -f $targetAospFrameworkResOverlay ]]; then
     java $javaOpts -jar bin/apktool/apktool.jar b tmp/$targetDir -o tmp/$filename || error "apktool 打包失败" "apktool mod failed"
     cp -rf tmp/$filename $targetAospFrameworkResOverlay
 fi
-
 #其他机型可能没有default.prop
 for prop_file in $(find build/portrom/images/vendor/ -name "*.prop"); do
     vndk_version=$(python3 bin/read_config.py "$prop_file" "ro.vndk.version")
@@ -407,7 +377,6 @@ echo "ro.vendor.mi_sf.ultimate.perf.support=true"  >> build/portrom/images/vendo
 echo "ro.surface_flinger.use_content_detection_for_refresh_rate=false" >> build/portrom/images/vendor/build.prop
 echo "ro.surface_flinger.set_touch_timer_ms=0" >> build/portrom/images/vendor/build.prop
 echo "ro.surface_flinger.set_idle_timer_ms=0" >> build/portrom/images/vendor/build.prop
-
 #解决开机报错问题
 targetVintf=$(find build/portrom/images/system_ext/etc/vintf -type f -name "manifest.xml")
 if [ -f "$targetVintf" ]; then
@@ -431,10 +400,8 @@ else
 fi
 #blue "解除状态栏通知个数限制(默认最大6个)" "Set SystemUI maxStaticIcons to 6 by default."
 #patch_smali "MiuiSystemUI.apk" "NotificationIconAreaController.smali" "iput p10, p0, Lcom\/android\/systemui\/statusbar\/phone\/NotificationIconContainer;->mMaxStaticIcons:I" "const\/4 p10, 0x6\n\n\tiput p10, p0, Lcom\/android\/systemui\/statusbar\/phone\/NotificationIconContainer;->mMaxStaticIcons:I"
-
 if [[ ${is_eu_rom} == "true" ]];then
     patch_smali "miui-services.jar" "SystemServerImpl.smali" ".method public constructor <init>()V/,/.end method" ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom\/android\/server\/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method" "regex"
-
 else    
     if [[ "$compatible_matrix_matches_enabled" == "false" ]]; then
         patch_smali "framework.jar" "Build.smali" ".method public static isBuildConsistent()Z" ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst\/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z"
@@ -453,7 +420,6 @@ else
         if [[ $smali_dir != $old_smali_dir ]]; then
             smali_dirs+=("$smali_dir")
         fi
-
         method_line=$(grep -n "$target_method" "$smali_file" | cut -d ':' -f 1)
         register_number=$(tail -n +"$method_line" "$smali_file" | grep -m 1 "move-result" | tr -dc '0-9')
         move_result_end_line=$(awk -v ML=$method_line 'NR>=ML && /move-result /{print NR; exit}' "$smali_file")
@@ -472,7 +438,6 @@ fi
 if [ -f build/portrom/images/system/system/etc/init/hw/init.rc ];then
 	sed -i '/on boot/a\'$'\n''    chmod 0731 \/data\/system\/theme' build/portrom/images/system/system/etc/init/hw/init.rc
 fi
-
 if [[ ${is_eu_rom} == true ]];then
     rm -rf build/portrom/images/product/app/Updater
     baseXGoogle=$(find build/baserom/images/product/ -type d -name "HotwordEnrollmentXGoogleHEXAGON*")
@@ -487,7 +452,6 @@ if [[ ${is_eu_rom} == true ]];then
             cp -rf ${baseXGoogle} build/portrom/images/product/priv-app/
         fi
     fi
-
     #baseOKGoogle=$(find build/baserom/images/product/ -type d -name "HotwordEnrollmentOKGoogleHEXAGON*")
     #portOKGoogle=$(find build/portrom/images/product/ -type d -name "HotwordEnrollmentOKGoogleHEXAGON*")
     #if [ -d "${baseOKGoogle}" ] && [ -d "${portOKGoogle}" ];then
@@ -500,7 +464,6 @@ if [[ ${is_eu_rom} == true ]];then
     #        cp -rf ${baseOKGoogle} build/portrom/images/product/priv-app/
     #    fi
     #fi
-
 else
     yellow "删除多余的App" "Debloating..." 
     # List of apps to be removed
@@ -538,7 +501,6 @@ else
 fi
 # build.prop 修改
 blue "正在修改 build.prop" "Modifying build.prop"
-#
 #change the locale to English
 export LC_ALL=en_US.UTF-8
 buildDate=$(date -u +"%a %b %d %H:%M:%S UTC %Y")
@@ -1011,7 +973,6 @@ else
     busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/flash_update.bat
     busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/flash_and_format.bat
 fi
-
 find out/${os_type}_${device_code}_${port_rom_version} |xargs touch
 pushd out/${os_type}_${device_code}_${port_rom_version}/  || exit
 zip -r ${os_type}_${device_code}_${port_rom_version}.zip ./*
