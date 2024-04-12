@@ -4,7 +4,7 @@
 # Based on Android 13
 # Test Base ROM: A-only Mi 10/PRO/Ultra (MIUI 14 Latset stockrom)
 # Test Port ROM: Mi 14/Pro OS1.0.9-1.0.25 Mi 13/PRO OS1.0 23.11.09-23.11.10 DEV
-
+javaOpts="-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 build_user="Bruce Teng"
 # 底包和移植包为外部参数传入
 export PATH=$(pwd)/bin/$(uname)/$(uname -m)/:$PATH
@@ -336,13 +336,13 @@ if [[ -f $targetDevicesAndroidOverlay ]]; then
     filename=$(basename $targetDevicesAndroidOverlay)
     yellow "修复息屏和屏下指纹问题" "Fixing AOD issue: $filename ..."
     targetDir=$(echo "$filename" | sed 's/\..*$//')
-    bin/apktool/apktool d $targetDevicesAndroidOverlay -o tmp/$targetDir -f
+    java $javaOpts -jar bin/apktool/apktool.jar d $targetDevicesAndroidOverlay -o tmp/$targetDir -f
     search_pattern="com\.miui\.aod\/com\.miui\.aod\.doze\.DozeService"
     replacement_pattern="com\.android\.systemui\/com\.android\.systemui\.doze\.DozeService"
     for xml in $(find tmp/$targetDir -type f -name "*.xml");do
         sed -i "s/$search_pattern/$replacement_pattern/g" $xml
     done
-    bin/apktool/apktool b tmp/$targetDir -o tmp/$filename  || error "apktool 打包失败" "apktool mod failed"
+    java $javaOpts -jar bin/apktool/apktool.jar b tmp/$targetDir -o tmp/$filename  || error "apktool 打包失败" "apktool mod failed"
     cp -rf tmp/$filename $targetDevicesAndroidOverlay
     rm -rf tmp
 fi
@@ -357,13 +357,13 @@ if [[ -f $targetAospFrameworkResOverlay ]]; then
     filename=$(basename $targetAospFrameworkResOverlay)
     yellow "Change defaultPeakRefreshRate: $filename ..."
     targetDir=$(echo "$filename" | sed 's/\..*$//')
-    bin/apktool/apktool d $targetAospFrameworkResOverlay -o tmp/$targetDir -f
+    java $javaOpts -jar bin/apktool/apktool.jar d $targetAospFrameworkResOverlay -o tmp/$targetDir -f
 
     for xml in $(find tmp/$targetDir -type f -name "integers.xml");do
         # magic: Change DefaultPeakRefrshRate to 60
         python3 bin/xmlstarlet.py $xml config_defaultPeakRefreshRate 60
     done
-    bin/apktool/apktool b tmp/$targetDir -o tmp/$filename || error "apktool 打包失败" "apktool mod failed"
+    java $javaOpts -jar bin/apktool/apktool.jar b tmp/$targetDir -o tmp/$filename || error "apktool 打包失败" "apktool mod failed"
     cp -rf tmp/$filename $targetAospFrameworkResOverlay
 fi
 
@@ -688,12 +688,12 @@ if [[ ${port_rom_code} == "dagu_cn" ]];then
         filename=$(basename $targetAospFrameworkTelephonyResOverlay)
         yellow "Enable Phone Call and SMS feature in Pad port."
         targetDir=$(echo "$filename" | sed 's/\..*$//')
-        bin/apktool/apktool d $targetAospFrameworkTelephonyResOverlay -o tmp/$targetDir -f
+        java $javaOpts -jar bin/apktool/apktool.jar d $targetAospFrameworkTelephonyResOverlay -o tmp/$targetDir -f
         for xml in $(find tmp/$targetDir -type f -name "*.xml");do
             sed -i 's|<bool name="config_sms_capable">false</bool>|<bool name="config_sms_capable">true</bool>|' $xml
             sed -i 's|<bool name="config_voice_capable">false</bool>|<bool name="config_voice_capable">true</bool>|' $xml
         done
-        bin/apktool/apktool b tmp/$targetDir -o tmp/$filename || error "apktool 打包失败" "apktool mod failed"
+        java $javaOpts -jar bin/apktool/apktool.jar b tmp/$targetDir -o tmp/$filename || error "apktool 打包失败" "apktool mod failed"
         cp -rf tmp/$filename $targetAospFrameworkTelephonyResOverlay
         #rm -rf tmp
     fi
