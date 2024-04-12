@@ -1,14 +1,7 @@
 #!/bin/bash
-# hyperOS_port project
-# For A-only and V/A-B (not tested) Devices
-# Based on Android 13
-# Test Base ROM: A-only Mi 10/PRO/Ultra (MIUI 14 Latset stockrom)
-# Test Port ROM: Mi 14/Pro OS1.0.9-1.0.25 Mi 13/PRO OS1.0 23.11.09-23.11.10 DEV
 javaOpts="-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 build_user="Bruce Teng"
-# 底包和移植包为外部参数传入
 export PATH=$(pwd)/bin/$(uname)/$(uname -m)/:$PATH
-# Import functions
 source functions.sh
 shopt -s expand_aliases
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -18,12 +11,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     alias grep=ggrep
     alias du=gdu
     alias date=gdate
-    #alias find=gfind
 fi
 if [[ "$OSTYPE" == "Windows"* ]]; then
   alias python3=python
 fi
-# 移植的分区，可在 bin/port_config 中更改
 if [[ ${repackext4} == true ]]; then
     pack_type=EXT
 else
@@ -231,64 +222,14 @@ do
     cp -rf ${base_file} ${port_file}
   fi
 done
-#baseAospWifiResOverlay=$(find build/baserom/images/product -type f -name "AospWifiResOverlay.apk")
-##portAospWifiResOverlay=$(find build/portrom/images/product -type f -name "AospWifiResOverlay.apk")
-#if [ -f ${baseAospWifiResOverlay} ] && [ -f ${portAospWifiResOverlay} ];then
-#    blue "正在替换 [AospWifiResOverlay.apk]"
-#    cp -rf ${baseAospWifiResOverlay} ${portAospWifiResOverlay}
-#fi
-# radio lib
-# blue "信号相关"
-# for radiolib in $(find build/baserom/images/system/system/lib/ -maxdepth 1 -type f -name "*radio*");do
-#     cp -rf $radiolib build/portrom/images/system/system/lib/
-# done
-# for radiolib in $(find build/baserom/images/system/system/lib64/ -maxdepth 1 -type f -name "*radio*");do
-#     cp -rf $radiolib build/portrom/images/system/system/lib64/
-# done
-# audio lib
-# blue "音频相关"
-# for audiolib in $(find build/baserom/images/system/system/lib/ -maxdepth 1 -type f -name "*audio*");do
-#     cp -rf $audiolib build/portrom/images/system/system/lib/
-# done
-# for audiolib in $(find build/baserom/images/system/system/lib64/ -maxdepth 1 -type f -name "*audio*");do
-#     cp -rf $audiolib build/portrom/images/system/system/lib64/
-# done
-# # bt lib
-# blue "蓝牙相关"
-# for btlib in $(find build/baserom/images/system/system/lib/ -maxdepth 1 -type f -name "*bluetooth*");do
-#     cp -rf $btlib build/portrom/images/system/system/lib/
-# done
-# for btlib in $(find build/baserom/images/system/system/lib64/ -maxdepth 1 -type f -name "*bluetooth*");do
-#     cp -rf $btlib build/portrom/images/system/system/lib64/
-# done
-# displayconfig id
 rm -rf build/portrom/images/product/etc/displayconfig/display_id*.xml
 cp -rf build/baserom/images/product/etc/displayconfig/display_id*.xml build/portrom/images/product/etc/displayconfig/
-# device_features
 blue "Copying device_features"   
 rm -rf build/portrom/images/product/etc/device_features/*
 cp -rf build/baserom/images/product/etc/device_features/* build/portrom/images/product/etc/device_features/
-#device_info
 if [[ ${is_eu_rom} == "true" ]];then
     cp -rf build/baserom/images/product/etc/device_info.json build/portrom/images/product/etc/device_info.json
 fi
-# MiSound
-#baseMiSound=$(find build/baserom/images/product -type d -name "MiSound")
-#portMiSound=$(find build/baserom/images/product -type d -name "MiSound")
-#if [ -d ${baseMiSound} ] && [ -d ${portMiSound} ];then
-#    blue "正在替换 MiSound"
- #   rm -rf ./${portMiSound}/*
- #   cp -rf ./${baseMiSound}/* ${portMiSound}/
-#fi
-# MusicFX
-#baseMusicFX=$(find build/baserom/images/product build/baserom/images/system -type d -name "MusicFX")
-#portMusicFX=$(find build/baserom/images/product build/baserom/images/system -type d -name "MusicFX")
-#if [ -d ${baseMusicFX} ] && [ -d ${portMusicFX} ];then
-#    blue "正在替换 MusicFX"
-##    rm -rf ./${portMusicFX}/*
- #   cp -rf ./${baseMusicFX}/* ${portMusicFX}/
-#fi
-# 人脸
 baseMiuiBiometric=$(find build/baserom/images/product/app -type d -name "MiuiBiometric*")
 portMiuiBiometric=$(find build/portrom/images/product/app -type d -name "MiuiBiometric*")
 if [ -d "${baseMiuiBiometric}" ] && [ -d "${portMiuiBiometric}" ];then
@@ -371,8 +312,6 @@ fi
 # props from k60
 echo "persist.vendor.mi_sf.optimize_for_refresh_rate.enable=1" >> build/portrom/images/vendor/build.prop
 echo "ro.vendor.mi_sf.ultimate.perf.support=true"  >> build/portrom/images/vendor/build.prop
-#echo "debug.sf.set_idle_timer_ms=1100" >> build/portrom/images/vendor/build.prop
-#echo "ro.surface_flinger.set_touch_timer_ms=200" >> build/portrom/images/vendor/build.prop
 # https://source.android.com/docs/core/graphics/multiple-refresh-rate
 echo "ro.surface_flinger.use_content_detection_for_refresh_rate=false" >> build/portrom/images/vendor/build.prop
 echo "ro.surface_flinger.set_touch_timer_ms=0" >> build/portrom/images/vendor/build.prop
@@ -452,18 +391,6 @@ if [[ ${is_eu_rom} == true ]];then
             cp -rf ${baseXGoogle} build/portrom/images/product/priv-app/
         fi
     fi
-    #baseOKGoogle=$(find build/baserom/images/product/ -type d -name "HotwordEnrollmentOKGoogleHEXAGON*")
-    #portOKGoogle=$(find build/portrom/images/product/ -type d -name "HotwordEnrollmentOKGoogleHEXAGON*")
-    #if [ -d "${baseOKGoogle}" ] && [ -d "${portOKGoogle}" ];then
-    #    yellow "查找并替换HotwordEnrollmentOKGoogleHEXAGON_WIDEBAND.apk" "Searching and Replacing HotwordEnrollmentOKGoogleHEXAGON_WIDEBAND.apk.."
-    #    rm -rf ./${portOKGoogle}/*
-    #    cp -rf ./${baseOKGoogle}/* ${portOKGoogle}/
-    #else
-    #    if [ -d "${baseOKGoogle}" ] && [ ! -d "${portOKGoogle}" ];then
-    #        blue "未找到HotwordEnrollmentOKGoogleHEXAGON_WIDEBAND.apk，替换为原包" "HotwordEnrollmentOKGoogleHEXAGON_WIDEBAND.apk is missing, copying from base..."
-    #        cp -rf ${baseOKGoogle} build/portrom/images/product/priv-app/
-    #    fi
-    #fi
 else
     yellow "删除多余的App" "Debloating..." 
     # List of apps to be removed
@@ -547,11 +474,6 @@ for i in $(find build/portrom/images -type f -name "build.prop");do
     sed -i "/persist.wm.extensions.enabled=true/d" ${i}
 done
 
-#sed -i -e '$a\'$'\n''persist.adb.notify=0' build/portrom/images/system/system/build.prop
-#sed -i -e '$a\'$'\n''persist.sys.usb.config=mtp,adb' build/portrom/images/system/system/build.prop
-#sed -i -e '$a\'$'\n''persist.sys.disable_rescue=true' build/portrom/images/system/system/build.prop
-#sed -i -e '$a\'$'\n''persist.miui.extm.enable=0' build/portrom/images/system/system/build.prop
-
 # 屏幕密度修修改
 for prop in $(find build/baserom/images/product build/baserom/images/system -type f -name "build.prop");do
     base_rom_density=$(python3 bin/read_config.py "$prop" "ro.sf.lcd_density")
@@ -576,12 +498,6 @@ if [ $found -eq 0  ]; then
         echo "ro.sf.lcd_density=${base_rom_density}" >> build/portrom/images/product/etc/build.prop
 fi
 echo "ro.miui.cust_erofs=0" >> build/portrom/images/product/etc/build.prop
-#vendorprop=$(find build/portrom/images/vendor -type f -name "build.prop")
-#odmprop=$(find build/baserom/images/odm -type f -name "build.prop" |awk 'NR==1')
-#if [ "$(< $vendorprop grep "sys.haptic" |awk 'NR==1')" != "" ];then
-#    blue "复制 haptic prop 到 odm"
-#    < $vendorprop grep "sys.haptic" >>${odmprop}
-#fi
 
 #Fix： mi10 boot stuck at the first screen
 sed -i "s/persist\.sys\.millet\.cgroup1/#persist\.sys\.millet\.cgroup1/" build/portrom/images/vendor/build.prop
