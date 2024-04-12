@@ -371,10 +371,7 @@ class Extractor:
             os.path.basename(output_dir))
         self.OUTPUT_IMAGE_FILE = (os.path.realpath(os.path.dirname(target)) + os.sep) + os.path.basename(target)
         self.FileName = self.__out_name(os.path.basename(target), out=0)
-        if sys.argv.__len__() == 3:
-            self.CONFING_DIR = sys.argv[2] + os.sep + 'config'
-        else:
-            self.CONFING_DIR = os.path.dirname(output_dir) + os.sep + 'config'
+        self.CONFING_DIR = os.path.dirname(output_dir) + os.sep + 'config'
         if target_type == 's_img':
             simg2img(target)
             target_type = 'img'
