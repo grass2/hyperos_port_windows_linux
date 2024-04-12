@@ -323,7 +323,7 @@ def main(baserom, portrom):
                 except:
                     red(f"提取{part}失败\nExtracting partition {part} failed")
                     sys.exit()
-                os.makedirs(f'build/portrom/images/{part}/lost+found')
+                os.makedirs(f'build/portrom/images/{part}/lost+found', exist_ok=True)
                 os.remove(f'build/portrom/images/{part}.img')
                 green(f"提取 [{part}] [ext]镜像完毕\nExtracting [{part}].img [ext] done")
             elif gettype(img) == 'erofs':
@@ -333,7 +333,7 @@ def main(baserom, portrom):
                     pack_type = 'EXT'
                 if call(f'extract.erofs -x -i build/portrom/images/{part}.img -o build/portrom/images/'):
                     red(f"提取{part}失败\nExtracting {part} failed")
-                os.makedirs(f'build/portrom/images/{part}/lost+found')
+                os.makedirs(f'build/portrom/images/{part}/lost+found', exist_ok=True)
                 os.remove(f'build/portrom/images/{part}.img')
                 green(f"提取移植包[{part}] [erofs]镜像完毕\nExtracting {part} [erofs] done.")
 
