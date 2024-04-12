@@ -603,7 +603,6 @@ if [[ -d "devices/common" ]];then
         rm -rf $targetNQNfcNci
         cp -rf devices/common/overlay/system/* build/portrom/images/system/
         cp -rf devices/common/overlay/system_ext/framework/* build/portrom/images/system_ext/framework/
-
     fi
     if [[ $base_android_version == "13" ]] && [[ -f $commonCamera ]];then
         yellow "替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ" "Replacing a compatible MiuiCamera.apk verson 4.5.003000.2"
@@ -640,13 +639,11 @@ if [ ${pack_type} == "EROFS" ];then
                for pname in system odm vendor product mi_ext system_ext; do
                      sed -i "/\/${pname}[[:space:]]\+ext4/{p;s/ext4/erofs/;}" build/portrom/images/vendor/etc/fstab.qcom
                      added_line=$(sed -n "/\/${pname}[[:space:]]\+erofs/p" build/portrom/images/vendor/etc/fstab.qcom)
-    
                     if [ -n "$added_line" ]; then
                         yellow "添加$pname" "Adding mount point $pname"
                     else
                         error "添加失败，请检查" "Adding faild, please check."
                         exit 1
-                        
                     fi
                 done
     fi
