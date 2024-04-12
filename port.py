@@ -65,8 +65,9 @@ def main(baserom, portrom):
             f.write(f'is_shennong_houji_port="false"\n')
         f.write(f"build_host='{gethostname()}'\n")
         blue("正在检测ROM底包\nValidating BASEROM..")
-        is_base_rom_eu:bool
+        is_base_rom_eu: bool
         baserom_type: str
+        is_eu_rom: bool
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
                 f.write("baserom_type='payload'\n")
@@ -89,6 +90,7 @@ def main(baserom, portrom):
                 green("ROM初步检测通过\nROM validation passed.")
             elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
                 f.write("is_eu_rom=true\n")
+                is_eu_rom = True
             else:
                 red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
                 sys.exit()
@@ -118,7 +120,7 @@ def main(baserom, portrom):
     for i in ['build/baserom/images/', 'build/portrom/images/']:
         if not os.path.exists(i):
             os.makedirs(i)
-    # Extract Zip
+    # Extract BaseRom Zip
     if baserom_type == 'payload':
         blue("正在提取底包 [payload.bin]\nExtracting files from BASEROM [payload.bin]")
         with zipfile.ZipFile(baserom) as rom:
@@ -162,8 +164,31 @@ def main(baserom, portrom):
             os.system('simg2img build/baserom/firmware-update/cust.img.* build/baserom/firmware-update/cust.img')
             for i in glob.glob('build/baserom/firmware-update/cust.img.*'):
                 os.remove(i)
-
-
+    # Extract PortRom Zip
+    if is_eu_rom:
+        blue("正在提取移植包 [super.img]" "Extracting files from PORTROM [super.img]")
+        with zipfile.ZipFile(portrom) as rom:
+            for i in [i for i in rom.namelist() if 'images/super.img.' in i]:
+                try:
+                    rom.extract(i, path='build/portrom')
+                except:
+                    red("解压移植包 [super.img] 时出错\nExtracting [super.img] error")
+                    sys.exit()
+        blue("合并super.img* 到super.img\nMerging super.img.* into super.img")
+        os.system('simg2img build/portrom/images/super.img.* build/portrom/images/super.img')
+        for i in glob.glob(' build/portrom/images/super.img.*'):
+            os.remove(i)
+        shutil.move('build/portrom/images/super.img', 'build/portrom/super.img')
+        green("移植包 [super.img] 提取完毕\n[super.img] extracted.")
+    else:
+        blue("正在提取移植包 [payload.bin]" "Extracting files from PORTROM [payload.bin]")
+        with zipfile.ZipFile(portrom) as rom:
+            try:
+                rom.extract('payload.bin',  path='build/portrom')
+            except:
+                red("解压移植包 [payload.bin] 时出错\nExtracting [payload.bin] error")
+                sys.exit()
+        green("移植包 [payload.bin] 提取完毕\n[payload.bin] extracted.")
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 

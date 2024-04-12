@@ -19,19 +19,6 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-if [[ ${is_eu_rom} == true ]];then
-    blue "正在提取移植包 [super.img]" "Extracting files from PORTROM [super.img]"
-    unzip ${portrom} 'images/super.img.*' -d build/portrom  ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
-    blue "合并super.img* 到super.img" "Merging super.img.* into super.img"
-    simg2img build/portrom/images/super.img.* build/portrom/images/super.img
-    rm -rf build/portrom/images/super.img.*
-    mv build/portrom/images/super.img build/portrom/super.img
-    green "移植包 [super.img] 提取完毕" "[super.img] extracted."
-else
-    blue "正在提取移植包 [payload.bin]" "Extracting files from PORTROM [payload.bin]"
-    unzip ${portrom} payload.bin -d build/portrom ||error "解压移植包 [payload.bin] 时出错"  "Extracting [payload.bin] error"
-    green "移植包 [payload.bin] 提取完毕" "[payload.bin] extracted."
-fi
 if [[ ${baserom_type} == 'payload' ]];then
     blue "开始分解底包 [payload.bin]" "Unpacking BASEROM [payload.bin]"
     payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin  ||error "分解底包 [payload.bin] 时出错" "Unpacking [payload.bin] failed"
