@@ -338,10 +338,10 @@ else
         patch_smali "framework.jar" "Build.smali" ".method public static isBuildConsistent()Z" ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst\/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z"
     fi
     if [[ ! -d tmp ]];then
-        mkdir -p tmp/
+        mkdir -p tmp
     fi
     blue "开始移除 Android 签名校验" "Disalbe Android 14 Apk Signature Verfier"
-    mkdir -p tmp/services/
+    mkdir -p tmp/services
     cp -rf build/portrom/images/system/system/framework/services.jar tmp/services.apk
     java -jar bin/apktool/apktool.jar d -q -f tmp/services.apk -o tmp/services/
     target_method='getMinimumSignatureSchemeVersionForTargetSdk' 
