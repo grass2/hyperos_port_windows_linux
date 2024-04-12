@@ -19,21 +19,15 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-
 blue "正在获取ROM参数" "Fetching ROM build prop."
-# 安卓版本
 base_android_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.release")
 port_android_version=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop "ro.system.build.version.release")
 green "安卓版本: 底包为[Android ${base_android_version}], 移植包为 [Android ${port_android_version}]" "Android Version: BASEROM:[Android ${base_android_version}], PORTROM [Android ${port_android_version}]"
-# SDK版本
 base_android_sdk=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.sdk")
 port_android_sdk=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop "ro.system.build.version.sdk")
 green "SDK 版本: 底包为 [SDK ${base_android_sdk}], 移植包为 [SDK ${port_android_sdk}]" "SDK Verson: BASEROM: [SDK ${base_android_sdk}], PORTROM: [SDK ${port_android_sdk}]"
-# ROM版本
 base_rom_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.incremental")
-#HyperOS版本号获取
 port_mios_version_incremental=$(python3 bin/read_config.py build/portrom/images/mi_ext/etc/build.prop "ro.mi.os.version.incremental")
-#替换机型代号,比如小米10：UNBCNXM -> UJBCNXM
 port_device_code=$(echo $port_mios_version_incremental | cut -d "." -f 5)
 if [[ $port_mios_version_incremental == *DEV* ]];then
     yellow "检测到开发板，跳过修改版本代码" "Dev deteced,skip replacing codename"
@@ -43,11 +37,9 @@ else
     port_rom_version=$(echo $port_mios_version_incremental | sed "s/$port_device_code/$base_device_code/")
 fi
 green "ROM 版本: 底包为 [${base_rom_version}], 移植包为 [${port_rom_version}]" "ROM Version: BASEROM: [${base_rom_version}], PORTROM: [${port_rom_version}] "
-# 代号
 base_rom_code=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.product.vendor.device")
 port_rom_code=$(python3 bin/read_config.py build/portrom/images/product/etc/build.prop "ro.product.product.name")
 green "机型代号: 底包为 [${base_rom_code}], 移植包为 [${port_rom_code}]" "Device Code: BASEROM: [${base_rom_code}], PORTROM: [${port_rom_code}]"
-
 if grep -q "ro.build.ab_update=true" build/portrom/images/vendor/build.prop;  then
     is_ab_device=true
 else
@@ -82,7 +74,6 @@ else
         cp -rf ${baseMiuiBiometric} build/portrom/images/product/app/
     fi
 fi
-# 修复AOD问题
 targetDevicesAndroidOverlay=$(find build/portrom/images/product -type f -name "DevicesAndroidOverlay.apk")
 if [[ -f $targetDevicesAndroidOverlay ]]; then
     mkdir tmp/  
@@ -102,7 +93,6 @@ fi
 # Fix boot up frame drop issue. 
 targetAospFrameworkResOverlay=$(find build/portrom/images/product -type f -name "AospFrameworkResOverlay.apk")
 if [[ -f $targetAospFrameworkResOverlay ]]; then
-    
     if [[ ! -d tmp ]]; then
      mkdir tmp
     fi
@@ -236,7 +226,6 @@ else
     for debloat_app in "${debloat_apps[@]}"; do
         # Find the app directory
         app_dir=$(find build/portrom/images/product -type d -name "*$debloat_app*")
-        
         # Check if the directory exists before removing
         if [[ -d "$app_dir" ]]; then
             yellow "删除目录: $app_dir" "Removing directory: $app_dir"
@@ -309,7 +298,6 @@ for i in $(find build/portrom/images -type f -name "build.prop");do
     sed -i "/ro.miui.density.primaryscale=.*/d" ${i}
     sed -i "/persist.wm.extensions.enabled=true/d" ${i}
 done
-
 # 屏幕密度修修改
 for prop in $(find build/baserom/images/product build/baserom/images/system -type f -name "build.prop");do
     base_rom_density=$(python3 bin/read_config.py "$prop" "ro.sf.lcd_density")
@@ -328,13 +316,11 @@ for prop in $(find build/portrom/images/product build/portrom/images/system -typ
     fi
     sed -i "s/persist.miui.density_v2=.*/persist.miui.density_v2=${base_rom_density}/g" ${prop}
 done
-
 if [ $found -eq 0  ]; then
         blue "未找到ro.fs.lcd_density，build.prop新建一个值$base_rom_density" "ro.fs.lcd_density not found, create a new value ${base_rom_density} "
         echo "ro.sf.lcd_density=${base_rom_density}" >> build/portrom/images/product/etc/build.prop
 fi
 echo "ro.miui.cust_erofs=0" >> build/portrom/images/product/etc/build.prop
-
 #Fix： mi10 boot stuck at the first screen
 sed -i "s/persist\.sys\.millet\.cgroup1/#persist\.sys\.millet\.cgroup1/" build/portrom/images/vendor/build.prop
 #Fix：Fingerprint issue encountered on OS V1.0.18
@@ -356,14 +342,11 @@ if [ -z $(python3 bin/read_config.py build/portrom/images/product/etc/build.prop
 else
     sed -i "s/persist.sys.background_blur_supported=.*/persist.sys.background_blur_supported=true/" build/portrom/images/product/etc/build.prop
 fi
-
 echo "persist.sys.perf.cgroup8250.stune=true" >> build/portrom/images/product/etc/build.prop
-
 unlock_device_feature "Whether support AI Display"  "bool" "support_AI_display"
 unlock_device_feature "device support screen enhance engine"  "bool" "support_screen_enhance_engine"
 unlock_device_feature "Whether suppot Android Flashlight Controller"  "bool" "support_android_flashlight"
 unlock_device_feature "Whether support SR for image display"  "bool" "support_SR_for_image_display"
-
 # Unlock MEMC; unlocking the screen enhance engine is a prerequisite.
 # This feature add additional frames to videos to make content appear smooth and transitions lively.
 if  grep -q "ro.vendor.media.video.frc.support" build/portrom/images/vendor/build.prop ;then
@@ -374,7 +357,6 @@ fi
 # Game splashscreen speed up
 echo "debug.game.video.speed=true" >> build/portrom/images/product/etc/build.prop
 echo "debug.game.video.support=true" >> build/portrom/images/product/etc/build.prop
-
 # Unlock Smart fps
 maxFps=$(python3 bin/maxfps.py build/portrom/images/product/etc/device_features/${base_rom_code}.xml)
 if [ -z "$maxFps" ]; then
@@ -433,16 +415,13 @@ if [[ ${port_rom_code} == "dagu_cn" ]];then
             cp -rf devices/pad/overlay/product/app/$app build/portrom/images/product/app/
         done
     fi
-
     if [[ -d devices/pad/overlay/system_ext ]]; then
         cp -rf devices/pad/overlay/system_ext/* build/portrom/images/system_ext/
     fi
-
     blue "Add permissions" 
     sed -i 's|</permissions>|\t<privapp-permissions package="com.android.mms"> \n\t\t<permission name="android.permission.WRITE_APN_SETTINGS" />\n\t\t<permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />\n\t\t<permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />\n\t\t<permission name="android.permission.CALL_PRIVILEGED" /> \n\t\t<permission name="android.permission.GET_ACCOUNTS_PRIVILEGED" /> \n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t\t<permission name="android.permission.SEND_SMS_NO_CONFIRMATION" /> \n\t\t<permission name="android.permission.SEND_RESPOND_VIA_MESSAGE" />\n\t\t<permission name="android.permission.UPDATE_APP_OPS_STATS" />\n\t\t<permission name="android.permission.MODIFY_PHONE_STATE" /> \n\t\t<permission name="android.permission.WRITE_MEDIA_STORAGE" /> \n\t\t<permission name="android.permission.MANAGE_USERS" /> \n\t\t<permission name="android.permission.INTERACT_ACROSS_USERS" />\n\t\t <permission name="android.permission.SCHEDULE_EXACT_ALARM" /> \n\t</privapp-permissions>\n</permissions>|'  build/portrom/images/product/etc/permissions/privapp-permissions-product.xml
     sed -i 's|</permissions>|\t<privapp-permissions package="com.miui.contentextension">\n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t</privapp-permissions>\n</permissions>|' build/portrom/images/product/etc/permissions/privapp-permissions-product.xml
 fi
-
 if [[ -d "devices/common" ]];then
     commonCamera=$(find devices/common -type f -name "MiuiCamera.apk")
     targetCamera=$(find build/portrom/images/product -type d -name "MiuiCamera")
@@ -451,7 +430,6 @@ if [[ -d "devices/common" ]];then
     MiLinkCirculateMIUI15=$(find devices/common -type d -name "MiLinkCirculate*" )
     targetMiLinkCirculateMIUI15=$(find build/portrom/images/product -type d -name "MiLinkCirculate*")
     targetNQNfcNci=$(find build/portrom/images/system/system build/portrom/images/product build/portrom/images/system_ext -type d -name "NQNfcNci*")
-
     if [[ $base_android_version == "13" ]];then
         rm -rf $targetNQNfcNci
         cp -rf devices/common/overlay/system/* build/portrom/images/system/
@@ -477,14 +455,12 @@ if [[ -d "devices/common" ]];then
         cp -rf $MiLinkCirculateMIUI15 build/portrom/images/product/app/
     fi
 fi
-
 #Devices/机型代码/overaly 按照镜像的目录结构，可直接替换目标。
 if [[ -d "devices/${base_rom_code}/overlay" ]]; then
     cp -rf devices/${base_rom_code}/overlay/* build/portrom/images/
 else
     yellow "devices/${base_rom_code}/overlay 未找到" "devices/${base_rom_code}/overlay not found" 
 fi
-
 #添加erofs文件系统fstab
 if [ ${pack_type} == "EROFS" ];then
     yellow "检查 vendor fstab.qcom是否需要添加erofs挂载点" "Validating whether adding erofs mount points is needed."
