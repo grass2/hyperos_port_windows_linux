@@ -332,7 +332,7 @@ def main(baserom, portrom):
                 if read_config('bin/port_config', 'repack_with_ext4') == "true":
                     pack_type = 'EXT'
                 if call(f'extract.erofs -x -i build/portrom/images/{part}.img -o build/portrom/images/'):
-                        red(f"提取{part}失败\nExtracting {part} failed")
+                    red(f"提取{part}失败\nExtracting {part} failed")
                 os.makedirs(f'build/portrom/images/{part}/lost+found')
                 os.remove(f'build/portrom/images/{part}.img')
                 green(f"提取移植包[{part}] [erofs]镜像完毕\nExtracting {part} [erofs] done.")
