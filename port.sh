@@ -74,7 +74,6 @@ for i in ${port_partition};do
 done
 sudo rm -rf app
 sudo rm -rf tmp
-sudo rm -rf config
 sudo rm -rf build/baserom/
 sudo rm -rf build/portrom/
 find . -type d -name 'hyperos_*' |xargs rm -rf
@@ -204,7 +203,6 @@ for part in ${super_list};do
         
     fi
 done
-rm -rf config
 blue "正在获取ROM参数" "Fetching ROM build prop."
 # 安卓版本
 base_android_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.release")
