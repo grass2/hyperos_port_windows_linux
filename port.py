@@ -55,6 +55,10 @@ def main(baserom, portrom):
             device_code = "YourDevice"
         f.write(f"device_code='{device_code}'\n")
         print(device_code)
+        if [True for i in ['SHENNONG', 'HOUJI'] if i in device_code]:
+            f.write(f'is_shennong_houji_port="true"\n')
+        else:
+            f.write(f'is_shennong_houji_port="false"\n')
         f.write(f"build_host='{gethostname()}'\n")
         f.write(f"source $1\n")
     os.system(f"bash ./bin/call ./port.sh")

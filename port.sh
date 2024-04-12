@@ -42,10 +42,6 @@ else
     error "目标移植包没有payload.bin，请用MIUI官方包作为移植包" "payload.bin not found, please use HyperOS official OTA zip package."
 fi
 green "ROM初步检测通过" "ROM validation passed."
-is_shennong_houji_port=false
-if [[ "$portrom" =~ SHENNONG|HOUJI ]]; then
-    is_shennong_houji_port=true
-fi
 blue "正在清理文件" "Cleaning up.."
 for i in ${port_partition};do
     [ -d ./${i} ] && rm -rf ./${i}
