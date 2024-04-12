@@ -849,7 +849,7 @@ else
     mkdir -p out/${os_type}_${device_code}_${port_rom_version}/images/
     mv -f build/portrom/images/super.zst out/${os_type}_${device_code}_${port_rom_version}/images/
     cp -rf bin/flash/vab/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
-    cp -rf bin/flash/vab/platform-tools-windows out/${os_type}_${device_code}_${port_rom_version}/META-INF/
+    cp -rf bin/flash/platform-tools-windows out/${os_type}_${device_code}_${port_rom_version}/META-INF/
     cp -rf bin/flash/vab/flash_update.bat out/${os_type}_${device_code}_${port_rom_version}/
     cp -rf bin/flash/vab/flash_and_format.bat out/${os_type}_${device_code}_${port_rom_version}/
     cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/
