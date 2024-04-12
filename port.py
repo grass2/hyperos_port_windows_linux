@@ -34,12 +34,12 @@ def main(baserom, portrom):
             red("PORTROM: Invalid parameter")
             sys.exit()
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
-        f.write(f"baserom={baserom}\n")
-        f.write(f"portrom={portrom}\n")
-        f.write(f"port_partition={read_config('bin/port_config', 'partition_to_port')}\n")
-        f.write(f"repackext4={read_config('bin/port_config', 'repack_with_ext4')}\n")
-        f.write(f"brightness_fix_method={read_config('bin/port_config', 'brightness_fix_method')}\n")
-        f.write(f"compatible_matrix_matches_enabled={read_config('bin/port_config', 'compatible_matrix_matches_check')}\n")
+        f.write(f"baserom='{baserom}'\n")
+        f.write(f"portrom='{portrom}'\n")
+        f.write(f"port_partition='{read_config('bin/port_config', 'partition_to_port')}'\n")
+        f.write(f"repackext4='{read_config('bin/port_config', 'repack_with_ext4')}'\n")
+        f.write(f"brightness_fix_method='{read_config('bin/port_config', 'brightness_fix_method')}'\n")
+        f.write(f"compatible_matrix_matches_enabled='{read_config('bin/port_config', 'compatible_matrix_matches_check')}'\n")
         f.write(f"source $1\n")
     os.system(f"bash ./bin/call ./port.sh")
 
