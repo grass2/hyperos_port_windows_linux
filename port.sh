@@ -126,10 +126,8 @@ if [ $(grep -c "sm8250" "build/portrom/images/vendor/build.prop") -ne 0 ]; then
     ## Fix the drop frame issus
     echo "ro.surface_flinger.enable_frame_rate_override=false" >> build/portrom/images/vendor/build.prop
     echo "ro.vendor.display.mode_change_optimize.enable=true" >> build/portrom/images/vendor/build.prop
-
     sed -i "s/persist.sys.miui_animator_sched.bigcores=.*/persist.sys.miui_animator_sched.bigcores=4-6/" build/portrom/images/product/etc/build.prop
     sed -i "s/persist.sys.miui_animator_sched.big_prime_cores=.*/persist.sys.miui_animator_sched.big_prime_cores=4-7/" build/portrom/images/product/etc/build.prop
-
     {
         echo "persist.sys.miui.sf_cores=4-7"
         echo "persist.sys.minfree_def=73728,92160,110592,154832,482560,579072" 
@@ -137,7 +135,6 @@ if [ $(grep -c "sm8250" "build/portrom/images/vendor/build.prop") -ne 0 ]; then
         echo "persist.sys.minfree_8g=73728,92160,110592,387072,1105920,1451520"
         echo "persist.vendor.display.miui.composer_boost=4-7"
     }  >> build/portrom/images/product/etc/build.prop
-
 fi
 # props from k60
 echo "persist.vendor.mi_sf.optimize_for_refresh_rate.enable=1" >> build/portrom/images/vendor/build.prop
@@ -222,7 +219,6 @@ else
     yellow "删除多余的App" "Debloating..." 
     # List of apps to be removed
     debloat_apps=("MSA" "mab" "Updater" "MiuiUpdater" "MiService" "MIService" "SoterService" "Hybrid" "AnalyticsCore")
-
     for debloat_app in "${debloat_apps[@]}"; do
         # Find the app directory
         app_dir=$(find build/portrom/images/product -type d -name "*$debloat_app*")
