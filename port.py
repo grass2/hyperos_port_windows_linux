@@ -6,7 +6,7 @@ import sys
 from _socket import gethostname
 
 from bin import downloader
-from bin.echo import blue, red
+from bin.echo import blue, red, green
 import bin.check
 from bin.read_config import main as read_config
 import zipfile
@@ -76,7 +76,14 @@ def main(baserom, portrom):
             else:
                 red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试\npayload.bin/new.br not found, please use HyperOS official OTA zip package.")
                 sys.exit()
-
+        with zipfile.ZipFile(portrom) as rom:
+            if "payload.bin" in rom.namelist():
+                green("ROM初步检测通过\nROM validation passed.")
+            elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
+                f.write("is_eu_rom=true\n")
+            else:
+                red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
+                sys.exit()
         f.write(f"source $1\n")
     os.system(f"bash ./bin/call ./port.sh")
 

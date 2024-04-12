@@ -19,15 +19,6 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-blue "开始检测ROM移植包" "Validating PORTROM.."
-if unzip -l ${portrom} | grep  -q "payload.bin"; then
-    green "ROM初步检测通过" "ROM validation passed."
-elif [[ ${portrom} == *"xiaomi.eu"* ]];then
-    is_eu_rom=true
-else
-    error "目标移植包没有payload.bin，请用MIUI官方包作为移植包" "payload.bin not found, please use HyperOS official OTA zip package."
-fi
-green "ROM初步检测通过" "ROM validation passed."
 blue "正在清理文件" "Cleaning up.."
 for i in ${port_partition};do
     [ -d ./${i} ] && rm -rf ./${i}
