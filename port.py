@@ -53,6 +53,7 @@ def main(baserom, portrom):
         else:
             device_code = "YourDevice"
         f.write(f"device_code='{device_code}'\n")
+        print(device_code)
         f.write(f"build_host='{gethostname()}'\n")
         f.write(f"source $1\n")
     os.system(f"bash ./bin/call ./port.sh")
