@@ -1,6 +1,5 @@
 #!/bin/bash
 javaOpts="-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
-build_user="Bruce Teng"
 export PATH=$(pwd)/bin/$(uname)/$(uname -m)/:$PATH
 source functions.sh
 shopt -s expand_aliases

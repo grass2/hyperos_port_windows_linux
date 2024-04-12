@@ -46,6 +46,7 @@ def main(baserom, portrom):
         f.write(f"work_dir='{os.getcwd()}'\n")
         f.write(f"tools_dir='{os.getcwd()}/bin/{platform.system()}/{platform.machine()}'\n")
         f.write(f"OSTYPE='{platform.system()}'\n")
+        f.write(f"build_user='Bruce Teng'")
         if "miui_" in baserom:
             device_code = baserom.split('_')[1]
         elif "xiaomi.eu_" in baserom:
