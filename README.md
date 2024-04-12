@@ -57,7 +57,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
     # 安装依赖
     sudo ./setup.sh
     # 开始移植
-    sudo ./port.sh <底包路径> <移植包路径>
+    sudo python3 ./port.py <底包路径> <移植包路径>
 ```
 - 在macOS下
 ```shell
@@ -70,7 +70,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
     # 安装依赖
     sudo ./setup.sh
     # 开始移植
-    sudo ./port.sh <底包路径> <移植包路径>
+    sudo python3 ./port.py <底包路径> <移植包路径>
 ```
 - 在Termux上(未测试)
 ```shell
@@ -84,7 +84,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
     ./setup.sh
     # 进入root模式
     tsu
-    ./port.sh <底包路径> <移植包路径>
+    python3 ./port.py <底包路径> <移植包路径>
 ```
 - 上述代码中，底包路径和移植包路径可以替换为链接
 
