@@ -10,13 +10,32 @@ import sys
 from _socket import gethostname
 from bin.sdat2img import main as sdat2img
 from bin import downloader
+from bin.gettype import gettype
 from bin.echo import blue, red, green
 import bin.check
 from bin.read_config import main as read_config
 import zipfile
-from bin.lpunpack import unpack as lpunpack
+from bin.lpunpack import unpack as lpunpack, SparseImage
+from bin.imgextractor import Extractor
 
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
+def simg2img(path):
+    with open(path, 'rb') as fd:
+        if SparseImage(fd).check():
+            print('Sparse image detected.')
+            print('Converting to raw image...')
+            unsparse_file = SparseImage(fd).unsparse()
+            print('Result:[ok]')
+        else:
+            print(f"{path} not Sparse.Skip!")
+    try:
+        if os.path.exists(unsparse_file):
+            os.remove(path)
+            os.rename(unsparse_file, path)
+    except Exception as e:
+        print(e)
 
 
 def call(exe, kz='Y', out=0, shstate=False, sp=0):
@@ -76,6 +95,7 @@ def main(baserom, portrom):
         else:
             red("PORTROM: Invalid parameter")
             sys.exit()
+    pack_type = 'EXT'
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
         f.write(f"baserom='{baserom}'\n")
         f.write(f"portrom='{portrom}'\n")
@@ -88,6 +108,10 @@ def main(baserom, portrom):
         f.write(f"tools_dir='{os.getcwd()}/bin/{platform.system()}/{platform.machine()}'\n")
         f.write(f"OSTYPE='{platform.system()}'\n")
         f.write(f"build_user='Bruce Teng'\n")
+        if read_config('bin/port_config', 'repack_with_ext4') == 'true':
+            pack_type = 'EXT'
+        else:
+            pack_type = 'EROFS'
         if "miui_" in baserom:
             device_code = baserom.split('_')[1]
         elif "xiaomi.eu_" in baserom:
@@ -223,7 +247,7 @@ def main(baserom, portrom):
         shutil.move('build/portrom/images/super.img', 'build/portrom/super.img')
         green("移植包 [super.img] 提取完毕\n[super.img] extracted.")
     else:
-        blue("正在提取移植包 [payload.bin]" "Extracting files from PORTROM [payload.bin]")
+        blue("正在提取移植包 [payload.bin]\nExtracting files from PORTROM [payload.bin]")
         with zipfile.ZipFile(portrom) as rom:
             try:
                 rom.extract('payload.bin', path='build/portrom')
@@ -250,6 +274,24 @@ def main(baserom, portrom):
                      glob.glob(f'build/baserom/{i}.patch.*'):
                 os.remove(v)
 
+    for part in ['system', 'system_dlkm', 'system_ext', 'product', 'product_dlkm', 'mi_ext']:
+        img = f'build/baserom/images/{part}.img'
+        if os.path.isfile(img):
+            if gettype(img) == 'sparse':
+                simg2img(img)
+            if gettype(img) == 'ext':
+                blue(f"正在分解底包 {part}.img [ext]\nExtracing {part}.img [ext] from BASEROM")
+                Extractor().main(img, ('build/baserom/images/' + os.sep + os.path.basename(img).split('.')[0]))
+                blue(f"分解底包 [{part}.img] 完成\nBASEROM {part}.img [ext] extracted.")
+                os.remove(img)
+            elif gettype(img) == 'erofs':
+                pack_type = 'EROFS'
+                blue(f"正在分解底包 {part}.img [erofs]\nExtracing {part}.img [erofs] from BASEROM")
+                if call(f'extract.erofs -x -i build/baserom/images/{part}.img  -o build/baserom/images/'):
+                    red(f"分解 {part}.img 失败\nExtracting {part}.img failed.")
+                    sys.exit()
+                blue(f"分解底包 [{part}.img][erofs] 完成\nBASEROM {part}.img [erofs] extracted.")
+                os.remove(img)
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 

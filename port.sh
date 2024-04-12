@@ -20,22 +20,6 @@ else
     pack_type=EROFS
 fi
 
-for part in system system_dlkm system_ext product product_dlkm mi_ext ;do
-    if [[ -f build/baserom/images/${part}.img ]];then 
-        if [[ $(python3 bin/gettype.py build/baserom/images/${part}.img) == "ext" ]];then
-            blue "正在分解底包 ${part}.img [ext]" "Extracing ${part}.img [ext] from BASEROM"
-            sudo python3 bin/imgextractor/imgextractor.py build/baserom/images/${part}.img build/baserom/images/
-            blue "分解底包 [${part}.img] 完成" "BASEROM ${part}.img [ext] extracted."
-            rm -rf build/baserom/images/${part}.img      
-        elif [[ $(python3 bin/gettype.py build/baserom/images/${part}.img) == "erofs" ]]; then
-            pack_type=EROFS
-            blue "正在分解底包 ${part}.img [erofs]" "Extracing ${part}.img [erofs] from BASEROM"
-            extract.erofs -x -i build/baserom/images/${part}.img  -o build/baserom/images/ || error "分解 ${part}.img 失败" "Extracting ${part}.img failed."
-            blue "分解底包 [${part}.img][erofs] 完成" "BASEROM ${part}.img [erofs] extracted."
-            rm -rf build/baserom/images/${part}.img
-        fi
-    fi
-done
 for image in vendor odm vendor_dlkm odm_dlkm;do
     if [ -f build/baserom/images/${image}.img ];then
         cp -rf build/baserom/images/${image}.img build/portrom/images/${image}.img
