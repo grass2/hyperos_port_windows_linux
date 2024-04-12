@@ -96,6 +96,7 @@ def main(baserom, portrom):
             red("PORTROM: Invalid parameter")
             sys.exit()
     pack_type = 'EXT'
+    device_code = "YourDevice"
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
         f.write(f"baserom='{baserom}'\n")
         f.write(f"portrom='{portrom}'\n")
@@ -116,8 +117,6 @@ def main(baserom, portrom):
             device_code = baserom.split('_')[1]
         elif "xiaomi.eu_" in baserom:
             device_code = baserom.split('_')[2]
-        else:
-            device_code = "YourDevice"
         f.write(f"device_code='{device_code}'\n")
         print(device_code)
         if [True for i in ['SHENNONG', 'HOUJI'] if i in device_code]:
