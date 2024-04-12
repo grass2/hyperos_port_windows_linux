@@ -100,7 +100,6 @@ if [[ -f $targetAospFrameworkResOverlay ]]; then
     yellow "Change defaultPeakRefreshRate: $filename ..."
     targetDir=$(echo "$filename" | sed 's/\..*$//')
     java $javaOpts -jar bin/apktool/apktool.jar d $targetAospFrameworkResOverlay -o tmp/$targetDir -f
-
     for xml in $(find tmp/$targetDir -type f -name "integers.xml");do
         # magic: Change DefaultPeakRefrshRate to 60
         python3 bin/xmlstarlet.py $xml config_defaultPeakRefreshRate 60
