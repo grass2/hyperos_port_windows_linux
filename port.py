@@ -292,6 +292,51 @@ def main(baserom, portrom):
                     sys.exit()
                 blue(f"分解底包 [{part}.img][erofs] 完成\nBASEROM {part}.img [erofs] extracted.")
                 os.remove(img)
+
+    for image in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm']:
+        source_file = f'build/baserom/images/{image}.img'
+        if os.path.isfile(source_file):
+            shutil.copy(source_file, f'build/portrom/images/{image}.img')
+    green("开始提取逻辑分区镜像\nStarting extract partition from img")
+    for part in source_file:
+        if part in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm'] and os.path.isfile(f"build/portrom/images/{part}.img"):
+            blue(f"从底包中提取 [{part}]分区 ...\nExtracting [{part}] from BASEROM")
+        else:
+            if is_eu_rom:
+                blue(f"PORTROM super.img 提取 [{part}] 分区...\nExtracting [{part}] from PORTROM super.img")
+                lpunpack('build/portrom/super.img', 'build/portrom/images', [f"{part}_a"])
+                shutil.move(f"build/portrom/images/{part}_a.img", f"build/portrom/images/{part}.img")
+            else:
+                blue(f"payload.bin 提取 [{part}] 分区...\nExtracting [{part}] from PORTROM payload.bin")
+                if call(f'payload-dumper-go -p {part} -o build/portrom/images/ build/portrom/payload.bin'):
+                    red(f"提取移植包 [{part}] 分区时出错\nExtracting partition [{part}] error.")
+                    sys.exit()
+        img = f'build/portrom/images/{part}.img'
+        if os.path.isfile(img):
+            blue(f"开始提取 {part}.img\nExtracting {part}.img")
+            if gettype(img) == 'sparse':
+                simg2img(img)
+            if gettype(img) == 'ext':
+                pack_type = 'EXT'
+                try:
+                    Extractor().main(img, ('build/portrom/images/' + os.sep + os.path.basename(img).split('.')[0]))
+                except:
+                    red(f"提取{part}失败\nExtracting partition {part} failed")
+                    sys.exit()
+                os.makedirs(f'build/portrom/images/{part}/lost+found')
+                os.remove(f'build/portrom/images/{part}.img')
+                green(f"提取 [{part}] [ext]镜像完毕\nExtracting [{part}].img [ext] done")
+            elif gettype(img) == 'erofs':
+                pack_type = 'EROFS'
+                green("移植包为 [erofs] 文件系统\nPORTROM filesystem: [erofs]. ")
+                if read_config('bin/port_config', 'repack_with_ext4') == "true":
+                    pack_type = 'EXT'
+                if call(f'extract.erofs -x -i build/portrom/images/{part}.img -o build/portrom/images/'):
+                        red(f"提取{part}失败\nExtracting {part} failed")
+                os.makedirs(f'build/portrom/images/{part}/lost+found')
+                os.remove(f'build/portrom/images/{part}.img')
+                green(f"提取移植包[{part}] [erofs]镜像完毕\nExtracting {part} [erofs] done.")
+
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 

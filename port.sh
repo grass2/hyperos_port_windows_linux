@@ -20,49 +20,6 @@ else
     pack_type=EROFS
 fi
 
-for image in vendor odm vendor_dlkm odm_dlkm;do
-    if [ -f build/baserom/images/${image}.img ];then
-        cp -rf build/baserom/images/${image}.img build/portrom/images/${image}.img
-    fi
-done
-# 分解镜像
-green "开始提取逻辑分区镜像" "Starting extract partition from img"
-echo $super_list
-for part in ${super_list};do
-    if [[ $part =~ ^(vendor|odm|vendor_dlkm|odm_dlkm)$ ]] && [[ -f "build/portrom/images/$part.img" ]]; then
-        blue "从底包中提取 [${part}]分区 ..." "Extracting [${part}] from BASEROM"
-    else
-        if [[ ${is_eu_rom} == true ]];then
-            blue "PORTROM super.img 提取 [${part}] 分区..." "Extracting [${part}] from PORTROM super.img"
-            blue "lpunpack.py PORTROM super.img ${patrt}_a"
-            python3 bin/lpunpack.py -p ${part}_a build/portrom/super.img build/portrom/images 
-            mv build/portrom/images/${part}_a.img build/portrom/images/${part}.img
-        else
-            blue "payload.bin 提取 [${part}] 分区..." "Extracting [${part}] from PORTROM payload.bin"
-            payload-dumper-go -p ${part} -o build/portrom/images/ build/portrom/payload.bin  ||error "提取移植包 [${part}] 分区时出错" "Extracting partition [${part}] error."
-        fi
-    fi
-    if [ -f "${work_dir}/build/portrom/images/${part}.img" ];then
-        blue "开始提取 ${part}.img" "Extracting ${part}.img"
-        
-        if [[ $(python3 bin/gettype.py build/portrom/images/${part}.img) == "ext" ]];then
-            pack_type=EXT
-            python3 bin/imgextractor/imgextractor.py build/portrom/images/${part}.img build/portrom/images/ || error "提取${part}失败" "Extracting partition ${part} failed"
-            mkdir -p build/portrom/images/${part}/lost+found
-            rm -rf build/portrom/images/${part}.img
-            green "提取 [${part}] [ext]镜像完毕" "Extracting [${part}].img [ext] done"
-        elif [[ $(python3 bin/gettype.py build/portrom/images/${part}.img) == "erofs" ]];then
-            pack_type=EROFS
-            green "移植包为 [erofs] 文件系统" "PORTROM filesystem: [erofs]. "
-            [ "${repackext4}" = "true" ] && pack_type=EXT
-            extract.erofs -x -i build/portrom/images/${part}.img -o build/portrom/images/ || error "提取${part}失败" "Extracting ${part} failed"
-            mkdir -p build/portrom/images/${part}/lost+found
-            rm -rf build/portrom/images/${part}.img
-            green "提取移植包[${part}] [erofs]镜像完毕" "Extracting ${part} [erofs] done."
-        fi
-        
-    fi
-done
 blue "正在获取ROM参数" "Fetching ROM build prop."
 # 安卓版本
 base_android_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.release")
