@@ -31,11 +31,6 @@ fi
 if [[ "$OSTYPE" == "Windows"* ]]; then
   alias python3=python
 fi
-command -v "python3" >/dev/null || (error "please Install Python3 First, run ./setup.sh first (sudo is required on Linux system)"; exit )
-python3 bin/check.py
-if [ "$?" == '1' ] ; then
-  exit 1
-fi
 # 移植的分区，可在 bin/port_config 中更改
 port_partition=$(python3 bin/read_config.py bin/port_config "partition_to_port")
 repackext4=$(python3 bin/read_config.py bin/port_config "repack_with_ext4")

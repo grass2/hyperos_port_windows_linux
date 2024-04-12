@@ -4,6 +4,7 @@ import sys
 
 from bin import downloader
 from bin.echo import blue, red
+import bin.check
 
 
 def main(baserom, portrom):
@@ -35,6 +36,7 @@ def main(baserom, portrom):
 
 
 if __name__ == '__main__':
+    bin.check.main()
     parser = argparse.ArgumentParser(description='HyperOS stock/xiaomi.eu ROM port for Android 13 based ROM')
     parser.add_argument('baserom', type=str, help='baserom')
     parser.add_argument('portrom', type=str, help='portrom')

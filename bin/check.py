@@ -1,5 +1,5 @@
 import shutil
-from echo import red
+from bin.echo import red
 import sys
 import os
 
