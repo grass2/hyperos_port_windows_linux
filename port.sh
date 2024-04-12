@@ -461,8 +461,8 @@ if [ ${pack_type} == "EROFS" ];then
     yellow "检查 vendor fstab.qcom是否需要添加erofs挂载点" "Validating whether adding erofs mount points is needed."
     if ! grep -q "erofs" build/portrom/images/vendor/etc/fstab.qcom ; then
                for pname in system odm vendor product mi_ext system_ext; do
-                     sed -i "/\/${pname}[[:space:]]\+ext4/{p;s/ext4/erofs/;}" build/portrom/images/vendor/etc/fstab.qcom
-                     added_line=$(sed -n "/\/${pname}[[:space:]]\+erofs/p" build/portrom/images/vendor/etc/fstab.qcom)
+                    sed -i "/\/${pname}[[:space:]]\+ext4/{p;s/ext4/erofs/;}" build/portrom/images/vendor/etc/fstab.qcom
+                    added_line=$(sed -n "/\/${pname}[[:space:]]\+erofs/p" build/portrom/images/vendor/etc/fstab.qcom)
                     if [ -n "$added_line" ]; then
                         yellow "添加$pname" "Adding mount point $pname"
                     else
@@ -489,13 +489,14 @@ if [ "$(python3 bin/read_config.py bin/port_config "remove_data_encryption")" = 
 		sed -i "s/,fileencryption=aes-256-xts:wrappedkey_v0//g" $fstab
 		sed -i "s/,metadata_encryption=aes-256-xts//g" $fstab
 		sed -i "s/,fileencryption=aes-256-xts//g" $fstab
-        sed -i "s/,fileencryption=ice//g" $fstab
+    sed -i "s/,fileencryption=ice//g" $fstab
 		sed -i "s/fileencryption/encryptable/g" $fstab
 	done
 fi
 for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done
+
 superSize=$(python3 bin/getSuperSize.py $device_code)
 green "Super大小为${superSize}" "Super image size: ${superSize}"
 green "开始打包镜像" "Packing super.img"
