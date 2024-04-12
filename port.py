@@ -12,6 +12,7 @@ import bin.check
 from bin.read_config import main as read_config
 import zipfile
 
+
 def main(baserom, portrom):
     if not os.path.exists(os.path.basename(baserom)):
         if 'http' in baserom:
@@ -66,7 +67,8 @@ def main(baserom, portrom):
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
                 f.write("baserom_type='payload'\n")
-                f.write("super_list='vendor mi_ext odm odm_dlkm system system_dlkm vendor_dlkm product product_dlkm system_ext'\n")
+                f.write(
+                    "super_list='vendor mi_ext odm odm_dlkm system system_dlkm vendor_dlkm product product_dlkm system_ext'\n")
             elif [True for i in rom.namelist() if '.br' in i]:
                 f.write("baserom_type='br'\n")
                 f.write("super_list='vendor mi_ext odm system product system_ext'\n")
