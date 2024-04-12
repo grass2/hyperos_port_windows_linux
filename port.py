@@ -1,4 +1,5 @@
 import argparse
+import glob
 import os
 import platform
 import shutil
@@ -64,16 +65,21 @@ def main(baserom, portrom):
             f.write(f'is_shennong_houji_port="false"\n')
         f.write(f"build_host='{gethostname()}'\n")
         blue("正在检测ROM底包\nValidating BASEROM..")
+        is_base_rom_eu:bool
+        baserom_type: str
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
                 f.write("baserom_type='payload'\n")
+                baserom_type = 'payload'
                 f.write(
                     "super_list='vendor mi_ext odm odm_dlkm system system_dlkm vendor_dlkm product product_dlkm system_ext'\n")
             elif [True for i in rom.namelist() if '.br' in i]:
                 f.write("baserom_type='br'\n")
+                baserom_type = 'br'
                 f.write("super_list='vendor mi_ext odm system product system_ext'\n")
             elif [True for i in rom.namelist() if 'images/super.img' in i]:
                 f.write("is_base_rom_eu='true'\n")
+                is_base_rom_eu = True
                 f.write("super_list='vendor mi_ext odm system product system_ext'\n")
             else:
                 red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试\npayload.bin/new.br not found, please use HyperOS official OTA zip package.")
@@ -112,6 +118,52 @@ def main(baserom, portrom):
     for i in ['build/baserom/images/', 'build/portrom/images/']:
         if not os.path.exists(i):
             os.makedirs(i)
+    # Extract Zip
+    if baserom_type == 'payload':
+        blue("正在提取底包 [payload.bin]\nExtracting files from BASEROM [payload.bin]")
+        with zipfile.ZipFile(baserom) as rom:
+            try:
+                rom.extract('payload.bin', path='build/baserom')
+            except:
+                red("解压底包 [payload.bin] 时出错\nExtracting [payload.bin] error")
+                sys.exit()
+            green("底包 [payload.bin] 提取完毕\n[payload.bin] extracted.")
+    elif baserom_type == 'br':
+        blue("正在提取底包 [new.dat.br]\nExtracting files from BASEROM [new.dat.br]")
+        with zipfile.ZipFile(baserom) as rom:
+            try:
+                rom.extractall('build/baserom')
+            except:
+                red("解压底包 [new.dat.br] 时出错\nExtracting [new.dat.br] error")
+                sys.exit()
+            green("底包 [new.dat.br] 提取完毕\n[new.dat.br] extracted.")
+    elif is_base_rom_eu:
+        blue("正在提取底包 [super.img]\nExtracting files from BASEROM [super.img]")
+        with zipfile.ZipFile(baserom) as rom:
+            try:
+                rom.extractall('build/baserom')
+            except:
+                red("解压底包 [super.img] 时出错\nExtracting [super.img] error")
+                sys.exit()
+            green("底包 [super.img] 提取完毕\n[super.img] extracted.")
+        blue("合并super.img* 到super.img\nMerging super.img.* into super.img")
+        os.system('simg2img build/baserom/images/super.img.* build/baserom/images/super.img')
+        files = glob.glob('build/baserom/images/super.img.*')
+        for file in files:
+            os.remove(file)
+        os.rename("build/baserom/images/super.img", 'build/baserom/super.img')
+        shutil.move('build/baserom/images/boot.img', 'build/baserom/')
+        if not os.path.exists("build/baserom/firmware-update"):
+            os.makedirs('build/baserom/firmware-update')
+        files_to_move = glob.glob('build/baserom/images/*')
+        for file in files_to_move:
+            shutil.move(file, 'build/baserom/firmware-update')
+        if os.path.exists('build/baserom/firmware-update/cust.img.0'):
+            os.system('simg2img build/baserom/firmware-update/cust.img.* build/baserom/firmware-update/cust.img')
+            for i in glob.glob('build/baserom/firmware-update/cust.img.*'):
+                os.remove(i)
+
+
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 

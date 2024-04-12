@@ -19,31 +19,6 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-# 提取分区
-if [[ ${baserom_type} == 'payload' ]];then
-    blue "正在提取底包 [payload.bin]" "Extracting files from BASEROM [payload.bin]"
-    unzip ${baserom} payload.bin -d build/baserom ||error "解压底包 [payload.bin] 时出错" "Extracting [payload.bin] error"
-    green "底包 [payload.bin] 提取完毕" "[payload.bin] extracted."
-elif [[ ${baserom_type} == 'br' ]];then
-    blue "正在提取底包 [new.dat.br]" "Extracting files from BASEROM [*.new.dat.br]"
-    unzip ${baserom} -d build/baserom || error "解压底包 [new.dat.br]时出错" "Extracting [new.dat.br] error"
-    green "底包 [new.dat.br] 提取完毕" "[new.dat.br] extracted."
-elif [[ ${is_base_rom_eu} == true ]];then
-    blue "正在提取底包 [super.img]" "Extracting files from BASETROM [super.img]"
-    unzip ${baserom} 'images/*' -d build/baserom  ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
-    blue "合并super.img* 到super.img" "Merging super.img.* into super.img"
-    simg2img build/baserom/images/super.img.* build/baserom/images/super.img
-    rm -rf build/baserom/images/super.img.*
-    mv build/baserom/images/super.img build/baserom/super.img
-    green "底包 [super.img] 提取完毕" "[super.img] extracted."
-    mv build/baserom/images/boot.img build/baserom/
-    mkdir -p build/baserom/firmware-update
-    mv build/baserom/images/* build/baserom/firmware-update
-    if [[ -f build/baserom/firmware-update/cust.img.0 ]];then
-        simg2img build/baserom/firmware-update/cust.img.* build/baserom/firmware-update/cust.img
-        rm -rf build/baserom/firmware-update/cust.img.*
-    fi
-fi
 if [[ ${is_eu_rom} == true ]];then
     blue "正在提取移植包 [super.img]" "Extracting files from PORTROM [super.img]"
     unzip ${portrom} 'images/super.img.*' -d build/portrom  ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
