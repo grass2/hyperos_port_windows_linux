@@ -16,7 +16,7 @@ import bin.check
 from bin.read_config import main as read_config
 import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
-from bin.imgextractor import Extractor
+from imgextractor import Extractor
 
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 

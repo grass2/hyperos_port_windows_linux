@@ -4,7 +4,7 @@ import sys
 from string import printable
 import struct
 
-import bin.ext4 as ext4
+import ext4
 
 if os.name == 'nt':
     from ctypes.wintypes import LPCSTR, DWORD
