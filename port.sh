@@ -19,20 +19,6 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-blue "正在检测ROM底包" "Validating BASEROM.."
-if unzip -l ${baserom} | grep -q "payload.bin"; then
-    baserom_type="payload"
-    super_list="vendor mi_ext odm odm_dlkm system system_dlkm vendor_dlkm product product_dlkm system_ext"
-elif unzip -l ${baserom} | grep -q "br$";then
-    baserom_type="br"
-    super_list="vendor mi_ext odm system product system_ext"
-elif unzip -l ${baserom} | grep -q "images/super.img*"; then
-    is_base_rom_eu=true
-    super_list="vendor mi_ext odm system product system_ext"
-else
-    error "底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试" "payload.bin/new.br not found, please use HyperOS official OTA zip package."
-    exit
-fi
 blue "开始检测ROM移植包" "Validating PORTROM.."
 if unzip -l ${portrom} | grep  -q "payload.bin"; then
     green "ROM初步检测通过" "ROM validation passed."
