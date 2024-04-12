@@ -6,14 +6,10 @@
 # Test Port ROM: Mi 14/Pro OS1.0.9-1.0.25 Mi 13/PRO OS1.0 23.11.09-23.11.10 DEV
 
 build_user="Bruce Teng"
-build_host=$(hostname)
 # 底包和移植包为外部参数传入
-work_dir=$(pwd)
-tools_dir=${work_dir}/bin/$(uname)/$(uname -m)
 export PATH=$(pwd)/bin/$(uname)/$(uname -m)/:$PATH
 # Import functions
 source functions.sh
-OSTYPE=$(uname)
 shopt -s expand_aliases
 if [[ "$OSTYPE" == "darwin"* ]]; then
     yellow "检测到Mac，设置alias" "macOS detected,setting alias"

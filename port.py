@@ -1,6 +1,9 @@
 import argparse
 import os
+import platform
 import sys
+
+from _socket import gethostname
 
 from bin import downloader
 from bin.echo import blue, red
@@ -40,6 +43,10 @@ def main(baserom, portrom):
         f.write(f"repackext4='{read_config('bin/port_config', 'repack_with_ext4')}'\n")
         f.write(f"brightness_fix_method='{read_config('bin/port_config', 'brightness_fix_method')}'\n")
         f.write(f"compatible_matrix_matches_enabled='{read_config('bin/port_config', 'compatible_matrix_matches_check')}'\n")
+        f.write(f"work_dir='{os.getcwd()}'\n")
+        f.write(f"tools_dir='{os.getcwd()}/bin/{platform.system()}/{platform.machine()}'\n")
+        f.write(f"OSTYPE='{platform.system()}'\n")
+        f.write(f"build_host='{gethostname()}'\n")
         f.write(f"source $1\n")
     os.system(f"bash ./bin/call ./port.sh")
 
