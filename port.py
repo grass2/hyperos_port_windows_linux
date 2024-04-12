@@ -1,6 +1,7 @@
 import argparse
 import os
 import platform
+import shutil
 import sys
 
 from _socket import gethostname
@@ -10,7 +11,6 @@ from bin.echo import blue, red, green
 import bin.check
 from bin.read_config import main as read_config
 import zipfile
-
 
 def main(baserom, portrom):
     if not os.path.exists(os.path.basename(baserom)):
@@ -85,6 +85,15 @@ def main(baserom, portrom):
                 red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
                 sys.exit()
         f.write(f"source $1\n")
+    # Clean Up
+    blue("正在清理文件\nCleaning up..")
+    for i in read_config('bin/port_config', 'partition_to_port').split():
+        if os.path.isdir(i):
+            try:
+                shutil.rmtree(i)
+            except:
+                pass
+    # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 
 

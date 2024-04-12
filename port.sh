@@ -19,10 +19,6 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-blue "正在清理文件" "Cleaning up.."
-for i in ${port_partition};do
-    [ -d ./${i} ] && rm -rf ./${i}
-done
 sudo rm -rf app
 sudo rm -rf tmp
 sudo rm -rf build/baserom/
