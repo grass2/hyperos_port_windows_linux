@@ -2,16 +2,53 @@ import argparse
 import glob
 import os
 import platform
+import shlex
 import shutil
+import subprocess
 import sys
 
 from _socket import gethostname
-
+from bin.sdat2img import main as sdat2img
 from bin import downloader
 from bin.echo import blue, red, green
 import bin.check
 from bin.read_config import main as read_config
 import zipfile
+from bin.lpunpack import unpack as lpunpack
+
+tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
+def call(exe, kz='Y', out=0, shstate=False, sp=0):
+    cmd = f'{tools_dir}/{exe}' if kz == "Y" else exe
+    if os.name != 'posix':
+        conf = subprocess.CREATE_NO_WINDOW
+    else:
+        if sp == 0:
+            cmd = shlex.split(cmd)
+        conf = 0
+    try:
+        ret = subprocess.Popen(cmd, shell=shstate, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, creationflags=conf)
+        for i in iter(ret.stdout.readline, b""):
+            if out == 0:
+                try:
+                    out_put = i.decode("utf-8").strip()
+                except (Exception, BaseException):
+                    out_put = i.decode("gbk").strip()
+                print(out_put)
+    except subprocess.CalledProcessError as e:
+        ret = lambda: print(f"Error!{exe}")
+        ret.returncode = 2
+        for i in iter(e.stdout.readline, b""):
+            if out == 0:
+                try:
+                    out_put = i.decode("utf-8").strip()
+                except (Exception, BaseException):
+                    out_put = i.decode("gbk").strip()
+                print(out_put)
+    ret.wait()
+    return ret.returncode
 
 
 def main(baserom, portrom):
@@ -65,23 +102,28 @@ def main(baserom, portrom):
             f.write(f'is_shennong_houji_port="false"\n')
         f.write(f"build_host='{gethostname()}'\n")
         blue("正在检测ROM底包\nValidating BASEROM..")
-        is_base_rom_eu: bool
-        baserom_type: str
-        is_eu_rom: bool
+        is_base_rom_eu: bool = False
+        baserom_type: str = ''
+        is_eu_rom: bool = False
+        super_list: list = []
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
                 f.write("baserom_type='payload'\n")
                 baserom_type = 'payload'
                 f.write(
                     "super_list='vendor mi_ext odm odm_dlkm system system_dlkm vendor_dlkm product product_dlkm system_ext'\n")
+                super_list = ['vendor', 'mi_ext', 'odm', 'odm_dlkm', 'system', 'system_dlkm', 'vendor_dlkm', 'product',
+                              'product_dlkm', 'system_ext']
             elif [True for i in rom.namelist() if '.br' in i]:
                 f.write("baserom_type='br'\n")
                 baserom_type = 'br'
                 f.write("super_list='vendor mi_ext odm system product system_ext'\n")
+                super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
             elif [True for i in rom.namelist() if 'images/super.img' in i]:
                 f.write("is_base_rom_eu='true'\n")
                 is_base_rom_eu = True
                 f.write("super_list='vendor mi_ext odm system product system_ext'\n")
+                super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
             else:
                 red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试\npayload.bin/new.br not found, please use HyperOS official OTA zip package.")
                 sys.exit()
@@ -184,11 +226,30 @@ def main(baserom, portrom):
         blue("正在提取移植包 [payload.bin]" "Extracting files from PORTROM [payload.bin]")
         with zipfile.ZipFile(portrom) as rom:
             try:
-                rom.extract('payload.bin',  path='build/portrom')
+                rom.extract('payload.bin', path='build/portrom')
             except:
                 red("解压移植包 [payload.bin] 时出错\nExtracting [payload.bin] error")
                 sys.exit()
         green("移植包 [payload.bin] 提取完毕\n[payload.bin] extracted.")
+    # Extract BaseRom Partition
+    if baserom_type == 'payload':
+        blue("开始分解底包 [payload.bin]\nUnpacking BASEROM [payload.bin]")
+        if call('payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin'):
+            red("分解底包 [payload.bin] 时出错\nUnpacking [payload.bin] failed")
+            sys.exit()
+    elif is_base_rom_eu:
+        blue("开始分解底包 [super.img]\nUnpacking BASEROM [super.img]")
+        lpunpack("build/baserom/super.img", 'build/baserom/images', super_list)
+    elif baserom_type == 'br':
+        blue("开始分解底包 [new.dat.br]\nUnpacking BASEROM[new.dat.br]")
+        for i in super_list:
+            call(f'brotli -d build/baserom/{i}.new.dat.br')
+            sdat2img(f'build/baserom/{i}.transfer.list', f'build/baserom/{i}.new.dat', f'build/baserom/images/{i}.img')
+            for v in glob.glob(f'build/baserom/{i}.new.dat*') + \
+                     glob.glob(f'build/baserom/{i}.transfer.list') + \
+                     glob.glob(f'build/baserom/{i}.patch.*'):
+                os.remove(v)
+
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 

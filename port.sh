@@ -19,22 +19,7 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-if [[ ${baserom_type} == 'payload' ]];then
-    blue "开始分解底包 [payload.bin]" "Unpacking BASEROM [payload.bin]"
-    payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin  ||error "分解底包 [payload.bin] 时出错" "Unpacking [payload.bin] failed"
-elif [[ ${is_base_rom_eu} == true ]];then
-     blue "开始分解底包 [super.img]" "Unpacking BASEROM [super.img]"
-        for i in ${super_list}; do 
-            python3 bin/lpunpack.py -p "${i}" build/baserom/super.img build/baserom/images
-        done
-elif [[ ${baserom_type} == 'br' ]];then
-    blue "开始分解底包 [new.dat.br]" "Unpacking BASEROM[new.dat.br]"
-        for i in ${super_list}; do 
-            ${tools_dir}/brotli -d build/baserom/$i.new.dat.br
-            sudo python3 bin/sdat2img.py build/baserom/"$i".transfer.list build/baserom/"$i".new.dat build/baserom/images/"$i".img 
-            rm -rf build/baserom/"$i".new.dat* build/baserom/"$i".transfer.list build/baserom/"$i".patch.*
-        done
-fi
+
 for part in system system_dlkm system_ext product product_dlkm mi_ext ;do
     if [[ -f build/baserom/images/${part}.img ]];then 
         if [[ $(python3 bin/gettype.py build/baserom/images/${part}.img) == "ext" ]];then

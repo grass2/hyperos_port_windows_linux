@@ -3,13 +3,13 @@ import copy
 import enum
 import io
 import json
-import re
+import os
 import struct
 import sys
 from dataclasses import dataclass, field
-from pathlib import Path
 from string import Template
-from typing import IO, Dict, List, TypeVar, cast, BinaryIO
+from timeit import default_timer as dti
+from typing import IO, Dict, List, TypeVar, cast, BinaryIO, Tuple
 
 SPARSE_HEADER_MAGIC = 0xED26FF3A
 SPARSE_HEADER_SIZE = 28
@@ -58,17 +58,16 @@ $groups
 
 
 def build_attribute_string(attributes: int) -> str:
-    match attributes:
-        case attributes if (attributes & LP_PARTITION_ATTR_READONLY):
-            result = "readonly"
-        case attributes if (attributes & LP_PARTITION_ATTR_SLOT_SUFFIXED):
-            result = "slot-suffixed"
-        case attributes if (attributes & LP_PARTITION_ATTR_UPDATED):
-            result = "updated"
-        case attributes if (attributes & LP_PARTITION_ATTR_DISABLED):
-            result = "disabled"
-        case _:
-            result = "none"
+    if attributes & LP_PARTITION_ATTR_READONLY:
+        result = "readonly"
+    elif attributes & LP_PARTITION_ATTR_SLOT_SUFFIXED:
+        result = "slot-suffixed"
+    elif attributes & LP_PARTITION_ATTR_UPDATED:
+        result = "updated"
+    elif attributes & LP_PARTITION_ATTR_DISABLED:
+        result = "disabled"
+    else:
+        result = "none"
     return result
 
 
@@ -141,7 +140,7 @@ class SparseHeader(object):
         (
             self.magic,  # 0xed26ff3a
             self.major_version,  # (0x1) - reject images with higher major versions
-            self.minor_version,  # (0x0) - allow images with higer minor versions
+            self.minor_version,  # (0x0) - allow images with higher minor versions
             self.file_hdr_sz,  # 28 bytes for first revision of the file format
             self.chunk_hdr_sz,  # 12 bytes for first revision of the file format
             self.blk_sz,  # block size in bytes, must be a multiple of 4 (4096)
@@ -204,7 +203,8 @@ class LpMetadataGeometry(LpMetadataBase):
             self.metadata_slot_count,
             self.logical_block_size
 
-        ) = struct.unpack(self._fmt, buffer[0:self.size])
+        ) = struct.unpack(self._fmt, buffer[0:struct.calcsize(self._fmt)])
+        # self.size
 
 
 class LpMetadataTableDescriptor(LpMetadataBase):
@@ -224,7 +224,7 @@ class LpMetadataTableDescriptor(LpMetadataBase):
             self.num_entries,
             self.entry_size
 
-        ) = struct.unpack(self._fmt, buffer[:self.size])
+        ) = struct.unpack(self._fmt, buffer[:struct.calcsize(self._fmt)])
 
 
 class LpMetadataPartition(LpMetadataBase):
@@ -255,7 +255,7 @@ class LpMetadataPartition(LpMetadataBase):
             self.num_extents,
             self.group_index
 
-        ) = struct.unpack(self._fmt, buffer[0:self.size])
+        ) = struct.unpack(self._fmt, buffer[0:struct.calcsize(self._fmt)])
 
         self.name = self.name.decode("utf-8").strip('\x00')
 
@@ -347,8 +347,9 @@ class LpMetadataHeader(LpMetadataBase):
             self.tables_size,
             self.tables_checksum
 
-        ) = struct.unpack(self._fmt, buffer[0:self.size])
+        ) = struct.unpack(self._fmt, buffer[0:struct.calcsize(self._fmt)])
         self.flags = 0
+        # self.size
 
 
 class LpMetadataPartitionGroup(LpMetadataBase):
@@ -366,7 +367,7 @@ class LpMetadataPartitionGroup(LpMetadataBase):
             self.name,
             self.flags,
             self.maximum_size
-        ) = struct.unpack(self._fmt, buffer[0:self.size])
+        ) = struct.unpack(self._fmt, buffer[0:struct.calcsize(self._fmt)])
 
         self.name = self.name.decode("utf-8").strip('\x00')
 
@@ -383,7 +384,7 @@ class LpMetadataBlockDevice(LpMetadataBase):
 
               Alignment is normally determined at runtime when growing or adding
               partitions. If for some reason the alignment cannot be determined, then
-              this predefined alignment in the geometry is used instead. By default it is set to 1MiB.
+              this predefined alignment in the geometry is used instead. By default, it is set to 1MiB.
 
     Offset 12: Alignment offset for "stacked" devices. For example, if the "super"
                partition itself is not aligned within the parent block device's
@@ -411,7 +412,7 @@ class LpMetadataBlockDevice(LpMetadataBase):
             self.block_device_size,
             self.partition_name,
             self.flags
-        ) = struct.unpack(self._fmt, buffer[0:self.size])
+        ) = struct.unpack(self._fmt, buffer[0:struct.calcsize(self._fmt)])
 
         self.partition_name = self.partition_name.decode("utf-8").strip('\x00')
 
@@ -487,13 +488,6 @@ class Metadata:
     def _get_info(self) -> Dict:
         # TODO 25.01.2023: Liblp version 1.2 build_header_flag_string check header version 1.2
         result = {}
-
-        def get_size(index):
-            try:
-                return self.extents[index].num_sectors
-            except:
-                return 0
-
         try:
             result = {
                 "metadata_version": f"{self.header.major_version}.{self.header.minor_version}",
@@ -524,7 +518,7 @@ class Metadata:
                         "name": item.name,
                         "group_name": self.groups[item.group_index].name,
                         "is_dynamic": True,
-                        "size": (get_size(item.first_extent_index)) * LP_SECTOR_SIZE,
+                        "size": self.extents[item.first_extent_index].num_sectors * LP_SECTOR_SIZE,
                         "attributes": build_attribute_string(item.attributes),
                         "extents": self._get_extents_string(item)
                     } for item in self.partitions
@@ -532,9 +526,16 @@ class Metadata:
                 "partition_layout": self._get_partition_layout()
             }
         except Exception:
-            pass
+            ...
         finally:
             return result
+
+    @property
+    def get_info2(self):
+        parts = {}
+        for item in self.partitions:
+            parts[self.groups[item.group_index].name] = parts[self.groups[item.group_index].name] + item.name
+        return parts
 
     def to_json(self) -> str:
         data = self._get_info()
@@ -605,7 +606,7 @@ class LpUnpackError(Exception):
 class UnpackJob:
     name: str
     geometry: LpMetadataGeometry
-    parts: list[tuple[int, int]] = field(default_factory=list)
+    parts: List[Tuple[int, int]] = field(default_factory=list)
     total_size: int = field(default=0)
 
 
@@ -631,8 +632,9 @@ class SparseImage:
             self.header = SparseHeader(self._fd.read(SPARSE_HEADER_SIZE))
         chunks = self.header.total_chunks
         self._fd.seek(self.header.file_hdr_sz - SPARSE_HEADER_SIZE, 1)
-        unsparse_file_dir = Path(self._fd.name).parent
-        unsparse_file = Path(unsparse_file_dir / "{}.unsparse.img".format(Path(self._fd.name).stem))
+        unsparse_file_dir = os.path.dirname(self._fd.name)
+        unsparse_file = os.path.join(unsparse_file_dir,
+                                     "{}.unsparse.img".format(os.path.splitext(os.path.basename(self._fd.name))[0]))
         with open(str(unsparse_file), 'wb') as out:
             sector_base = 82528
             output_len = 0
@@ -647,27 +649,25 @@ class SparseImage:
                         out.write(data)
                         output_len += len_data
                         sector_base += sector_size
+                elif chunk_header.chunk_type == 0xCAC2:
+                    data = self._read_data(chunk_data_size)
+                    len_data = sector_size << 9
+                    out.truncate(out.tell() + len_data)
+                    out.seek(0, 2)
+                    output_len += len(data)
+                    sector_base += sector_size
+                elif chunk_header.chunk_type == 0xCAC3:
+                    data = self._read_data(chunk_data_size)
+                    len_data = sector_size << 9
+                    out.truncate(out.tell() + len_data)
+                    out.seek(0, 2)
+                    output_len += len(data)
+                    sector_base += sector_size
                 else:
-                    if chunk_header.chunk_type == 0xCAC2:
-                        data = self._read_data(chunk_data_size)
-                        len_data = sector_size << 9
-                        out.truncate(out.tell() + len_data)
-                        out.seek(0, 2)
-                        output_len += len(data)
-                        sector_base += sector_size
-                    else:
-                        if chunk_header.chunk_type == 0xCAC3:
-                            data = self._read_data(chunk_data_size)
-                            len_data = sector_size << 9
-                            out.truncate(out.tell() + len_data)
-                            out.seek(0, 2)
-                            output_len += len(data)
-                            sector_base += sector_size
-                        else:
-                            len_data = sector_size << 9
-                            out.truncate(out.tell() + len_data)
-                            out.seek(0, 2)
-                            sector_base += sector_size
+                    len_data = sector_size << 9
+                    out.truncate(out.tell() + len_data)
+                    out.seek(0, 2)
+                    sector_base += sector_size
                 chunks -= 1
         return unsparse_file
 
@@ -678,8 +678,9 @@ T = TypeVar('T')
 class LpUnpack(object):
     def __init__(self, **kwargs):
         self._partition_name = kwargs.get('NAME')
-        self._show_info = kwargs.get('SHOW_INFO', False)
+        self._show_info = kwargs.get('SHOW_INFO', True)
         self._show_info_format = kwargs.get('SHOW_INFO_FORMAT', FormatType.TEXT)
+        self._config = kwargs.get('CONFIG', None)
         self._slot_num = None
         self._fd: BinaryIO = open(kwargs.get('SUPER_IMAGE'), 'rb')
         self._out_dir = kwargs.get('OUTPUT_DIR', None)
@@ -688,19 +689,20 @@ class LpUnpack(object):
         if self._out_dir is None:
             return
 
-        if not self._out_dir.exists():
-            self._out_dir.mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(self._out_dir):
+            os.makedirs(self._out_dir, exist_ok=True)
 
     def _extract_partition(self, unpack_job: UnpackJob):
         self._check_out_dir_exists()
-        print(f'Extracting partition [{unpack_job.name}] ....', end='', flush=True)
-        out_file = self._out_dir / f'{unpack_job.name}.img'
+        start = dti()
+        print(f'Extracting partition [{unpack_job.name}]')
+        out_file = os.path.join(self._out_dir, f'{unpack_job.name}.img')
         with open(str(out_file), 'wb') as out:
             for part in unpack_job.parts:
                 offset, size = part
                 self._write_extent_to_file(out, offset, size, unpack_job.geometry.logical_block_size)
 
-        print(' [ok]')
+        print('Done:[%s]' % (dti() - start))
 
     def _extract(self, partition, metadata):
         unpack_job = UnpackJob(name=partition.name, geometry=metadata.geometry)
@@ -738,11 +740,11 @@ class LpUnpack(object):
         offsets = metadata.get_offsets()
         for index, offset in enumerate(offsets):
             self._fd.seek(offset, io.SEEK_SET)
-            header = LpMetadataHeader(self._fd.read(cast(int, LpMetadataHeader.size)))
-            header.partitions = LpMetadataTableDescriptor(self._fd.read(cast(int, LpMetadataTableDescriptor.size)))
-            header.extents = LpMetadataTableDescriptor(self._fd.read(cast(int, LpMetadataTableDescriptor.size)))
-            header.groups = LpMetadataTableDescriptor(self._fd.read(cast(int, LpMetadataTableDescriptor.size)))
-            header.block_devices = LpMetadataTableDescriptor(self._fd.read(cast(int, LpMetadataTableDescriptor.size)))
+            header = LpMetadataHeader(self._fd.read(80))
+            header.partitions = LpMetadataTableDescriptor(self._fd.read(12))
+            header.extents = LpMetadataTableDescriptor(self._fd.read(12))
+            header.groups = LpMetadataTableDescriptor(self._fd.read(12))
+            header.block_devices = LpMetadataTableDescriptor(self._fd.read(12))
 
             if header.magic != LP_METADATA_HEADER_MAGIC:
                 check_index = index + 1
@@ -820,15 +822,44 @@ class LpUnpack(object):
 
             size -= block_size
 
+    def get_info(self):
+        try:
+            if SparseImage(self._fd).check():
+                print('Sparse image detected.')
+                print('Process conversion to non sparse image...')
+                unsparse_file = SparseImage(self._fd).unsparse()
+                self._fd.close()
+                self._fd = open(str(unsparse_file), 'rb')
+                print('Result:[ok]')
+
+            self._fd.seek(0)
+            metadata = self._read_metadata()
+
+            filter_partition = []
+            for index, partition in enumerate(metadata.partitions):
+                filter_partition.append(partition.name)
+
+            if not filter_partition:
+                raise LpUnpackError(f'Could not find partition: {self._partition_name}')
+
+            return filter_partition
+
+        except LpUnpackError as e:
+            print(e.message)
+            sys.exit(1)
+
+        finally:
+            self._fd.close()
+
     def unpack(self):
         try:
             if SparseImage(self._fd).check():
                 print('Sparse image detected.')
-                print('Process conversion to non sparse image ....', end='', flush=True)
+                print('Process conversion to non sparse image...')
                 unsparse_file = SparseImage(self._fd).unsparse()
                 self._fd.close()
                 self._fd = open(str(unsparse_file), 'rb')
-                print('[ok]')
+                print('Result:[ok]')
 
             self._fd.seek(0)
             metadata = self._read_metadata()
@@ -849,11 +880,10 @@ class LpUnpack(object):
                     raise LpUnpackError(f'Invalid metadata slot number: {self._slot_num}')
 
             if self._show_info:
-                match self._show_info_format:
-                    case FormatType.TEXT:
-                        print(metadata)
-                    case FormatType.JSON:
-                        print(f"{metadata.to_json()}\n")
+                if self._show_info_format == FormatType.TEXT:
+                    print(metadata)
+                elif self._show_info_format == FormatType.JSON:
+                    print(f"{metadata.to_json()}\n")
 
             if not self._show_info and self._out_dir is None:
                 raise LpUnpackError(message=f'Not specified directory for extraction')
@@ -870,77 +900,17 @@ class LpUnpack(object):
             self._fd.close()
 
 
-def create_parser():
-    _parser = argparse.ArgumentParser(
-        description=f'{Path(sys.argv[0]).name} - command-line tool for extracting partition images from super'
-    )
-    _parser.add_argument(
-        '-p',
-        '--partition',
-        dest='NAME',
-        type=lambda x: re.split("\\W+", x),
-        help='Extract the named partition. This can be specified multiple times or through the delimiter [","  ":"]'
-    )
-    _parser.add_argument(
-        '-S',
-        '--slot',
-        dest='NUM',
-        type=int,
-        help=' !!! No implementation yet !!! Slot number (default is 0).'
-    )
-
-    if sys.version_info >= (3, 9):
-        _parser.add_argument(
-            '--info',
-            dest='SHOW_INFO',
-            default=False,
-            action=argparse.BooleanOptionalAction,
-            help='Displays pretty-printed partition metadata'
-        )
+def unpack(file: str, out: str, parts: list = None):
+    namespace = argparse.Namespace(SUPER_IMAGE=file, OUTPUT_DIR=out, SHOW_INFO=False, NAME=parts)
+    if not os.path.exists(namespace.SUPER_IMAGE):
+        raise FileNotFoundError("%s Cannot Find" % namespace.SUPER_IMAGE)
     else:
-        _parser.add_argument(
-            '--info',
-            dest='SHOW_INFO',
-            action='store_true',
-            help='Displays pretty-printed partition metadata'
-        )
-        _parser.add_argument(
-            '--no-info',
-            dest='SHOW_INFO',
-            action='store_false'
-        )
-        _parser.set_defaults(SHOW_INFO=False)
-
-    _parser.add_argument(
-        '-f',
-        '--format',
-        dest='SHOW_INFO_FORMAT',
-        type=FormatType,
-        action=EnumAction,
-        default=FormatType.TEXT,
-        help='Choice the format for printing info'
-    )
-    _parser.add_argument('SUPER_IMAGE')
-    _parser.add_argument(
-        'OUTPUT_DIR',
-        type=Path,
-        nargs='?',
-    )
-    return _parser
-
-
-def main():
-    parser = create_parser()
-    namespace = parser.parse_args()
-    if len(sys.argv) >= 2:
-        if not Path(namespace.SUPER_IMAGE).exists():
-            parser.print_help()
-            sys.exit(2)
         LpUnpack(**vars(namespace)).unpack()
+
+
+def get_parts(file_):
+    namespace = argparse.Namespace(SUPER_IMAGE=file_, SHOW_INFO=False)
+    if not os.path.exists(namespace.SUPER_IMAGE):
+        raise FileNotFoundError("%s Cannot Find" % namespace.SUPER_IMAGE)
     else:
-        parser.print_usage()
-        sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()
+        return LpUnpack(**vars(namespace)).get_info()
