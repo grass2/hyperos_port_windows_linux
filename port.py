@@ -281,7 +281,7 @@ def main(baserom, portrom):
                 simg2img(img)
             if gettype(img) == 'ext':
                 blue(f"正在分解底包 {part}.img [ext]\nExtracing {part}.img [ext] from BASEROM")
-                Extractor().main(img, ('build/baserom/images/' + os.sep + os.path.basename(img).split('.')[0]))
+                Extractor().main(img, ('build/baserom/images/' + os.path.basename(img).split('.')[0]))
                 blue(f"分解底包 [{part}.img] 完成\nBASEROM {part}.img [ext] extracted.")
                 os.remove(img)
             elif gettype(img) == 'erofs':
