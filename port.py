@@ -96,6 +96,10 @@ def main(baserom, portrom):
             red("PORTROM: Invalid parameter")
             sys.exit()
     pack_type = 'EXT'
+    is_base_rom_eu: bool = False
+    baserom_type: str = ''
+    is_eu_rom: bool = False
+    super_list: list = []
     device_code = "YourDevice"
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
         f.write(f"baserom='{baserom}'\n")
@@ -125,10 +129,7 @@ def main(baserom, portrom):
             f.write(f'is_shennong_houji_port="false"\n')
         f.write(f"build_host='{gethostname()}'\n")
         blue("正在检测ROM底包\nValidating BASEROM..")
-        is_base_rom_eu: bool = False
-        baserom_type: str = ''
-        is_eu_rom: bool = False
-        super_list: list = []
+
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
                 f.write("baserom_type='payload'\n")
