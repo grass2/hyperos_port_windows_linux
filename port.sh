@@ -7,11 +7,7 @@
 
 build_user="Bruce Teng"
 build_host=$(hostname)
-
 # 底包和移植包为外部参数传入
-baserom="$1"
-portrom="$2"
-
 work_dir=$(pwd)
 tools_dir=${work_dir}/bin/$(uname)/$(uname -m)
 export PATH=$(pwd)/bin/$(uname)/$(uname -m)/:$PATH
@@ -32,10 +28,6 @@ if [[ "$OSTYPE" == "Windows"* ]]; then
   alias python3=python
 fi
 # 移植的分区，可在 bin/port_config 中更改
-port_partition=$(python3 bin/read_config.py bin/port_config "partition_to_port")
-repackext4=$(python3 bin/read_config.py bin/port_config "repack_with_ext4")
-brightness_fix_method=$(python3 bin/read_config.py bin/port_config "brightness_fix_method")
-compatible_matrix_matches_enabled=$(python3 bin/read_config.py bin/port_config "compatible_matrix_matches_check")
 if [[ ${repackext4} == true ]]; then
     pack_type=EXT
 else
