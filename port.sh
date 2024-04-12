@@ -19,14 +19,6 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-sudo rm -rf app
-sudo rm -rf tmp
-sudo rm -rf build/baserom/
-sudo rm -rf build/portrom/
-find . -type d -name 'hyperos_*' |xargs rm -rf
-green "文件清理完毕" "Files cleaned up."
-mkdir -p build/baserom/images/
-mkdir -p build/portrom/images/
 # 提取分区
 if [[ ${baserom_type} == 'payload' ]];then
     blue "正在提取底包 [payload.bin]" "Extracting files from BASEROM [payload.bin]"

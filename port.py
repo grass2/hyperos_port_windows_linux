@@ -93,6 +93,23 @@ def main(baserom, portrom):
                 shutil.rmtree(i)
             except:
                 pass
+    for i in ['app', 'tmp', 'build/baserom/', 'build/portrom/']:
+        if os.path.isdir(i):
+            try:
+                shutil.rmtree(i)
+            except:
+                pass
+    for root, dirs, files in os.walk('.'):
+        for i in [i for i in dirs if 'hyperos_' in i]:
+            try:
+                shutil.rmtree(i)
+            except:
+                pass
+
+    green("文件清理完毕\nFiles cleaned up.")
+    for i in ['build/baserom/images/', 'build/portrom/images/']:
+        if not os.path.exists(i):
+            os.makedirs(i)
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 
