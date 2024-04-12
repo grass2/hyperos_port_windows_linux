@@ -62,15 +62,15 @@ mkdir -p build/portrom/images/
 # 提取分区
 if [[ ${baserom_type} == 'payload' ]];then
     blue "正在提取底包 [payload.bin]" "Extracting files from BASEROM [payload.bin]"
-    unzip ${baserom} payload.bin -d build/baserom > /dev/null 2>&1 ||error "解压底包 [payload.bin] 时出错" "Extracting [payload.bin] error"
+    unzip ${baserom} payload.bin -d build/baserom ||error "解压底包 [payload.bin] 时出错" "Extracting [payload.bin] error"
     green "底包 [payload.bin] 提取完毕" "[payload.bin] extracted."
 elif [[ ${baserom_type} == 'br' ]];then
     blue "正在提取底包 [new.dat.br]" "Extracting files from BASEROM [*.new.dat.br]"
-    unzip ${baserom} -d build/baserom  > /dev/null 2>&1 || error "解压底包 [new.dat.br]时出错" "Extracting [new.dat.br] error"
+    unzip ${baserom} -d build/baserom || error "解压底包 [new.dat.br]时出错" "Extracting [new.dat.br] error"
     green "底包 [new.dat.br] 提取完毕" "[new.dat.br] extracted."
 elif [[ ${is_base_rom_eu} == true ]];then
     blue "正在提取底包 [super.img]" "Extracting files from BASETROM [super.img]"
-    unzip ${baserom} 'images/*' -d build/baserom >  /dev/null 2>&1 ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
+    unzip ${baserom} 'images/*' -d build/baserom  ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
     blue "合并super.img* 到super.img" "Merging super.img.* into super.img"
     simg2img build/baserom/images/super.img.* build/baserom/images/super.img
     rm -rf build/baserom/images/super.img.*
@@ -86,7 +86,7 @@ elif [[ ${is_base_rom_eu} == true ]];then
 fi
 if [[ ${is_eu_rom} == true ]];then
     blue "正在提取移植包 [super.img]" "Extracting files from PORTROM [super.img]"
-    unzip ${portrom} 'images/super.img.*' -d build/portrom >  /dev/null 2>&1 ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
+    unzip ${portrom} 'images/super.img.*' -d build/portrom  ||error "解压移植包 [super.img] 时出错"  "Extracting [super.img] error"
     blue "合并super.img* 到super.img" "Merging super.img.* into super.img"
     simg2img build/portrom/images/super.img.* build/portrom/images/super.img
     rm -rf build/portrom/images/super.img.*
@@ -94,12 +94,12 @@ if [[ ${is_eu_rom} == true ]];then
     green "移植包 [super.img] 提取完毕" "[super.img] extracted."
 else
     blue "正在提取移植包 [payload.bin]" "Extracting files from PORTROM [payload.bin]"
-    unzip ${portrom} payload.bin -d build/portrom  > /dev/null 2>&1 ||error "解压移植包 [payload.bin] 时出错"  "Extracting [payload.bin] error"
+    unzip ${portrom} payload.bin -d build/portrom ||error "解压移植包 [payload.bin] 时出错"  "Extracting [payload.bin] error"
     green "移植包 [payload.bin] 提取完毕" "[payload.bin] extracted."
 fi
 if [[ ${baserom_type} == 'payload' ]];then
     blue "开始分解底包 [payload.bin]" "Unpacking BASEROM [payload.bin]"
-    payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin >/dev/null 2>&1 ||error "分解底包 [payload.bin] 时出错" "Unpacking [payload.bin] failed"
+    payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin  ||error "分解底包 [payload.bin] 时出错" "Unpacking [payload.bin] failed"
 elif [[ ${is_base_rom_eu} == true ]];then
      blue "开始分解底包 [super.img]" "Unpacking BASEROM [super.img]"
         for i in ${super_list}; do 
@@ -109,7 +109,7 @@ elif [[ ${baserom_type} == 'br' ]];then
     blue "开始分解底包 [new.dat.br]" "Unpacking BASEROM[new.dat.br]"
         for i in ${super_list}; do 
             ${tools_dir}/brotli -d build/baserom/$i.new.dat.br
-            sudo python3 bin/sdat2img.py build/baserom/"$i".transfer.list build/baserom/"$i".new.dat build/baserom/images/"$i".img >/dev/null 2>&1
+            sudo python3 bin/sdat2img.py build/baserom/"$i".transfer.list build/baserom/"$i".new.dat build/baserom/images/"$i".img 
             rm -rf build/baserom/"$i".new.dat* build/baserom/"$i".transfer.list build/baserom/"$i".patch.*
         done
 fi
@@ -148,7 +148,7 @@ for part in ${super_list};do
             mv build/portrom/images/${part}_a.img build/portrom/images/${part}.img
         else
             blue "payload.bin 提取 [${part}] 分区..." "Extracting [${part}] from PORTROM payload.bin"
-            payload-dumper-go -p ${part} -o build/portrom/images/ build/portrom/payload.bin >/dev/null 2>&1 ||error "提取移植包 [${part}] 分区时出错" "Extracting partition [${part}] error."
+            payload-dumper-go -p ${part} -o build/portrom/images/ build/portrom/payload.bin  ||error "提取移植包 [${part}] 分区时出错" "Extracting partition [${part}] error."
         fi
     fi
     if [ -f "${work_dir}/build/portrom/images/${part}.img" ];then
@@ -363,7 +363,6 @@ else
     java -jar bin/apktool/apktool.jar b -q -f -c tmp/services/ -o tmp/services_modified.jar
     blue "打包services.jar完成" "Repacking services.jar completed"
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
-    
 fi
 # 主题防恢复
 if [ -f build/portrom/images/system/system/etc/init/hw/init.rc ];then
@@ -399,13 +398,12 @@ else
         fi
     done
     rm -rf build/portrom/images/product/etc/auto-install*
-    rm -rf build/portrom/images/product/data-app/*GalleryLockscreen* >/dev/null 2>&1
+    rm -rf build/portrom/images/product/data-app/*GalleryLockscreen* 
     mkdir -p tmp/app
     kept_data_apps=("DownloadProviderUi" "VirtualSim" "ThirdAppAssistant" "GameCenter" "Video" "Weather" "DeskClock" "Gallery" "SoundRecorder" "ScreenRecorder" "Calculator" "CleanMaster" "Calendar" "Compass" "Notes" "MediaEditor" "Scanner" "SpeechEngine" "wps-lite")
     for app in "${kept_data_apps[@]}"; do
-        mv build/portrom/images/product/data-app/*"${app}"* tmp/app/ >/dev/null 2>&1
-        done
-
+        mv build/portrom/images/product/data-app/*"${app}"* tmp/app/ 
+    done
     rm -rf build/portrom/images/product/data-app/*
     cp -rf tmp/app/* build/portrom/images/product/data-app
     rm -rf tmp/app
