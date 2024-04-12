@@ -298,7 +298,7 @@ def main(baserom, portrom):
         if os.path.isfile(source_file):
             shutil.copy(source_file, f'build/portrom/images/{image}.img')
     green("开始提取逻辑分区镜像\nStarting extract partition from img")
-    for part in source_file:
+    for part in super_list:
         if part in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm'] and os.path.isfile(f"build/portrom/images/{part}.img"):
             blue(f"从底包中提取 [{part}]分区 ...\nExtracting [{part}] from BASEROM")
         else:
