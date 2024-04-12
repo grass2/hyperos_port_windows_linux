@@ -20,14 +20,6 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-
-if [ "$(echo $baserom |grep miui_)" != "" ];then
-    device_code=$(basename $baserom |cut -d '_' -f 2)
-elif [ "$(echo $baserom |grep xiaomi.eu_)" != "" ];then
-    device_code=$(basename $baserom |cut -d '_' -f 3)
-else
-    device_code="YourDevice"
-fi
 blue "正在检测ROM底包" "Validating BASEROM.."
 if unzip -l ${baserom} | grep -q "payload.bin"; then
     baserom_type="payload"

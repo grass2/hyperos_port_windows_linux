@@ -46,6 +46,13 @@ def main(baserom, portrom):
         f.write(f"work_dir='{os.getcwd()}'\n")
         f.write(f"tools_dir='{os.getcwd()}/bin/{platform.system()}/{platform.machine()}'\n")
         f.write(f"OSTYPE='{platform.system()}'\n")
+        if "miui_" in baserom:
+            device_code = baserom.split('_')[1]
+        elif "xiaomi.eu_" in baserom:
+            device_code = baserom.split('_')[2]
+        else:
+            device_code = "YourDevice"
+        f.write(f"device_code='{device_code}'\n")
         f.write(f"build_host='{gethostname()}'\n")
         f.write(f"source $1\n")
     os.system(f"bash ./bin/call ./port.sh")
