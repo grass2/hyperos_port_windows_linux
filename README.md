@@ -46,6 +46,9 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
 - 任何个人及组织不得在未经允许的情况下商用、炒作！
 
 ## 如何使用
+- 在Windows上
+自行设置环境变量
+- 需要包含 ZIP 7Z java zipalign
 - 在WSL、ubuntu、deepin等Linux下
 ```shell
     sudo apt update
