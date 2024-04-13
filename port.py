@@ -1286,7 +1286,7 @@ def main(baserom, portrom):
     os.chdir(old)
     now = datetime.now()
     pack_timestamp = now.strftime("%m%d%H%M")
-    hash = get_file_md5(f'{os_type}_{device_code}_{port_rom_version}.zip')[:10]
+    hash = get_file_md5(f'out/{os_type}_{device_code}_{port_rom_version}.zip')[:10]
     if pack_type == 'EROFS':
         pack_type = "ROOT_" + pack_type
         yellow(
