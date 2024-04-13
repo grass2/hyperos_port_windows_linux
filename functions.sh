@@ -20,7 +20,6 @@ error() {
 
 yellow() {
     if [ "$#" -eq 2 ]; then
-        
         if [[ "$LANG" == zh_CN* ]]; then
             echo -e \[$(date +%m%d-%T)\] "\033[1;33m"$1"\033[0m"
         elif [[ "$LANG" == en* ]]; then
