@@ -31,6 +31,14 @@ def append(file, lines):
         f.writelines(lines)
 
 
+def sed(file, old, new):
+    with open(file, 'r', encoding='utf-8') as f:
+        data = f.read()
+    data = re.sub(old, new, data)
+    with open(file, 'w', encoding='utf-8', newline='\n') as f:
+        f.write(data)
+
+
 def insert_after_line(file_path, target_line, text_to_insert):
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
@@ -634,9 +642,11 @@ def main(baserom, portrom):
             details = re.sub('ro.product.mod_device=.*', f'ro.product.mod_device={base_rom_code}', details)
             details = re.sub('ro.build.host=.*', f'ro.build.host={gethostname()}', details)
         details = re.sub('ro.build.characteristics=tablet', 'ro.build.characteristics=nosdcard', details)
-        details = re.sub('ro.config.miui_multi_window_switch_enable=true', 'ro.config.miui_multi_window_switch_enable=false', details)
-        details = re.sub('ro.config.miui_desktop_mode_enabled=true', 'ro.config.miui_desktop_mode_enabled=false', details)
-        details = re.sub('ro.miui.density.primaryscale=.*', '',details)
+        details = re.sub('ro.config.miui_multi_window_switch_enable=true',
+                         'ro.config.miui_multi_window_switch_enable=false', details)
+        details = re.sub('ro.config.miui_desktop_mode_enabled=true', 'ro.config.miui_desktop_mode_enabled=false',
+                         details)
+        details = re.sub('ro.miui.density.primaryscale=.*', '', details)
         details = re.sub('persist.wm.extensions.enabled=true', '', details)
         with open(i, "w", encoding='utf-8', newline='\n') as tf:
             tf.write(details)
@@ -652,7 +662,8 @@ def main(baserom, portrom):
             green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
             break
     found = 0
-    for prop1, prop2 in zip(find_files('build/portrom/images/system', 'build.prop'), find_files('build/portrom/images/product', 'build.prop')):
+    for prop1, prop2 in zip(find_files('build/portrom/images/system', 'build.prop'),
+                            find_files('build/portrom/images/product', 'build.prop')):
         if read_config(prop1, 'ro.sf.lcd_density'):
             with open(prop1, 'r', encoding='utf-8') as f:
                 data = re.sub('ro.sf.lcd_density=.*', f'ro.sf.lcd_density={base_rom_density}', f.read())
@@ -668,10 +679,14 @@ def main(baserom, portrom):
             with open(prop2, 'w', encoding='utf-8', newline='\n') as f:
                 f.write(data)
     if found == 0:
-        blue(f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}\nro.fs.lcd_density not found, create a new value {base_rom_density} ")
+        blue(
+            f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}\nro.fs.lcd_density not found, create a new value {base_rom_density} ")
         append('build/portrom/images/product/etc/build.prop', [f'ro.sf.lcd_density={base_rom_density}\n'])
     append('build/portrom/images/product/etc/build.prop', ['ro.miui.cust_erofs=0\n'])
-
+    # Fix： mi10 boot stuck at the first screen
+    sed('build/portrom/images/vendor/build.prop', 'persist.sys.millet.cgroup1', '#persist.sys.millet.cgroup1')
+    # Fix：Fingerprint issue encountered on OS V1.0.18
+    append("build/portrom/images/vendor/build.prop", ['vendor.perf.framepacing.enable=false\n'])
 
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")

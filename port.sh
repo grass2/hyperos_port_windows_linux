@@ -84,10 +84,6 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-#Fix： mi10 boot stuck at the first screen
-sed -i "s/persist\.sys\.millet\.cgroup1/#persist\.sys\.millet\.cgroup1/" build/portrom/images/vendor/build.prop
-#Fix：Fingerprint issue encountered on OS V1.0.18
-echo "vendor.perf.framepacing.enable=false" >> build/portrom/images/vendor/build.prop
 # Millet fix
 blue "修复Millet" "Fix Millet"
 millet_netlink_version=$(grep "ro.millet.netlink" build/baserom/images/product/etc/build.prop | cut -d "=" -f 2)
