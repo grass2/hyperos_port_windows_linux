@@ -587,21 +587,21 @@ def main(baserom, portrom):
     # Apk
     blue("左侧挖孔灵动岛修复\nStrongToast UI fix")
     if is_shennong_houji_port:
-        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast\$2.smali", "const\/4 v7\, 0x0",
-                    "iget-object v7\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7",
+        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast$2.smali", "const/4 v7, 0x0",
+                    "iget-object v7, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid/widget/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7",
                     port_android_sdk)
     else:
-        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast\$2.smali", "const\/4 v9\, 0x0",
-                    "iget-object v9\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v9}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v9\\n\\tint-to-float v9,v9",
+        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast$2.smali", "const/4 v9, 0x0",
+                    "iget-object v9, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\\n\\tinvoke-virtual {v9}, Landroid/widget/RelativeLayout;->getLeft()I\\n\\tmove-result v9\\n\\tint-to-float v9,v9",
                     port_android_sdk)
     if is_eu_rom:
         patch_smali("miui-services.jar", "SystemServerImpl.smali", ".method public constructor <init>()V/,/.end method",
-                    ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom\/android\/server\/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method",
+                    ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom/android/server/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method",
                     port_android_sdk, regex=True)
     else:
         if compatible_matrix_matches_enabled:
             patch_smali("framework.jar", "Build.smali", ".method public static isBuildConsistent()Z",
-                        ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst\/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",
+                        ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",
                         port_android_sdk)
         os.makedirs('tmp', exist_ok=True)
         blue("开始移除 Android 签名校验\nDisalbe Android 14 Apk Signature Verfier")
@@ -625,7 +625,7 @@ def main(baserom, portrom):
 
     patch_smali("PowerKeeper.apk", "DisplayFrameSetting.smali", "unicorn", "umi", port_android_sdk)
     patch_smali("MiSettings.apk", "NewRefreshRateFragment.smali", "const-string v1, \"btn_preferce_category\"",
-                "const-string v1, \"btn_preferce_category\"\n\n\tconst\/16 p1, 0x1", port_android_sdk)
+                "const-string v1, \"btn_preferce_category\"\n\n\tconst/16 p1, 0x1", port_android_sdk)
     #
     targetDevicesAndroidOverlay = find_file('build/portrom/images/product', 'DevicesAndroidOverlay.apk')
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
