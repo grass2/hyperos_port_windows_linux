@@ -431,6 +431,7 @@ def main(baserom, portrom):
                 green(f"提取移植包[{part}] [erofs]镜像完毕\nExtracting {part} [erofs] done.")
     # Modify The Rom
     blue("正在获取ROM参数\nFetching ROM build prop.")
+    is_ab_device = read_config('build/portrom/images/vendor/build.prop', 'ro.build.ab_update')
     base_android_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.release')
     port_android_version = read_config('build/portrom/images/system/system/build.prop',
                                        'ro.system.build.version.release')
@@ -893,7 +894,7 @@ def main(baserom, portrom):
             os.makedirs('build/portrom/images/product/app/MiLinkCirculateMIUI15', exist_ok=True)
             shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/', dirs_exist_ok=True)
     # Devices/机型代码/overaly 按照镜像的目录结构，可直接替换目标。
-    is_ab_device = read_config('build/portrom/images/vendor/build.prop', 'ro.build.ab_update')
+
     if os.path.isdir(f'devices/{base_rom_code}/overlay'):
         shutil.copytree(f'devices/{base_rom_code}/overlay/', 'build/portrom/images/', dirs_exist_ok=True)
     else:
