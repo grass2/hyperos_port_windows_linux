@@ -663,13 +663,14 @@ def main(baserom, portrom):
         if baserom_type:
             green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
             break
-    for prop in find_files('build/baserom/images/system', 'build.prop'):
-        base_rom_density = read_config(prop, 'ro.sf.lcd_density')
-        if baserom_type.strip():
-            green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
-            break
-        else:
-            base_rom_density = '440'
+    if not base_rom_density:
+        for prop in find_files('build/baserom/images/system', 'build.prop'):
+            base_rom_density = read_config(prop, 'ro.sf.lcd_density')
+            if base_rom_density :
+                green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
+                break
+            else:
+                base_rom_density = '440'
     found = 0
     for prop1, prop2 in zip(find_files('build/portrom/images/system', 'build.prop'),
                             find_files('build/portrom/images/product', 'build.prop')):
