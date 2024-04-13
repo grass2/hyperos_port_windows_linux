@@ -529,7 +529,7 @@ def main(baserom, portrom):
     if os.path.isfile('build/portrom/images/system/system/etc/init/hw/init.rc'):
         insert_after_line('build/portrom/images/system/system/etc/init/hw/init.rc', 'on boot\n', '    chmod 0731 /data/system/theme\n')
     # Run Script
-    os.system(f"bash ./bin/call ./port.sh")
+    os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 
 
 if __name__ == '__main__':
