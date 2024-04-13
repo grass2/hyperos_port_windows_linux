@@ -53,7 +53,6 @@ else
     blue "打包services.jar完成" "Repacking services.jar completed"
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
-
 unlock_device_feature "Whether support AI Display"  "bool" "support_AI_display"
 unlock_device_feature "device support screen enhance engine"  "bool" "support_screen_enhance_engine"
 unlock_device_feature "Whether suppot Android Flashlight Controller"  "bool" "support_android_flashlight"
