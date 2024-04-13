@@ -99,53 +99,10 @@ unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare
 unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
 #自定义替换
 if [[ ${port_rom_code} == "dagu_cn" ]];then
-    echo "ro.control_privapp_permissions=log" >> build/portrom/images/product/etc/build.prop
-    rm -rf build/portrom/images/product/overlay/MiuiSystemUIResOverlay.apk
-    rm -rf build/portrom/images/product/overlay/SettingsRroDeviceSystemUiOverlay.apk
-    targetAospFrameworkTelephonyResOverlay=$(find build/portrom/images/product -type f -name "AospFrameworkTelephonyResOverlay.apk")
-    if [[ -f $targetAospFrameworkTelephonyResOverlay ]]; then
-        mkdir tmp/  
-        filename=$(basename $targetAospFrameworkTelephonyResOverlay)
-        yellow "Enable Phone Call and SMS feature in Pad port."
-        targetDir=$(echo "$filename" | sed 's/\..*$//')
-        java $javaOpts -jar bin/apktool/apktool.jar d $targetAospFrameworkTelephonyResOverlay -o tmp/$targetDir -f
-        for xml in $(find tmp/$targetDir -type f -name "*.xml");do
-            sed -i 's|<bool name="config_sms_capable">false</bool>|<bool name="config_sms_capable">true</bool>|' $xml
-            sed -i 's|<bool name="config_voice_capable">false</bool>|<bool name="config_voice_capable">true</bool>|' $xml
-        done
-        java $javaOpts -jar bin/apktool/apktool.jar b tmp/$targetDir -o tmp/$filename || error "apktool 打包失败" "apktool mod failed"
-        cp -rf tmp/$filename $targetAospFrameworkTelephonyResOverlay
-        #rm -rf tmp
-    fi
-    blue "Replace Pad Software"
-    if [[ -d devices/pad/overlay/product/priv-app ]];then
-        for app in $(ls devices/pad/overlay/product/priv-app); do
-            sourceApkFolder=$(find devices/pad/overlay/product/priv-app -type d -name *"$app"* )
-            targetApkFolder=$(find build/portrom/images/product/priv-app -type d -name *"$app"* )
-            if  [[ -d $targetApkFolder ]];then
-                    rm -rfv $targetApkFolder
-                    cp -rf $sourceApkFolder build/portrom/images/product/priv-app
-            else
-                cp -rf $sourceApkFolder build/portrom/images/product/priv-app
-            fi
-        done
-    fi
-    if [[ -d devices/pad/overlay/product/app ]];then
-        for app in $(ls devices/pad/overlay/product/app); do
-            targetAppfolder=$(find build/portrom/images/product/app -type d -name *"$app"* )
-            if [ -d $targetAppfolder ]; then
-                rm -rfv $targetAppfolder
-            fi
-            cp -rf devices/pad/overlay/product/app/$app build/portrom/images/product/app/
-        done
-    fi
-    if [[ -d devices/pad/overlay/system_ext ]]; then
-        cp -rf devices/pad/overlay/system_ext/* build/portrom/images/system_ext/
-    fi
-    blue "Add permissions" 
     sed -i 's|</permissions>|\t<privapp-permissions package="com.android.mms"> \n\t\t<permission name="android.permission.WRITE_APN_SETTINGS" />\n\t\t<permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />\n\t\t<permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />\n\t\t<permission name="android.permission.CALL_PRIVILEGED" /> \n\t\t<permission name="android.permission.GET_ACCOUNTS_PRIVILEGED" /> \n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t\t<permission name="android.permission.SEND_SMS_NO_CONFIRMATION" /> \n\t\t<permission name="android.permission.SEND_RESPOND_VIA_MESSAGE" />\n\t\t<permission name="android.permission.UPDATE_APP_OPS_STATS" />\n\t\t<permission name="android.permission.MODIFY_PHONE_STATE" /> \n\t\t<permission name="android.permission.WRITE_MEDIA_STORAGE" /> \n\t\t<permission name="android.permission.MANAGE_USERS" /> \n\t\t<permission name="android.permission.INTERACT_ACROSS_USERS" />\n\t\t <permission name="android.permission.SCHEDULE_EXACT_ALARM" /> \n\t</privapp-permissions>\n</permissions>|'  build/portrom/images/product/etc/permissions/privapp-permissions-product.xml
     sed -i 's|</permissions>|\t<privapp-permissions package="com.miui.contentextension">\n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t</privapp-permissions>\n</permissions>|' build/portrom/images/product/etc/permissions/privapp-permissions-product.xml
 fi
+
 if [[ -d "devices/common" ]];then
     commonCamera=$(find devices/common -type f -name "MiuiCamera.apk")
     targetCamera=$(find build/portrom/images/product -type d -name "MiuiCamera")
@@ -201,8 +158,6 @@ if [ ${pack_type} == "EROFS" ];then
                 done
     fi
 fi
-
-
 superSize=$(python3 bin/getSuperSize.py $device_code)
 green "Super大小为${superSize}" "Super image size: ${superSize}"
 green "开始打包镜像" "Packing super.img"

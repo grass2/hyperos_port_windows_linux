@@ -22,8 +22,9 @@ from imgextractor import Extractor
 from bin.xmlstarlet import main as xmlstarlet
 from datetime import datetime
 from bin.maxfps import main as maxfps
-from bin.disable_avb_verify import  main as disavb
+from bin.disable_avb_verify import main as disavb
 import xml.etree.ElementTree as ET
+
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
@@ -159,7 +160,7 @@ def main(baserom, portrom):
     baserom_type: str = ''
     is_eu_rom: bool = False
     super_list: list = []
-    port_partition= read_config('bin/port_config', 'partition_to_port').split()
+    port_partition = read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'Bruce Teng'
     device_code = "YourDevice"
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
@@ -402,6 +403,7 @@ def main(baserom, portrom):
     base_android_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.release')
     port_android_version = read_config('build/portrom/images/system/system/build.prop',
                                        'ro.system.build.version.release')
+    port_rom_code = read_config('build/portrom/images/product/etc/build.prop', 'ro.product.product.name')
     green(
         f"安卓版本: 底包为[Android {base_android_version}], 移植包为 [Android {port_android_version}]\nAndroid Version: BASEROM:[Android {base_android_version}], PORTROM [Android {port_android_version}]")
     base_android_sdk = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.sdk')
@@ -668,7 +670,7 @@ def main(baserom, portrom):
     if not base_rom_density:
         for prop in find_files('build/baserom/images/system', 'build.prop'):
             base_rom_density = read_config(prop, 'ro.sf.lcd_density')
-            if base_rom_density :
+            if base_rom_density:
                 green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
                 break
             else:
@@ -725,6 +727,54 @@ def main(baserom, portrom):
     append('build/portrom/images/product/etc/build.prop',
            ['debug.game.video.speed=true\n', 'debug.game.video.support=true\n'])
     # Second Modify
+    if port_rom_code == 'dagu_cn':
+        append('build/portrom/images/product/etc/build.prop', ['ro.control_privapp_permissions=log\n'])
+        for i in ['MiuiSystemUIResOverlay.apk', 'SettingsRroDeviceSystemUiOverlay.apk']:
+            try:
+                os.remove(f'build/portrom/images/product/overlay/{i}')
+            except:
+                pass
+        targetAospFrameworkTelephonyResOverlay = find_file('build/portrom/images/product',
+                                                           'AospFrameworkTelephonyResOverlay.apk')
+        if os.path.isfile(targetAospFrameworkTelephonyResOverlay) and targetAospFrameworkTelephonyResOverlay:
+            os.makedirs('tmp', exist_ok=True)
+            filename = os.path.basename(targetAospFrameworkTelephonyResOverlay)
+            yellow("Enable Phone Call and SMS feature in Pad port.")
+            targetDir = filename.split('.')[0]
+            os.system(
+                f'java {javaOpts} -jar bin/apktool/apktool.jar d {targetAospFrameworkTelephonyResOverlay} -o tmp/{targetDir} -f')
+            for root, dirs, files in os.walk(f'tmp/{targetDir}'):
+                for i in files:
+                    if i.endswith('.xml'):
+                        xml = os.path.join(root, i)
+                        sed(xml, '<bool name="config_sms_capable">false</bool>',
+                            '<bool name="config_sms_capable">true</bool>')
+                        sed(xml, '<bool name="config_voice_capable">false</bool>',
+                            '<bool name="config_voice_capable">true</bool>')
+            if os.system(f'java {javaOpts} -jar bin/apktool/apktool.jar b tmp/{targetDir} -o tmp/{filename}') != 0:
+                red("apktool 打包失败\napktool mod failed")
+                sys.exit()
+            shutil.copyfile(f"tmp/{filename}", targetAospFrameworkTelephonyResOverlay)
+        blue("Replace Pad Software")
+        if os.path.isdir('devices/pad/overlay/product/priv-app'):
+            for i in os.listdir('devices/pad/overlay/product/priv-app'):
+                sourceApkFolder = find_folder_mh('devices/pad/overlay/product/priv-app', i)
+                targetApkFolder = find_folder_mh('build/portrom/images/product/priv-app', i)
+                if os.path.isdir(targetApkFolder):
+                    shutil.rmtree(targetApkFolder)
+                    shutil.copytree(sourceApkFolder, 'build/portrom/images/product/priv-app', dirs_exist_ok=True)
+                else:
+                    shutil.copytree(sourceApkFolder, 'build/portrom/images/product/priv-app', dirs_exist_ok=True)
+        if os.path.exists('devices/pad/overlay/product/app'):
+            for app in os.listdir('devices/pad/overlay/product/app'):
+                targetAppfolder = find_folder_mh('build/portrom/images/product/app', app)
+                if os.path.isdir(targetAppfolder) and targetAppfolder:
+                    shutil.rmtree(targetAppfolder)
+                shutil.copytree(f'devices/pad/overlay/product/app/{app}', 'build/portrom/images/product/app/',
+                                dirs_exist_ok=True)
+        if os.path.isdir('devices/pad/overlay/system_ext'):
+            shutil.copytree('devices/pad/overlay/system_ext/', 'build/portrom/images/system_ext/', dirs_exist_ok=True)
+        blue("Add permissions" )
 
     blue("去除avb校验\nDisable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
@@ -738,7 +788,8 @@ def main(baserom, portrom):
                 if file.startswith("fstab."):
                     fstab_path = os.path.join(root, file)
                     blue(f"Target: {fstab_path}")
-                    sed(fstab_path, ',fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0', '')
+                    sed(fstab_path, ',fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0',
+                        '')
                     sed(fstab_path, ',fileencryption=aes-256-xts:aes-256-cts:v2+emmc_optimized+wrappedkey_v0', '')
                     sed(fstab_path, ',fileencryption=aes-256-xts:aes-256-cts:v2', '')
                     sed(fstab_path, ',metadata_encryption=aes-256-xts:wrappedkey_v0', '')
