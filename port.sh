@@ -99,39 +99,6 @@ unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare
 unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
 #自定义替换
 
-if [[ -d "devices/common" ]];then
-    commonCamera=$(find devices/common -type f -name "MiuiCamera.apk")
-    targetCamera=$(find build/portrom/images/product -type d -name "MiuiCamera")
-    bootAnimationZIP=$(find devices/common -type f -name "bootanimation_${base_rom_density}.zip")
-    targetAnimationZIP=$(find build/portrom/images/product -type f -name "bootanimation.zip")
-    MiLinkCirculateMIUI15=$(find devices/common -type d -name "MiLinkCirculate*" )
-    targetMiLinkCirculateMIUI15=$(find build/portrom/images/product -type d -name "MiLinkCirculate*")
-    targetNQNfcNci=$(find build/portrom/images/system/system build/portrom/images/product build/portrom/images/system_ext -type d -name "NQNfcNci*")
-    if [[ $base_android_version == "13" ]];then
-        rm -rf $targetNQNfcNci
-        cp -rf devices/common/overlay/system/* build/portrom/images/system/
-        cp -rf devices/common/overlay/system_ext/framework/* build/portrom/images/system_ext/framework/
-    fi
-    if [[ $base_android_version == "13" ]] && [[ -f $commonCamera ]];then
-        yellow "替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ" "Replacing a compatible MiuiCamera.apk verson 4.5.003000.2"
-        if [[ -d $targetCamera ]];then
-            rm -rf $targetCamera/*
-        fi
-        cp -rf $commonCamera $targetCamera
-    fi
-    if [[ -f "$bootAnimationZIP" ]];then
-        yellow "替换开机第二屏动画" "Repacling bootanimation.zip"
-        cp -rf $bootAnimationZIP $targetAnimationZIP
-    fi
-
-    if [[ -d "$targetMiLinkCirculateMIUI15" ]]; then
-        rm -rf $targetMiLinkCirculateMIUI15/*
-        cp -rf $MiLinkCirculateMIUI15 $targetMiLinkCirculateMIUI15
-    else
-        mkdir -p build/portrom/images/product/app/MiLinkCirculateMIUI15
-        cp -rf $MiLinkCirculateMIUI15 build/portrom/images/product/app/
-    fi
-fi
 #Devices/机型代码/overaly 按照镜像的目录结构，可直接替换目标。
 if [[ -d "devices/${base_rom_code}/overlay" ]]; then
     cp -rf devices/${base_rom_code}/overlay/* build/portrom/images/

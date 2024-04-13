@@ -795,9 +795,10 @@ def main(baserom, portrom):
         </permissions>
         """
         new_permissions2 = '\t<privapp-permissions package="com.miui.contentextension">\n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t</privapp-permissions>\n</permissions>'
-        sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>', new_permissions)
-        sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>', new_permissions2)
-
+        sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>',
+            new_permissions)
+        sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>',
+            new_permissions2)
     blue("去除avb校验\nDisable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
         for file in files:
@@ -823,6 +824,39 @@ def main(baserom, portrom):
     for i in port_partition:
         if os.path.isfile(f'build/portrom/images/{i}.img'):
             os.remove(f'build/portrom/images/{i}.img')
+    if os.path.isdir('devices/common'):
+        commonCamera = find_file('devices/common', 'MiuiCamera.apk')
+        targetCamera = find_folder_mh('build/portrom/images/product', 'MiuiCamera')
+        bootAnimationZIP = find_file('devices/common', f'bootanimation_{base_rom_density}.zip')
+        targetAnimationZIP = find_file('build/portrom/images/product', 'bootanimation.zip')
+        MiLinkCirculateMIUI15 = find_folder_mh('devices/common', 'MiLinkCirculate')
+        targetMiLinkCirculateMIUI15 = find_folder_mh('build/portrom/images/product', 'MiLinkCirculate')
+        for i in ['build/portrom/images/system/system', 'build/portrom/images/product',
+                  'build/portrom/images/system_ext']:
+            targetNQNfcNci = find_folder_mh(i, 'NQNfcNci')
+            if os.path.isdir(targetNQNfcNci):
+                break
+        if base_android_version == '13':
+            if targetNQNfcNci:
+                shutil.rmtree(targetNQNfcNci)
+            shutil.copytree('devices/common/overlay/system/', 'build/portrom/images/system/', dirs_exist_ok=True)
+            shutil.copytree('devices/common/overlay/system_ext/framework/',
+                            'build/portrom/images/system_ext/framework/', dirs_exist_ok=True)
+        if base_android_version == '13' and os.path.isfile(commonCamera):
+            yellow("替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ\nReplacing a compatible MiuiCamera.apk verson 4.5.003000.2")
+            shutil.rmtree(targetCamera)
+            os.makedirs(targetCamera, exist_ok=True)
+            shutil.copy2(commonCamera, targetCamera)
+        if os.path.isfile(bootAnimationZIP):
+            yellow("替换开机第二屏动画\nRepacling bootanimation.zip")
+            shutil.copyfile(bootAnimationZIP, targetAnimationZIP)
+        if os.path.isdir(targetMiLinkCirculateMIUI15):
+            shutil.rmtree(targetMiLinkCirculateMIUI15)
+            os.makedirs(targetMiLinkCirculateMIUI15, exist_ok=True)
+            shutil.copytree(MiLinkCirculateMIUI15, targetMiLinkCirculateMIUI15)
+        else:
+            os.makedirs('build/portrom/images/product/app/MiLinkCirculateMIUI15', exist_ok=True)
+            shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/')
     # Run Script
     os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
 
