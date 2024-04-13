@@ -119,7 +119,7 @@ def insert_after_line(file_path, target_line, text_to_insert):
             lines = file.readlines()
     index_text = None
     for i, line in enumerate(lines):
-        if target_line.strip() == line.strip():
+        if target_line == line:
             index_text = i
             break
     if index_text is None:
