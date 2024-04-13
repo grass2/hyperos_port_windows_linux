@@ -640,6 +640,37 @@ def main(baserom, portrom):
         details = re.sub('persist.wm.extensions.enabled=true', '', details)
         with open(i, "w", encoding='utf-8', newline='\n') as tf:
             tf.write(details)
+    base_rom_density = '440'
+    for prop in find_files('build/baserom/images/product', 'build.prop'):
+        base_rom_density = read_config(prop, 'ro.sf.lcd_density')
+        if baserom_type:
+            green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
+            break
+    for prop in find_files('build/baserom/images/system', 'build.prop'):
+        base_rom_density = read_config(prop, 'ro.sf.lcd_density')
+        if baserom_type:
+            green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
+            break
+    found = 0
+    for prop1, prop2 in zip(find_files('build/portrom/images/system', 'build.prop'), find_files('build/portrom/images/product', 'build.prop')):
+        if read_config(prop1, 'ro.sf.lcd_density'):
+            with open(prop1, 'r', encoding='utf-8') as f:
+                data = re.sub('ro.sf.lcd_density=.*', f'ro.sf.lcd_density={base_rom_density}', f.read())
+                found = 1
+                data = re.sub('persist.miui.density_v2=.*', f'persist.miui.density_v2={base_rom_density}', data)
+            with open(prop1, 'w', encoding='utf-8', newline='\n') as f:
+                f.write(data)
+        if read_config(prop2, 'ro.sf.lcd_density'):
+            with open(prop2, 'r', encoding='utf-8') as f:
+                data = re.sub('ro.sf.lcd_density=.*', f'ro.sf.lcd_density={base_rom_density}', f.read())
+                found = 1
+                data = re.sub('persist.miui.density_v2=.*', f'persist.miui.density_v2={base_rom_density}', data)
+            with open(prop2, 'w', encoding='utf-8', newline='\n') as f:
+                f.write(data)
+    if found == 0:
+        blue(f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}\nro.fs.lcd_density not found, create a new value {base_rom_density} ")
+        append('build/portrom/images/product/etc/build.prop', [f'ro.sf.lcd_density={base_rom_density}'])
+
 
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")

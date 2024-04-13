@@ -84,28 +84,6 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-# 屏幕密度修修改
-for prop in $(find build/baserom/images/product build/baserom/images/system -type f -name "build.prop");do
-    base_rom_density=$(python3 bin/read_config.py "$prop" "ro.sf.lcd_density")
-    if [ "${base_rom_density}" != "" ];then
-        green "底包屏幕密度值 ${base_rom_density}" "Screen density: ${base_rom_density}"
-        break 
-    fi
-done
-# 未在底包找到则默认440,如果是其他值可自己修改
-[ -z ${base_rom_density} ] && base_rom_density=440
-found=0
-for prop in $(find build/portrom/images/product build/portrom/images/system -type f -name "build.prop");do
-    if grep -q "ro.sf.lcd_density" ${prop};then
-        sed -i "s/ro.sf.lcd_density=.*/ro.sf.lcd_density=${base_rom_density}/g" ${prop}
-        found=1
-    fi
-    sed -i "s/persist.miui.density_v2=.*/persist.miui.density_v2=${base_rom_density}/g" ${prop}
-done
-if [ $found -eq 0  ]; then
-        blue "未找到ro.fs.lcd_density，build.prop新建一个值$base_rom_density" "ro.fs.lcd_density not found, create a new value ${base_rom_density} "
-        echo "ro.sf.lcd_density=${base_rom_density}" >> build/portrom/images/product/etc/build.prop
-fi
 echo "ro.miui.cust_erofs=0" >> build/portrom/images/product/etc/build.prop
 #Fix： mi10 boot stuck at the first screen
 sed -i "s/persist\.sys\.millet\.cgroup1/#persist\.sys\.millet\.cgroup1/" build/portrom/images/vendor/build.prop
