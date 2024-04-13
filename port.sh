@@ -99,17 +99,8 @@ unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare
 unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
 
 
-if [[ "$is_ab_device" == false ]];then
-    busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-    sed -i "s/portversion/${port_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-    sed -i "s/baseversion/${base_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-    sed -i "s/andVersion/${port_android_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-    sed -i "s/device_code/${base_rom_code}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-else
-    mkdir -p out/${os_type}_${device_code}_${port_rom_version}/images/
-    mv -f build/portrom/images/super.zst out/${os_type}_${device_code}_${port_rom_version}/images/
+if [[ "$is_ab_device" != false ]];then
     cp -rf bin/flash/vab/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
-    cp -rf bin/flash/platform-tools-windows out/${os_type}_${device_code}_${port_rom_version}/META-INF/
     cp -rf bin/flash/vab/flash_update.bat out/${os_type}_${device_code}_${port_rom_version}/
     cp -rf bin/flash/vab/flash_and_format.bat out/${os_type}_${device_code}_${port_rom_version}/
     cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/

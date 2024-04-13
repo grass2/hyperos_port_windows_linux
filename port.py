@@ -32,6 +32,14 @@ javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFiel
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
+def unix_to_dos(input_file):
+    with open(input_file, 'r', encoding='utf-8') as input_f:
+        unix_content = input_f.read()
+    dos_content = unix_content.replace('\r\n', '\n').replace('\n', '\r\n')
+    with open(input_file, 'w') as output_f:
+        output_f.write(dos_content)
+
+
 def get_dir_size(ddir):
     size = 0
     for (root, dirs, files) in os.walk(ddir):
@@ -1058,6 +1066,17 @@ def main(baserom, portrom):
                 'boot_tv.img', ksubootimg)
             sed(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat', 'boot_tv.img', ksubootimg)
             sed(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', 'boot_tv.img', ksubootimg)
+        unix_to_dos(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat')
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'portversion', port_rom_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'baseversion', base_rom_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'andVersion', port_android_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'device_code', base_rom_code)
+    else:
+        os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/images/', exist_ok=True)
+        os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/images/')
+        shutil.copytree('bin/flash/platform-tools-windows/',
+                        f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/',
+                        dirs_exist_ok=True)
 
 
 if __name__ == '__main__':
