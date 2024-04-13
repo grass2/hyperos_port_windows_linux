@@ -24,6 +24,11 @@ javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFiel
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
+def append(file, lines):
+    with open(file, 'a', encoding='utf-8') as f:
+        f.writelines(lines)
+
+
 def find_file(directory, filename):
     for root, dirs, files in os.walk(directory):
         for file in files:
@@ -465,6 +470,26 @@ def main(baserom, portrom):
         if not os.path.isfile(port_vndk) and os.path.isfile(base_vndk):
             yellow("apex不存在，从原包复制\ntarget apex is missing, copying from baserom")
             shutil.copy2(base_vndk, 'build/portrom/images/system_ext/apex/')
+    sm8250 = False
+    with open('build/portrom/images/vendor/build.prop', 'r', encoding='utf-8') as f:
+        for i in f.readlines():
+            if 'sm8250' in i:
+                sm8250 = True
+                break
+    if sm8250:
+        append('build/portrom/images/vendor/build.prop', ['ro.surface_flinger.enable_frame_rate_override=false\n',
+                                                          'ro.vendor.display.mode_change_optimize.enable=true\n'])
+        with open('build/portrom/images/product/etc/build.prop', 'r', encoding='utf-8') as f:
+            details = re.sub("persist.sys.miui_animator_sched.bigcores=.*", "persist.sys.miui_animator_sched.bigcores=4-6", f.read())
+            details = re.sub('persist.sys.miui_animator_sched.big_prime_cores=.*', 'persist.sys.miui_animator_sched.big_prime_cores=4-7', details)
+        with open('build/portrom/images/product/etc/build.prop', 'w', encoding='utf-8', newline='\n'):
+            f.write(details)
+            f.write('persist.sys.miui.sf_cores=4-7\n')
+            f.write('persist.sys.minfree_def=73728,92160,110592,154832,482560,579072\n')
+            f.write('persist.sys.minfree_6g=73728,92160,110592,258048,663552,903168\n')
+            f.write('persist.sys.minfree_8g=73728,92160,110592,387072,1105920,1451520\n')
+            f.write('persist.vendor.display.miui.composer_boost=4-7\n')
+
 
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
