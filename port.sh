@@ -21,6 +21,8 @@ else
 fi
 base_android_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.release")
 port_android_version=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop "ro.system.build.version.release")
+base_android_sdk=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop 'ro.vendor.build.version.sdk')
+port_android_sdk=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop 'ro.system.build.version.sdk')
 base_rom_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.incremental")
 port_mios_version_incremental=$(python3 bin/read_config.py build/portrom/images/mi_ext/etc/build.prop "ro.mi.os.version.incremental")
 port_device_code=$(echo $port_mios_version_incremental | cut -d "." -f 5)
