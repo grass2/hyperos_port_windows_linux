@@ -364,6 +364,14 @@ def main(baserom, portrom):
         if os.path.isfile(base_file) and os.path.isfile(port_file):
             blue(f"正在替换 [{cpfile}]\nReplacing [{cpfile}]")
             shutil.copy2(base_file, port_file)
+
+    for file_path in glob.glob("build/portrom/images/product/etc/displayconfig/display_id*.xml"):
+        try:
+            os.remove(file_path)
+            print(f"Removed: {file_path}")
+        except OSError as e:
+            pass
+
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 
