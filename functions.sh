@@ -68,7 +68,7 @@ patch_smali() {
         rm -rf tmp/$foldername/
         mkdir -p tmp/$foldername/
         cp -rf $targetfilefullpath tmp/$foldername/
-        7z x -y tmp/$foldername/$targetfilename *.dex -otmp/$foldername >/dev/null
+        7z x -y tmp/$foldername/$targetfilename *.dex -otmp/$foldername
         for dexfile in tmp/$foldername/*.dex;do
             smalifname=${dexfile%.*}
             smalifname=$(echo $smalifname | cut -d "/" -f 3)
@@ -92,12 +92,12 @@ patch_smali() {
             java -jar bin/apktool/smali.jar a --api ${port_android_sdk} tmp/$foldername/${smalidir} -o tmp/$foldername/${smalidir}.dex || error " Smaling 失败" "Smaling failed"
             pushd tmp/$foldername/  || exit
             7z a -y -mx0 -tzip $targetfilename ${smalidir}.dex  || error "修改$targetfilename失败" "Failed to modify $targetfilename"
-            popd >/dev/null || exit
+            popd  || exit
             yellow "修补$targetfilename 完成" "Fix $targetfilename completed"
             if [[ $targetfilename == *.apk ]]; then
                 yellow "检测到apk，进行zipalign处理。。" "APK file detected, initiating ZipAlign process..."
                 rm -rf ${targetfilefullpath}
-                zipalign -p -f -v 4 tmp/$foldername/$targetfilename ${targetfilefullpath} > /dev/null 2>&1 || error "zipalign错误，请检查原因。" "zipalign error,please check for any issues"
+                zipalign -p -f -v 4 tmp/$foldername/$targetfilename ${targetfilefullpath} || error "zipalign错误，请检查原因。" "zipalign error,please check for any issues"
                 yellow "apk zipalign处理完成" "APK ZipAlign process completed."
                 yellow "复制APK到目标位置：${targetfilefullpath}" "Copying APK to target ${targetfilefullpath}"
             else
