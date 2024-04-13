@@ -774,7 +774,29 @@ def main(baserom, portrom):
                                 dirs_exist_ok=True)
         if os.path.isdir('devices/pad/overlay/system_ext'):
             shutil.copytree('devices/pad/overlay/system_ext/', 'build/portrom/images/system_ext/', dirs_exist_ok=True)
-        blue("Add permissions" )
+        blue("Add permissions")
+        new_permissions = """\
+        \t<privapp-permissions package="com.android.mms">
+        \t\t<permission name="android.permission.WRITE_APN_SETTINGS" />
+        \t\t<permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
+        \t\t<permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+        \t\t<permission name="android.permission.CALL_PRIVILEGED" />
+        \t\t<permission name="android.permission.GET_ACCOUNTS_PRIVILEGED" />
+        \t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />
+        \t\t<permission name="android.permission.SEND_SMS_NO_CONFIRMATION" />
+        \t\t<permission name="android.permission.SEND_RESPOND_VIA_MESSAGE" />
+        \t\t<permission name="android.permission.UPDATE_APP_OPS_STATS" />
+        \t\t<permission name="android.permission.MODIFY_PHONE_STATE" />
+        \t\t<permission name="android.permission.WRITE_MEDIA_STORAGE" />
+        \t\t<permission name="android.permission.MANAGE_USERS" />
+        \t\t<permission name="android.permission.INTERACT_ACROSS_USERS" />
+        \t\t<permission name="android.permission.SCHEDULE_EXACT_ALARM" />
+        \t</privapp-permissions>
+        </permissions>
+        """
+        new_permissions2 = '\t<privapp-permissions package="com.miui.contentextension">\n\t\t<permission name="android.permission.WRITE_SECURE_SETTINGS" />\n\t</privapp-permissions>\n</permissions>'
+        sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>', new_permissions)
+        sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>', new_permissions2)
 
     blue("去除avb校验\nDisable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
