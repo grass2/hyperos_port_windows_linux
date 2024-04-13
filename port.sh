@@ -14,14 +14,7 @@ fi
 if [[ "$OSTYPE" == "Windows"* ]]; then
   alias python3=python
 fi
-if [[ ${repackext4} == true ]]; then
-    pack_type=EXT
-else
-    pack_type=EROFS
-fi
-base_android_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.release")
-port_android_version=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop "ro.system.build.version.release")
-base_android_sdk=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop 'ro.vendor.build.version.sdk')
+
 port_android_sdk=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop 'ro.system.build.version.sdk')
 base_rom_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.incremental")
 port_mios_version_incremental=$(python3 bin/read_config.py build/portrom/images/mi_ext/etc/build.prop "ro.mi.os.version.incremental")
@@ -37,11 +30,6 @@ green "ROM 版本: 底包为 [${base_rom_version}], 移植包为 [${port_rom_ver
 base_rom_code=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.product.vendor.device")
 port_rom_code=$(python3 bin/read_config.py build/portrom/images/product/etc/build.prop "ro.product.product.name")
 green "机型代号: 底包为 [${base_rom_code}], 移植包为 [${port_rom_code}]" "Device Code: BASEROM: [${base_rom_code}], PORTROM: [${port_rom_code}]"
-if grep -q "ro.build.ab_update=true" build/portrom/images/vendor/build.prop;  then
-    is_ab_device=true
-else
-    is_ab_device=false
-fi
 #解决开机报错问题
 blue "左侧挖孔灵动岛修复" "StrongToast UI fix"
 if [[ "$is_shennong_houji_port" == true ]];then
@@ -97,20 +85,3 @@ patch_smali "MiSettings.apk" "NewRefreshRateFragment.smali" "const-string v1, \"
 # Unlock eyecare mode 
 unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare_mode" "2"
 unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
-
-
-find out/${os_type}_${device_code}_${port_rom_version} |xargs touch
-pushd out/${os_type}_${device_code}_${port_rom_version}/  || exit
-zip -r ${os_type}_${device_code}_${port_rom_version}.zip ./*
-mv ${os_type}_${device_code}_${port_rom_version}.zip ../
-popd || exit
-pack_timestamp=$(date +"%m%d%H%M")
-hash=$(md5sum out/${os_type}_${device_code}_${port_rom_version}.zip |head -c 10)
-if [[ $pack_type == "EROFS" ]];then
-    pack_type="ROOT_"${pack_type}
-    yellow "检测到打包类型为EROFS,请确保官方内核支持，或者在devices机型目录添加有支持EROFS的内核，否者将无法开机！" "EROFS filesystem detected. Ensure compatibility with the official boot.img or ensure a supported boot_tv.img is placed in the device folder."
-fi
-mv out/${os_type}_${device_code}_${port_rom_version}.zip out/${os_type}_${device_code}_${port_rom_version}_${hash}_${port_android_version}_${port_rom_code}_${pack_timestamp}_${pack_type}.zip
-green "移植完毕" "Porting completed"    
-green "输出包路径：" "Output: "
-green "$(pwd)/out/${os_type}_${device_code}_${port_rom_version}_${hash}_${port_android_version}_${port_rom_code}_${pack_timestamp}_${pack_type}.zip"

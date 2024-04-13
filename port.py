@@ -1,5 +1,6 @@
 import argparse
 import glob
+import hashlib
 import os
 import platform
 import re
@@ -30,6 +31,18 @@ from bin.patch_vbmeta import main as patch_vbmeta
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
+def get_file_md5(fname):
+    m = hashlib.md5()
+    with open(fname, 'rb') as fobj:
+        while True:
+            data = fobj.read(4096)
+            if not data:
+                break
+            m.update(data)
+
+    return m.hexdigest()
 
 
 def unix_to_dos(input_file):
@@ -1109,8 +1122,12 @@ def main(baserom, portrom):
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
                                   f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_a images\\"{fwimg}".img')
 
-            insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_b"')
-            insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_a"')
+            insert_after_line(
+                f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary',
+                '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_b"')
+            insert_after_line(
+                f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary',
+                '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_a"')
         sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'portversion',
             port_rom_version)
         sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'baseversion',
@@ -1121,6 +1138,24 @@ def main(baserom, portrom):
             base_rom_code)
         unix_to_dos(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat')
         unix_to_dos(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat')
+    old = os.getcwd()
+    os.chdir(f'out/{os_type}_{device_code}_{port_rom_version}/')
+    os.system(f'zip -r {os_type}_{device_code}_{port_rom_version}.zip ./*')
+    os.rename(f'{os_type}_{device_code}_{port_rom_version}.zip',
+              os.path.join(os.path.abspath('..'), f'{os_type}_{device_code}_{port_rom_version}.zip'))
+    os.chdir(old)
+    now = datetime.now()
+    pack_timestamp = now.strftime("%m%d%H%M")
+    hash = get_file_md5(f'{os_type}_{device_code}_{port_rom_version}.zip')[:10]
+    if pack_type == 'EROFS':
+        pack_type = "ROOT_" + pack_type
+        yellow(
+            "检测到打包类型为EROFS,请确保官方内核支持，或者在devices机型目录添加有支持EROFS的内核，否者将无法开机！\nEROFS filesystem detected. Ensure compatibility with the official boot.img or ensure a supported boot_tv.img is placed in the device folder.")
+    os.rename(f'out/{os_type}_{device_code}_{port_rom_version}.zip',
+              f'out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip')
+    green("移植完毕\nPorting completed")
+    green("输出包路径：\nOutput: ")
+    green(f"{os.getcwd()}/out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip")
 
 
 if __name__ == '__main__':
