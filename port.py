@@ -21,12 +21,26 @@ from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
 from bin.xmlstarlet import main as xmlstarlet
 from datetime import datetime
-from bin.maxfps import main as maxfps
 from bin.disable_avb_verify import main as disavb
 import xml.etree.ElementTree as ET
+from bin.getSuperSize import main as getSuperSize
+from bin.fspatch import main as fspatch
+from bin.contextpatch import main as context_patch
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
+def get_dir_size(ddir):
+    size = 0
+    for (root, dirs, files) in os.walk(ddir):
+        for name in files:
+            if not os.path.islink(name):
+                try:
+                    size += os.path.getsize(os.path.join(root, name))
+                except:
+                    ...
+    return int(size)
 
 
 def append(file, lines):
@@ -70,6 +84,13 @@ def find_files(directory, filename):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file == filename:
+                yield os.path.join(root, file)
+
+
+def find_files_mh(directory, filename):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if filename in file:
                 yield os.path.join(root, file)
 
 
@@ -843,7 +864,8 @@ def main(baserom, portrom):
             shutil.copytree('devices/common/overlay/system_ext/framework/',
                             'build/portrom/images/system_ext/framework/', dirs_exist_ok=True)
         if base_android_version == '13' and os.path.isfile(commonCamera):
-            yellow("替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ\nReplacing a compatible MiuiCamera.apk verson 4.5.003000.2")
+            yellow(
+                "替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ\nReplacing a compatible MiuiCamera.apk verson 4.5.003000.2")
             shutil.rmtree(targetCamera)
             os.makedirs(targetCamera, exist_ok=True)
             shutil.copy2(commonCamera, targetCamera)
@@ -859,11 +881,58 @@ def main(baserom, portrom):
             shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/')
     # Devices/机型代码/overaly 按照镜像的目录结构，可直接替换目标。
     if os.path.isdir(f'devices/{base_rom_code}/overlay'):
-        shutil.copytree(f'devices/{base_rom_code}/overlay/','build/portrom/images/', dirs_exist_ok=True)
+        shutil.copytree(f'devices/{base_rom_code}/overlay/', 'build/portrom/images/', dirs_exist_ok=True)
     else:
         yellow(f"devices/{base_rom_code}/overlay 未找到\ndevices/{base_rom_code}/overlay not found")
     # Run Script
     os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
+    # Pack The Rom
+    if pack_type == 'EROFS':
+        yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点\nValidating whether adding erofs mount points is needed.")
+        with open('build/portrom/images/vendor/etc/fstab.qcom', 'r') as file:
+            content = file.read()
+        if 'erofs' in content:
+            for pname in ['system', 'odm', 'vendor', 'product', 'mi_ext', 'system_ext']:
+                sed('build/portrom/images/vendor/etc/fstab.qcom', f"/{pname}\s+ext4", f"/{pname} erofs")
+                yellow(f"添加{pname}\nAdding mount point {pname}")
+    superSize = getSuperSize(device_code)
+    green(f"Super大小为{superSize}\nSuper image size: {superSize}")
+    green("开始打包镜像\nPacking super.img")
+    for pname in super_list:
+        if os.path.isdir(f"build/portrom/images/{pname}"):
+            addsize = {
+                "mi_ext": 4194304,
+                'odm': 4217728,
+                'system': 80217728,
+                'vendor': 80217728,
+                'system_ext': 80217728,
+                'product': 100217728,
+                'other': 8554432
+            }
+            fspatch(f'build/portrom/images/{pname}', f'build/portrom/images/config/{pname}_fs_config')
+            context_patch(f'build/portrom/images/{pname}', f'build/portrom/images/config/{pname}_file_contexts')
+            if pack_type == 'EXT':
+                for i in find_files_mh(f"build/portrom/images/{pname}/", 'fstab.'):
+                    sed(i, r'system\s+erofs', '')
+                    sed(i, r'system_ext\s+erofs', '')
+                    sed(i, r'vendor\s+erofs', '')
+                    sed(i, r'product\s+erofs', '')
+                thisSize = int(get_dir_size(f"build/portrom/images/{pname}")+addsize.get(pname, addsize.get('other')))
+                blue(f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]\nPacking [{pname}.img]:[{pack_type}] with size [{thisSize}]")
+                call(f'make_ext4fs -J -T {int(time.time())} -S build/portrom/images/config/{pname}_file_contexts -l {thisSize} -C build/portrom/images/config/{pname}_fs_config -L {pname} -a {pname} build/portrom/images/{pname}.img build/portrom/images/{pname}')
+                if os.path.isfile(f"build/portrom/images/{pname}.img"):
+                    green(f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
+                else:
+                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败\nPacking [{pname}] with[{pack_type}] filesystem failed!")
+                    sys.exit()
+            else:
+                blue(f'以[{pack_type}]文件系统打包[{pname}.img]\nPacking [{pname}.img] with [{pack_type}] filesystem')
+                call(f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
+                if os.path.isfile(f"build/portrom/images/{pname}.img"):
+                    green(f"成功打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}] success")
+                else:
+                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败\nPacking [{pname}] with[{pack_type}] filesystem failed!")
+                    sys.exit()
 
 
 if __name__ == '__main__':

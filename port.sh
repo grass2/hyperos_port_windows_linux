@@ -97,73 +97,8 @@ patch_smali "MiSettings.apk" "NewRefreshRateFragment.smali" "const-string v1, \"
 # Unlock eyecare mode 
 unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare_mode" "2"
 unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
-#添加erofs文件系统fstab
-if [ ${pack_type} == "EROFS" ];then
-    yellow "检查 vendor fstab.qcom是否需要添加erofs挂载点" "Validating whether adding erofs mount points is needed."
-    if ! grep -q "erofs" build/portrom/images/vendor/etc/fstab.qcom ; then
-               for pname in system odm vendor product mi_ext system_ext; do
-                    sed -i "/\/${pname}[[:space:]]\+ext4/{p;s/ext4/erofs/;}" build/portrom/images/vendor/etc/fstab.qcom
-                    added_line=$(sed -n "/\/${pname}[[:space:]]\+erofs/p" build/portrom/images/vendor/etc/fstab.qcom)
-                    if [ -n "$added_line" ]; then
-                        yellow "添加$pname" "Adding mount point $pname"
-                    else
-                        error "添加失败，请检查" "Adding faild, please check."
-                        exit 1
-                    fi
-                done
-    fi
-fi
-superSize=$(python3 bin/getSuperSize.py $device_code)
-green "Super大小为${superSize}" "Super image size: ${superSize}"
-green "开始打包镜像" "Packing super.img"
-for pname in ${super_list};do
-    if [ -d "build/portrom/images/$pname" ];then
-        if [[ "$OSTYPE" == "darwin"* ]];then
-            thisSize=$(find build/portrom/images/${pname} | xargs stat -f%z | awk ' {s+=$1} END { print s }' )
-        else
-            thisSize=$(du -sb build/portrom/images/${pname} |tr -cd 0-9)
-        fi
-        case $pname in
-            mi_ext) addSize=4194304 ;;
-            odm) addSize=4217728 ;;
-            system|vendor|system_ext) addSize=80217728 ;;
-            product) addSize=100217728 ;;
-            *) addSize=8554432 ;;
-        esac
-        python3 bin/fspatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_fs_config
-        python3 bin/contextpatch.py build/portrom/images/${pname} build/portrom/images/config/${pname}_file_contexts
-        if [ "$pack_type" = "EXT" ];then
-            for fstab in $(find build/portrom/images/${pname}/ -type f -name "fstab.*");do
-                #sed -i '/overlay/d' $fstab
-                sed -i '/system * erofs/d' $fstab
-                sed -i '/system_ext * erofs/d' $fstab
-                sed -i '/vendor * erofs/d' $fstab
-                sed -i '/product * erofs/d' $fstab
-            done
-            thisSize=$(python3 bin/bc.py $thisSize $addSize)
-            blue 以[$pack_type]文件系统打包[${pname}.img]大小[$thisSize] "Packing [${pname}.img]:[$pack_type] with size [$thisSize]"
-            make_ext4fs -J -T $(date +%s) -S build/portrom/images/config/${pname}_file_contexts -l $thisSize -C build/portrom/images/config/${pname}_fs_config -L ${pname} -a ${pname} build/portrom/images/${pname}.img build/portrom/images/${pname}
-            if [ -f "build/portrom/images/${pname}.img" ];then
-                green "成功以大小 [$thisSize] 打包 [${pname}.img] [${pack_type}] 文件系统" "Packing [${pname}.img] with [${pack_type}], size: [$thisSize] success"
-                #rm -rf build/baserom/images/${pname}
-            else
-                error "以 [${pack_type}] 文件系统打包 [${pname}] 分区失败" "Packing [${pname}] with[${pack_type}] filesystem failed!"
-            fi
-        else
-                blue 以[$pack_type]文件系统打包[${pname}.img] "Packing [${pname}.img] with [$pack_type] filesystem"
-                #sudo perl -pi -e 's/\\@/@/g' build/portrom/images/config/${pname}_file_contexts
-                mkfs.erofs --mount-point ${pname} --fs-config-file build/portrom/images/config/${pname}_fs_config --file-contexts build/portrom/images/config/${pname}_file_contexts build/portrom/images/${pname}.img build/portrom/images/${pname}
-                if [ -f "build/portrom/images/${pname}.img" ];then
-                    green "成功以 [erofs] 文件系统打包 [${pname}.img]" "Packing [${pname}.img] successfully with [erofs] format"
-                    #rm -rf build/portrom/images/${pname}
-                else
-                    error "以 [${pack_type}] 文件系统打包 [${pname}] 分区失败" "Faield to pack [${pname}]"
-                    exit 1
-                fi
-        fi
-        unset thisSize
-    fi
-done
+
+
 # 打包 super.img
 if [[ "$is_ab_device" == false ]];then
     blue "打包A-only super.img" "Packing super.img for A-only device"
