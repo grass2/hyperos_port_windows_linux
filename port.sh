@@ -84,16 +84,6 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-# Millet fix
-blue "修复Millet" "Fix Millet"
-millet_netlink_version=$(grep "ro.millet.netlink" build/baserom/images/product/etc/build.prop | cut -d "=" -f 2)
-if [[ -n "$millet_netlink_version" ]]; then
-  python3 bin/update_netlink.py "$millet_netlink_version" "build/portrom/images/product/etc/build.prop"
-else
-  blue "原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)" "ro.millet.netlink property value not found, change it manually(29 by default)."
-  millet_netlink_version=29
-  python3 bin/update_netlink.py "$millet_netlink_version" "build/portrom/images/product/etc/build.prop"
-fi
 # add advanced texture
 if [ -z $(python3 bin/read_config.py build/portrom/images/product/etc/build.prop persist.sys.background_blur_supported) ]; then
     echo "persist.sys.background_blur_supported=true" >> build/portrom/images/product/etc/build.prop

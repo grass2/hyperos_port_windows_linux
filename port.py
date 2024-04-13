@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 import time
-
+from bin.update_netlink import main as update_netlink
 from _socket import gethostname
 from bin.sdat2img import main as sdat2img
 from bin import downloader
@@ -687,7 +687,13 @@ def main(baserom, portrom):
     sed('build/portrom/images/vendor/build.prop', 'persist.sys.millet.cgroup1', '#persist.sys.millet.cgroup1')
     # Fix：Fingerprint issue encountered on OS V1.0.18
     append("build/portrom/images/vendor/build.prop", ['vendor.perf.framepacing.enable=false\n'])
-
+    blue("修复Millet\nFix Millet")
+    millet_netlink_version = read_config('build/baserom/images/product/etc/build.prop', 'ro.millet.netlink')
+    if millet_netlink_version:
+        update_netlink(millet_netlink_version,'build/portrom/images/product/etc/build.prop')
+    else:
+        blue("原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)\nro.millet.netlink property value not found, change it manually(29 by default).")
+        update_netlink('29', 'build/portrom/images/product/etc/build.prop')
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 
