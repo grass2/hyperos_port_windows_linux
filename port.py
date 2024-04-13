@@ -582,6 +582,7 @@ def main(baserom, portrom):
                 os.remove(fi)
             if os.path.isdir(fi):
                 shutil.rmtree(fi)
+        blue("正在修改 build.prop\nModifying build.prop")
 
         # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")

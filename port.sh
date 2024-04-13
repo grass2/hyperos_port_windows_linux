@@ -84,10 +84,7 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-# build.prop 修改
-blue "正在修改 build.prop" "Modifying build.prop"
-#change the locale to English
-export LC_ALL=en_US.UTF-8
+
 buildDate=$(date -u +"%a %b %d %H:%M:%S UTC %Y")
 buildUtc=$(date +%s)
 for i in $(find build/portrom/images -type f -name "build.prop");do
