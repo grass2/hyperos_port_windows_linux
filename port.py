@@ -21,9 +21,12 @@ from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
 from bin.xmlstarlet import main as xmlstarlet
 from datetime import datetime
+from bin.maxfps import main as maxfps
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
 
 
 def append(file, lines):
@@ -521,8 +524,8 @@ def main(baserom, portrom):
             details = re.sub("persist.sys.miui_animator_sched.bigcores=.*",
                              "persist.sys.miui_animator_sched.bigcores=4-6", f.read())
         details = re.sub('persist.sys.miui_animator_sched.big_prime_cores=.*',
-                             'persist.sys.miui_animator_sched.big_prime_cores=4-7', details)
-        with open('build/portrom/images/product/etc/build.prop', 'w', encoding='utf-8', newline='\n'):
+                         'persist.sys.miui_animator_sched.big_prime_cores=4-7', details)
+        with open('build/portrom/images/product/etc/build.prop', 'w', encoding='utf-8', newline='\n') as f:
             f.write(details)
             f.write('persist.sys.miui.sf_cores=4-7\n')
             f.write('persist.sys.minfree_def=73728,92160,110592,154832,482560,579072\n')
@@ -690,23 +693,28 @@ def main(baserom, portrom):
     blue("修复Millet\nFix Millet")
     millet_netlink_version = read_config('build/baserom/images/product/etc/build.prop', 'ro.millet.netlink')
     if millet_netlink_version:
-        update_netlink(millet_netlink_version,'build/portrom/images/product/etc/build.prop')
+        update_netlink(millet_netlink_version, 'build/portrom/images/product/etc/build.prop')
     else:
-        blue("原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)\nro.millet.netlink property value not found, change it manually(29 by default).")
+        blue(
+            "原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)\nro.millet.netlink property value not found, change it manually(29 by default).")
         update_netlink('29', 'build/portrom/images/product/etc/build.prop')
     if not read_config('build/portrom/images/product/etc/build.prop', 'persist.sys.background_blur_supported'):
-        append('build/portrom/images/product/etc/build.prop', ['persist.sys.background_blur_supported=true\n', 'persist.sys.background_blur_version=2\n'])
+        append('build/portrom/images/product/etc/build.prop',
+               ['persist.sys.background_blur_supported=true\n', 'persist.sys.background_blur_version=2\n'])
     else:
-        sed('persist.sys.background_blur_version=2', 'persist.sys.background_blur_supported=.*', 'persist.sys.background_blur_supported=true')
+        sed('persist.sys.background_blur_version=2', 'persist.sys.background_blur_supported=.*',
+            'persist.sys.background_blur_supported=true')
     append('build/portrom/images/product/etc/build.prop', ['persist.sys.perf.cgroup8250.stune=true\n'])
     if read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.media.video.frc.support'):
-        sed('build/portrom/images/vendor/build.prop', 'ro.vendor.media.video.frc.support=.*', 'ro.vendor.media.video.frc.support=true')
+        sed('build/portrom/images/vendor/build.prop', 'ro.vendor.media.video.frc.support=.*',
+            'ro.vendor.media.video.frc.support=true')
     else:
         # Unlock MEMC; unlocking the screen enhance engine is a prerequisite.
         # This feature add additional frames to videos to make content appear smooth and transitions lively.
         append('build/portrom/images/vendor/build.prop', ['ro.vendor.media.video.frc.support=true\n'])
     # Game splashscreen speed up
-    append('build/portrom/images/product/etc/build.prop', ['debug.game.video.speed=true\n', 'debug.game.video.support=true\n'])
+    append('build/portrom/images/product/etc/build.prop',
+           ['debug.game.video.speed=true\n', 'debug.game.video.support=true\n'])
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 
