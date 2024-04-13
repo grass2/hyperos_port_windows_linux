@@ -149,6 +149,7 @@ def main(baserom, portrom):
     baserom_type: str = ''
     is_eu_rom: bool = False
     super_list: list = []
+    build_user = 'Bruce Teng'
     device_code = "YourDevice"
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
         f.write(f"baserom='{baserom}'\n")
@@ -396,6 +397,16 @@ def main(baserom, portrom):
     port_android_sdk = read_config('build/portrom/images/system/system/build.prop', 'ro.system.build.version.sdk')
     green(
         f"SDK 版本: 底包为 [SDK {base_android_sdk}], 移植包为 [SDK {port_android_sdk}]\nSDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
+    base_rom_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.incremental')
+    port_mios_version_incremental = read_config('build/portrom/images/mi_ext/etc/build.prop',
+                                                'ro.mi.os.version.incremental')
+    port_device_code = port_mios_version_incremental.split(".")[4]
+    if 'DEV' in port_mios_version_incremental:
+        yellow("检测到开发板，跳过修改版本代码\nDev deteced,skip replacing codename")
+        port_rom_version = port_mios_version_incremental
+    else:
+        base_device_code = 'U' + base_rom_version.split(".")[4][1:]
+        port_rom_version = port_mios_version_incremental.replace(port_device_code, base_device_code)
     for cpfile in ['AospFrameworkResOverlay.apk', 'MiuiFrameworkResOverlay.apk', 'DevicesAndroidOverlay.apk',
                    'DevicesOverlay.apk', 'SettingsRroDeviceHideStatusBarOverlay.apk', 'MiuiBiometricResOverlay.apk']:
         base_file = find_file('build/baserom/images/product', cpfile)
@@ -612,7 +623,23 @@ def main(baserom, portrom):
         details = re.sub('ro.product.board=.*', f'ro.product.board={base_rom_code}', details)
         details = re.sub('ro.product.system_ext.device=.*', f'ro.product.system_ext.device={base_rom_code}', details)
         details = re.sub('persist.sys.timezone=.*', f'persist.sys.timezone=Asia/Shanghai', details)
-
+        if 'DEV' not in port_mios_version_incremental:
+            details = re.sub(port_device_code, base_device_code, details)
+        details = re.sub('ro.build.user=.*', f'ro.build.user={build_user}', details)
+        if is_eu_rom:
+            details = re.sub('ro.product.mod_device=.*', f'ro.product.mod_device={base_rom_code}_xiaomieu_global',
+                             details)
+            details = re.sub('ro.build.host=.*', 'ro.build.host=xiaomi.eu', details)
+        else:
+            details = re.sub('ro.product.mod_device=.*', f'ro.product.mod_device={base_rom_code}', details)
+            details = re.sub('ro.build.host=.*', f'ro.build.host={gethostname()}', details)
+        details = re.sub('ro.build.characteristics=tablet', 'ro.build.characteristics=nosdcard', details)
+        details = re.sub('ro.config.miui_multi_window_switch_enable=true', 'ro.config.miui_multi_window_switch_enable=false', details)
+        details = re.sub('ro.config.miui_desktop_mode_enabled=true', 'ro.config.miui_desktop_mode_enabled=false', details)
+        details = re.sub('ro.miui.density.primaryscale=.*', '',details)
+        details = re.sub('persist.wm.extensions.enabled=true', '', details)
+        with open(i, "w", encoding='utf-8', newline='\n') as tf:
+            tf.write(details)
 
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")

@@ -84,27 +84,6 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-for i in $(find build/portrom/images -type f -name "build.prop");do
-    #全局替换device_code
-    if [[ $port_mios_version_incremental != *DEV* ]];then
-        sed -i "s/$port_device_code/$base_device_code/g" ${i}
-    fi
-    # 添加build user信息
-    sed -i "s/ro.build.user=.*/ro.build.user=${build_user}/g" ${i}
-    if [[ ${is_eu_rom} == "true" ]];then
-        sed -i "s/ro.product.mod_device=.*/ro.product.mod_device=${base_rom_code}_xiaomieu_global/g" ${i}
-        sed -i "s/ro.build.host=.*/ro.build.host=xiaomi.eu/g" ${i}
-    else
-        sed -i "s/ro.product.mod_device=.*/ro.product.mod_device=${base_rom_code}/g" ${i}
-        sed -i "s/ro.build.host=.*/ro.build.host=${build_host}/g" ${i}
-    fi
-    sed -i "s/ro.build.characteristics=tablet/ro.build.characteristics=nosdcard/g" ${i}
-    sed -i "s/ro.config.miui_multi_window_switch_enable=true/ro.config.miui_multi_window_switch_enable=false/g" ${i}
-    sed -i "s/ro.config.miui_desktop_mode_enabled=true/ro.config.miui_desktop_mode_enabled=false/g" ${i}
-    sed -i "/ro.miui.density.primaryscale=.*/d" ${i}
-    sed -i "/persist.wm.extensions.enabled=true/d" ${i}
-done
-
 # 屏幕密度修修改
 for prop in $(find build/baserom/images/product build/baserom/images/system -type f -name "build.prop");do
     base_rom_density=$(python3 bin/read_config.py "$prop" "ro.sf.lcd_density")
