@@ -22,6 +22,7 @@ from imgextractor import Extractor
 from bin.xmlstarlet import main as xmlstarlet
 from datetime import datetime
 from bin.maxfps import main as maxfps
+from bin.disable_avb_verify import  main as disavb
 import xml.etree.ElementTree as ET
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
@@ -722,6 +723,27 @@ def main(baserom, portrom):
     # Game splashscreen speed up
     append('build/portrom/images/product/etc/build.prop',
            ['debug.game.video.speed=true\n', 'debug.game.video.support=true\n'])
+    blue("去除avb校验\nDisable avb verification.")
+    for root, dirs, files in os.walk('build/portrom/images/'):
+        for file in files:
+            if file.startswith("fstab."):
+                fstab_path = os.path.join(root, file)
+                disavb(fstab_path)
+    if read_config('bin/port_config', 'remove_data_encryption') == 'true':
+        for root, dirs, files in os.walk('build/portrom/images/'):
+            for file in files:
+                if file.startswith("fstab."):
+                    fstab_path = os.path.join(root, file)
+                    blue(f"Target: {fstab_path}")
+                    sed(fstab_path, ',fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0', '')
+                    sed(fstab_path, ',fileencryption=aes-256-xts:aes-256-cts:v2+emmc_optimized+wrappedkey_v0', '')
+                    sed(fstab_path, ',fileencryption=aes-256-xts:aes-256-cts:v2', '')
+                    sed(fstab_path, ',metadata_encryption=aes-256-xts:wrappedkey_v0', '')
+                    sed(fstab_path, ',fileencryption=aes-256-xts:wrappedkey_v0', '')
+                    sed(fstab_path, ',metadata_encryption=aes-256-xts', '')
+                    sed(fstab_path, ',fileencryption=aes-256-xts', '')
+                    sed(fstab_path, ',fileencryption=ice', '')
+                    sed(fstab_path, 'fileencryption', 'encryptable')
     # Run Script
     os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
 

@@ -201,27 +201,7 @@ if [ ${pack_type} == "EROFS" ];then
                 done
     fi
 fi
-# 去除avb校验
-blue "去除avb校验" "Disable avb verification."
-for fstab in $(find build/portrom/images/ -type f -name "fstab.*");do
-    python3 bin/disable_avb_verify.py $fstab
-done
-# data 加密
-if [ "$(python3 bin/read_config.py bin/port_config "remove_data_encryption")" = "true" ];then
-    blue "去除data加密"
-    for fstab in $(find build/portrom/images -type f -name "fstab.*");do
-		blue "Target: $fstab"
-		sed -i "s/,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0//g" $fstab
-		sed -i "s/,fileencryption=aes-256-xts:aes-256-cts:v2+emmc_optimized+wrappedkey_v0//g" $fstab
-		sed -i "s/,fileencryption=aes-256-xts:aes-256-cts:v2//g" $fstab
-		sed -i "s/,metadata_encryption=aes-256-xts:wrappedkey_v0//g" $fstab
-		sed -i "s/,fileencryption=aes-256-xts:wrappedkey_v0//g" $fstab
-		sed -i "s/,metadata_encryption=aes-256-xts//g" $fstab
-		sed -i "s/,fileencryption=aes-256-xts//g" $fstab
-    sed -i "s/,fileencryption=ice//g" $fstab
-		sed -i "s/fileencryption/encryptable/g" $fstab
-	done
-fi
+
 for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done
