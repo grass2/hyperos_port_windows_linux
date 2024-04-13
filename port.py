@@ -664,6 +664,8 @@ def main(baserom, portrom):
         if baserom_type.strip():
             green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
             break
+        else:
+            base_rom_density = '440'
     found = 0
     for prop1, prop2 in zip(find_files('build/portrom/images/system', 'build.prop'),
                             find_files('build/portrom/images/product', 'build.prop')):
