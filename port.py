@@ -35,6 +35,32 @@ javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFiel
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
+def replace_method_in_smali(smali_file, target_method):
+    with open(smali_file, 'r') as file:
+        smali_content = file.readlines()
+
+    method_line = None
+    move_result_end_line = None
+    for i, line in enumerate(smali_content):
+        if target_method in line:
+            method_line = i + 1
+        if method_line and 'move-result' in line:
+            move_result_end_line = i
+            break
+
+    if method_line is not None and move_result_end_line is not None:
+        register_number = re.search(r'\d+', smali_content[move_result_end_line]).group()
+        replace_with_command = f"const/4 v{register_number}, 0x0"
+        smali_content[method_line - 1:move_result_end_line + 1] = [replace_with_command + '\n']
+
+        with open(smali_file, 'w') as file:
+            file.writelines(smali_content)
+
+        print(f"{smali_file} 修改成功")
+    else:
+        print(f"未找到目标方法 {target_method} 在文件 {smali_file}")
+
+
 def get_file_md5(fname):
     m = hashlib.md5()
     with open(fname, 'rb') as fobj:
@@ -565,12 +591,18 @@ def main(baserom, portrom):
                     "iget-object v7\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7",
                     port_android_sdk)
     else:
-        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast\$2.smali", "const\/4 v9\, 0x0", "iget-object v9\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v9}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v9\\n\\tint-to-float v9,v9",port_android_sdk)
+        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast\$2.smali", "const\/4 v9\, 0x0",
+                    "iget-object v9\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v9}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v9\\n\\tint-to-float v9,v9",
+                    port_android_sdk)
     if is_eu_rom:
-        patch_smali("miui-services.jar", "SystemServerImpl.smali", ".method public constructor <init>()V/,/.end method", ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom\/android\/server\/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method", port_android_sdk, regex=True)
+        patch_smali("miui-services.jar", "SystemServerImpl.smali", ".method public constructor <init>()V/,/.end method",
+                    ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom\/android\/server\/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method",
+                    port_android_sdk, regex=True)
     else:
         if compatible_matrix_matches_enabled:
-            patch_smali("framework.jar", "Build.smali", ".method public static isBuildConsistent()Z", ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst\/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",port_android_sdk)
+            patch_smali("framework.jar", "Build.smali", ".method public static isBuildConsistent()Z",
+                        ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst\/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",
+                        port_android_sdk)
         os.makedirs('tmp', exist_ok=True)
         blue("开始移除 Android 签名校验\nDisalbe Android 14 Apk Signature Verfier")
         os.makedirs('tmp/services', exist_ok=True)
@@ -580,9 +612,20 @@ def main(baserom, portrom):
         )
         os.system('java -jar bin/apktool/apktool.jar d -q -f tmp/services.apk -o tmp/services/')
         target_method = 'getMinimumSignatureSchemeVersionForTargetSdk'
+        smali_files = [os.path.join(root, file) for root, dirs, files in os.walk("tmp/services") for file in files if
+                       file.endswith(".smali")]
+        for smali_file in smali_files:
+            replace_method_in_smali(smali_file, target_method)
+        blue("重新打包 services.jar\nRepacking services.jar")
+        os.system('java -jar bin/apktool/apktool.jar b -q -f -c tmp/services/ -o tmp/services_modified.jar')
+        blue("打包services.jar完成" "Repacking services.jar completed")
+        if os.path.exists('build/portrom/images/system/system/framework/services.jar'):
+            os.remove('build/portrom/images/system/system/framework/services.jar')
+        os.rename('tmp/services_modified.jar', 'build/portrom/images/system/system/framework/services.jar')
 
-    patch_smali("PowerKeeper.apk", "DisplayFrameSetting.smali", "unicorn", "umi",port_android_sdk)
-    patch_smali("MiSettings.apk", "NewRefreshRateFragment.smali", "const-string v1, \"btn_preferce_category\"", "const-string v1, \"btn_preferce_category\"\n\n\tconst\/16 p1, 0x1",port_android_sdk)
+    patch_smali("PowerKeeper.apk", "DisplayFrameSetting.smali", "unicorn", "umi", port_android_sdk)
+    patch_smali("MiSettings.apk", "NewRefreshRateFragment.smali", "const-string v1, \"btn_preferce_category\"",
+                "const-string v1, \"btn_preferce_category\"\n\n\tconst\/16 p1, 0x1", port_android_sdk)
     #
     targetDevicesAndroidOverlay = find_file('build/portrom/images/product', 'DevicesAndroidOverlay.apk')
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
