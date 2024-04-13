@@ -661,7 +661,7 @@ def main(baserom, portrom):
             break
     for prop in find_files('build/baserom/images/system', 'build.prop'):
         base_rom_density = read_config(prop, 'ro.sf.lcd_density')
-        if baserom_type:
+        if baserom_type.strip():
             green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
             break
     found = 0
