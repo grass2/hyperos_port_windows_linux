@@ -491,7 +491,7 @@ def main(baserom, portrom):
         yellow("查找MiuiBiometric\nSearching and Replacing MiuiBiometric..")
         shutil.rmtree(portMiuiBiometric)
         os.makedirs(portMiuiBiometric, exist_ok=True)
-        shutil.copytree(baseMiuiBiometric, portMiuiBiometric)
+        shutil.copytree(baseMiuiBiometric, portMiuiBiometric, dirs_exist_ok=True)
     elif os.path.isdir(baseMiuiBiometric):
         blue("未找到MiuiBiometric，替换为原包\nMiuiBiometric is missing, copying from base...")
         os.makedirs(f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
@@ -891,7 +891,7 @@ def main(baserom, portrom):
             shutil.copytree(MiLinkCirculateMIUI15, targetMiLinkCirculateMIUI15, dirs_exist_ok=True)
         else:
             os.makedirs('build/portrom/images/product/app/MiLinkCirculateMIUI15', exist_ok=True)
-            shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/')
+            shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/', dirs_exist_ok=True)
     # Devices/机型代码/overaly 按照镜像的目录结构，可直接替换目标。
     is_ab_device = read_config('build/portrom/images/vendor/build.prop', 'ro.build.ab_update')
     if os.path.isdir(f'devices/{base_rom_code}/overlay'):
@@ -1012,7 +1012,7 @@ def main(baserom, portrom):
         if os.path.isdir('build/baserom/firmware-update'):
             os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', exist_ok=True)
             shutil.copytree(f'build/baserom/firmware-update/',
-                            f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update')
+                            f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', dirs_exist_ok=True)
             for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update'):
                 if fwimg == "uefi_sec.mbn":
                     part = 'uefisecapp'
