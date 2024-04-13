@@ -7,6 +7,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import time
 
 from _socket import gethostname
 from bin.sdat2img import main as sdat2img
@@ -19,6 +20,7 @@ import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
 from bin.xmlstarlet import main as xmlstarlet
+from datetime import datetime
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
@@ -582,9 +584,37 @@ def main(baserom, portrom):
                 os.remove(fi)
             if os.path.isdir(fi):
                 shutil.rmtree(fi)
-        blue("正在修改 build.prop\nModifying build.prop")
+    blue("正在修改 build.prop\nModifying build.prop")
+    buildDate = datetime.utcnow().strftime("%a %b %d %H:%M:%S UTC %Y")
+    buildUtc = int(time.time())
+    base_rom_code = read_config('build/portrom/images/vendor/build.prop', "ro.product.vendor.device")
+    for i in find_files('build/portrom/images', 'build.prop'):
+        blue(f"正在处理 {i}\nmodifying {i}")
+        with open(i, 'r', encoding='utf-8') as f:
+            details = f.read()
+        details = re.sub('ro.build.date=.*', f'ro.build.date={buildDate}', details)
+        details = re.sub('ro.build.date.utc=.*', f'ro.build.date.utc={buildUtc}', details)
+        details = re.sub('ro.odm.build.date=.*', f'ro.odm.build.date={buildDate}', details)
+        details = re.sub('ro.odm.build.date.utc=.*', f'ro.odm.build.date.utc={buildUtc}', details)
+        details = re.sub('ro.vendor.build.date=.*', f'ro.vendor.build.date={buildDate}', details)
+        details = re.sub('ro.vendor.build.date.utc=.*', f'ro.vendor.build.date.utc={buildUtc}', details)
+        details = re.sub('ro.system.build.date=.*', f'ro.system.build.date={buildDate}', details)
+        details = re.sub('ro.system.build.date.utc=.*', f'ro.system.build.date.utc={buildUtc}', details)
+        details = re.sub('ro.product.build.date=.*', f'ro.product.build.date={buildDate}', details)
+        details = re.sub('ro.product.build.date.utc=.*', f'ro.product.build.date.utc={buildUtc}', details)
+        details = re.sub('ro.system_ext.build.date=.*', f'ro.system_ext.build.date={buildDate}', details)
+        details = re.sub('ro.system_ext.build.date.utc=.*', f'ro.system_ext.build.date.utc={buildUtc}', details)
+        details = re.sub('ro.product.device=.*', f'ro.product.device={base_rom_code}', details)
+        details = re.sub('ro.product.product.name=.*', f'ro.product.product.name={base_rom_code}', details)
+        details = re.sub('ro.product.odm.device=.*', f'ro.product.odm.device={base_rom_code}', details)
+        details = re.sub('ro.product.vendor.device=.*', f'ro.product.vendor.device={base_rom_code}', details)
+        details = re.sub('ro.product.system.device=.*', f'ro.product.system.device={base_rom_code}', details)
+        details = re.sub('ro.product.board=.*', f'ro.product.board={base_rom_code}', details)
+        details = re.sub('ro.product.system_ext.device=.*', f'ro.product.system_ext.device={base_rom_code}', details)
+        details = re.sub('persist.sys.timezone=.*', f'persist.sys.timezone=Asia/Shanghai', details)
 
-        # Run Script
+
+    # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 
 

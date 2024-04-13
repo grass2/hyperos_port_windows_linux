@@ -84,31 +84,7 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-
-buildDate=$(date -u +"%a %b %d %H:%M:%S UTC %Y")
-buildUtc=$(date +%s)
 for i in $(find build/portrom/images -type f -name "build.prop");do
-    blue "正在处理 ${i}" "modifying ${i}"
-    sed -i "s/ro.build.date=.*/ro.build.date=${buildDate}/g" ${i}
-    sed -i "s/ro.build.date.utc=.*/ro.build.date.utc=${buildUtc}/g" ${i}
-    sed -i "s/ro.odm.build.date=.*/ro.odm.build.date=${buildDate}/g" ${i}
-    sed -i "s/ro.odm.build.date.utc=.*/ro.odm.build.date.utc=${buildUtc}/g" ${i}
-    sed -i "s/ro.vendor.build.date=.*/ro.vendor.build.date=${buildDate}/g" ${i}
-    sed -i "s/ro.vendor.build.date.utc=.*/ro.vendor.build.date.utc=${buildUtc}/g" ${i}
-    sed -i "s/ro.system.build.date=.*/ro.system.build.date=${buildDate}/g" ${i}
-    sed -i "s/ro.system.build.date.utc=.*/ro.system.build.date.utc=${buildUtc}/g" ${i}
-    sed -i "s/ro.product.build.date=.*/ro.product.build.date=${buildDate}/g" ${i}
-    sed -i "s/ro.product.build.date.utc=.*/ro.product.build.date.utc=${buildUtc}/g" ${i}
-    sed -i "s/ro.system_ext.build.date=.*/ro.system_ext.build.date=${buildDate}/g" ${i}
-    sed -i "s/ro.system_ext.build.date.utc=.*/ro.system_ext.build.date.utc=${buildUtc}/g" ${i}
-    sed -i "s/ro.product.device=.*/ro.product.device=${base_rom_code}/g" ${i}
-    sed -i "s/ro.product.product.name=.*/ro.product.product.name=${base_rom_code}/g" ${i}
-    sed -i "s/ro.product.odm.device=.*/ro.product.odm.device=${base_rom_code}/g" ${i}
-    sed -i "s/ro.product.vendor.device=.*/ro.product.vendor.device=${base_rom_code}/g" ${i}
-    sed -i "s/ro.product.system.device=.*/ro.product.system.device=${base_rom_code}/g" ${i}
-    sed -i "s/ro.product.board=.*/ro.product.board=${base_rom_code}/g" ${i}
-    sed -i "s/ro.product.system_ext.device=.*/ro.product.system_ext.device=${base_rom_code}/g" ${i}
-    sed -i "s/persist.sys.timezone=.*/persist.sys.timezone=Asia\/Shanghai/g" ${i}
     #全局替换device_code
     if [[ $port_mios_version_incremental != *DEV* ]];then
         sed -i "s/$port_device_code/$base_device_code/g" ${i}
@@ -128,6 +104,7 @@ for i in $(find build/portrom/images -type f -name "build.prop");do
     sed -i "/ro.miui.density.primaryscale=.*/d" ${i}
     sed -i "/persist.wm.extensions.enabled=true/d" ${i}
 done
+
 # 屏幕密度修修改
 for prop in $(find build/baserom/images/product build/baserom/images/system -type f -name "build.prop");do
     base_rom_density=$(python3 bin/read_config.py "$prop" "ro.sf.lcd_density")
