@@ -70,7 +70,8 @@ jobs:
           if [[ ${{ github.event.inputs.ENCRYPTION }} == "TRUE" ]]; then
               sed -i "s/remove_data_encryption=false/remove_data_encryption=true/" bin/port_config
           fi
-          sudo bash "$GITHUB_WORKSPACE"/port.sh ${{ github.event.inputs.STOCK_URL }} ${{ github.event.inputs.PORT_URL }} 
+          sudo python3 -m pip install lxml rich
+          sudo python3 "$GITHUB_WORKSPACE"/port.py ${{ github.event.inputs.STOCK_URL }} ${{ github.event.inputs.PORT_URL }}
       - name: 6. 准备上传 | PREPARE UPLOADING
         run: |
           ROM_FILE=$(basename $(find "$GITHUB_WORKSPACE"/out -name "*.zip"))
