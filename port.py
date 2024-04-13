@@ -18,7 +18,9 @@ from bin.read_config import main as read_config
 import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
-javaOpts="-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
+from bin.xmlstarlet import main as xmlstarlet
+
+javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
@@ -28,6 +30,13 @@ def find_file(directory, filename):
             if file == filename:
                 return os.path.join(root, file)
     return ''
+
+
+def find_files(directory, filename):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file == filename:
+                yield os.path.join(root, file)
 
 
 def find_folder_mh(directory, filename):
@@ -419,7 +428,8 @@ def main(baserom, portrom):
                     file_path = os.path.join(root, file)
                     with open(file_path, 'r') as f:
                         content = f.read()
-                    new_content = re.sub('com.miui.aod/com.miui.aod.doze.DozeService', "com.android.systemui/com.android.systemui.doze.DozeService", content)
+                    new_content = re.sub('com.miui.aod/com.miui.aod.doze.DozeService',
+                                         "com.android.systemui/com.android.systemui.doze.DozeService", content)
                     with open(file_path, 'w') as f:
                         f.write(new_content)
                     print(f"已替换文件: {file_path}")
@@ -428,6 +438,33 @@ def main(baserom, portrom):
             sys.exit()
         shutil.copyfile(f'tmp/{filename}', targetDevicesAndroidOverlay)
         shutil.rmtree('tmp')
+    # Fix boot up frame drop issue.
+    targetAospFrameworkResOverlay = find_file('build/portrom/images/product', 'AospFrameworkResOverlay.apk')
+    if os.path.isfile(targetAospFrameworkResOverlay) and targetAospFrameworkResOverlay:
+        os.makedirs('tmp', exist_ok=True)
+        filename = os.path.basename(targetAospFrameworkResOverlay)
+        yellow(f"Change defaultPeakRefreshRate: {filename} ...")
+        targetDir = filename.split(".")[0]
+        os.system(
+            f"java {javaOpts} -jar bin/apktool/apktool.jar d {targetAospFrameworkResOverlay} -o tmp/{targetDir} -f")
+        for xml in find_files(f'tmp/{targetDir}', 'integers.xml'):
+            xmlstarlet(xml, 'config_defaultPeakRefreshRate', '60')
+        if os.system(f"java {javaOpts} -jar bin/apktool/apktool.jar b tmp/{targetDir} -o tmp/{filename}") != 0:
+            red("apktool 打包失败\napktool mod failed")
+            sys.exit()
+        shutil.copyfile(f'tmp/{filename}', targetAospFrameworkResOverlay)
+    vndk_version = ''
+    for i in glob.glob('build/portrom/images/vendor/*.prop'):
+        vndk_version = read_config(i, 'ro.vndk.version')
+        if vndk_version:
+            yellow(f"ro.vndk.version为{vndk_version}\nro.vndk.version found in {i}: {vndk_version}")
+            break
+    if vndk_version:
+        base_vndk = find_file('build/baserom/images/system_ext/apex', f'com.android.vndk.v{vndk_version}.apex')
+        port_vndk = find_file('build/portrom/images/system_ext/apex', f'com.android.vndk.v{vndk_version}.apex')
+        if not os.path.isfile(port_vndk) and os.path.isfile(base_vndk):
+            yellow("apex不存在，从原包复制\ntarget apex is missing, copying from baserom")
+            shutil.copy2(base_vndk, 'build/portrom/images/system_ext/apex/')
 
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")

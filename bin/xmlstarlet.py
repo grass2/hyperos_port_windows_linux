@@ -15,5 +15,6 @@ def main(file, rule, new_value):
         print("Target element not found.")
     tree.write(file)
 
+
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -87,7 +87,7 @@ patch_smali() {
         for dexfile in tmp/$foldername/*.dex;do
             smalifname=${dexfile%.*}
             smalifname=$(echo $smalifname | cut -d "/" -f 3)
-            java -jar bin/apktool/baksmali.jar d --api ${port_android_sdk} ${dexfile} -o tmp/$foldername/$smalifname 2>&1 || error " Baksmaling 失败" "Baksmaling failed"
+            java -jar bin/apktool/baksmali.jar d --api ${port_android_sdk} ${dexfile} -o tmp/$foldername/$smalifname || error " Baksmaling 失败" "Baksmaling failed"
         done
         if [[ $2 == *"/"* ]];then
             targetsmali=$(find tmp/$foldername/*/$(dirname $2) -type f -name $(basename $2))
