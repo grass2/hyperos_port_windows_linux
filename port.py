@@ -900,7 +900,7 @@ def main(baserom, portrom):
         yellow(f"devices/{base_rom_code}/overlay 未找到\ndevices/{base_rom_code}/overlay not found")
     # Run Script
 
-    os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
+    os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash -x ./bin/call ./port.sh")
     # Pack The Rom
 
     if pack_type == 'EROFS':
