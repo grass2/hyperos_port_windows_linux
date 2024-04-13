@@ -222,7 +222,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
             pass
         os.makedirs(f'tmp/{foldername}/', exist_ok=True)
         shutil.copy2(targetfilefullpath, f'tmp/{foldername}/')
-        os.system(f'7z x -y tmp/{foldername}/{targetfilename} *.dex -otmp/{foldername}')
+        call(f'7z x -y tmp/{foldername}/{targetfilename} *.dex -otmp/{foldername}', kz='Y' if os.name == 'nt' else 'N')
         for i in glob.glob(f'tmp/{foldername}/*.dex'):
             smalifname = os.path.basename(i).split('.')[0]
             os.system(
@@ -249,7 +249,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
                 sys.exit()
             old = os.getcwd()
             os.chdir(f'tmp/{foldername}/')
-            if os.system(f'7z a -y -mx0 -tzip {targetfilename} {smalidir}.dex') != 0:
+            if call(f'7z a -y -mx0 -tzip {targetfilename} {smalidir}.dex', kz='Y' if os.name == 'nt' else 'N') != 0:
                 red(f"修改{targetfilename}失败\nFailed to modify {targetfilename}")
                 sys.exit()
             os.chdir(old)
@@ -1282,7 +1282,7 @@ def main(baserom, portrom):
         unix_to_dos(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat')
     old = os.getcwd()
     os.chdir(f'out/{os_type}_{device_code}_{port_rom_version}/')
-    os.system(f'zip -r {os_type}_{device_code}_{port_rom_version}.zip ./*')
+    call(f'zip -r {os_type}_{device_code}_{port_rom_version}.zip ./*', kz='Y' if os.name == 'nt' else 'N')
     os.rename(f'{os_type}_{device_code}_{port_rom_version}.zip',
               os.path.join(os.path.abspath('..'), f'{os_type}_{device_code}_{port_rom_version}.zip'))
     os.chdir(old)
