@@ -230,7 +230,6 @@ def main(baserom, portrom):
             f.write(f'is_shennong_houji_port="false"\n')
         f.write(f"build_host='{gethostname()}'\n")
         blue("正在检测ROM底包\nValidating BASEROM..")
-
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
                 baserom_type = 'payload'
@@ -250,6 +249,7 @@ def main(baserom, portrom):
                 green("ROM初步检测通过\nROM validation passed.")
             elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
                 is_eu_rom = True
+                f.write("is_eu_rom='true'\n")
             else:
                 red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
                 sys.exit()
