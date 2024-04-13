@@ -122,6 +122,8 @@ def insert_after_line(file_path, target_line, text_to_insert):
         print("目标行未找到")
         print(lines)
         return
+    if not text_to_insert.endswith('\n'):
+        text_to_insert += '\n'
     lines.insert(index_text, text_to_insert)
     with open(file_path, 'w', encoding='utf-8', newline='\n') as file:
         file.writelines(lines)
