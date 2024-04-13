@@ -159,6 +159,7 @@ def main(baserom, portrom):
     baserom_type: str = ''
     is_eu_rom: bool = False
     super_list: list = []
+    port_partition= read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'Bruce Teng'
     device_code = "YourDevice"
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
@@ -723,6 +724,8 @@ def main(baserom, portrom):
     # Game splashscreen speed up
     append('build/portrom/images/product/etc/build.prop',
            ['debug.game.video.speed=true\n', 'debug.game.video.support=true\n'])
+    # Second Modify
+
     blue("去除avb校验\nDisable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
         for file in files:
@@ -744,6 +747,9 @@ def main(baserom, portrom):
                     sed(fstab_path, ',fileencryption=aes-256-xts', '')
                     sed(fstab_path, ',fileencryption=ice', '')
                     sed(fstab_path, 'fileencryption', 'encryptable')
+    for i in port_partition:
+        if os.path.isfile(f'build/portrom/images/{i}.img'):
+            os.remove(f'build/portrom/images/{i}.img')
     # Run Script
     os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
 
