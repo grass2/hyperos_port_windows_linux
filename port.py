@@ -52,13 +52,9 @@ def replace_method_in_smali(smali_file, target_method):
         register_number = re.search(r'\d+', smali_content[move_result_end_line]).group()
         replace_with_command = f"const/4 v{register_number}, 0x0"
         smali_content[method_line - 1:move_result_end_line + 1] = [replace_with_command + '\n']
-
         with open(smali_file, 'w') as file:
             file.writelines(smali_content)
-
         print(f"{smali_file} 修改成功")
-    else:
-        print(f"\r未找到目标方法 {target_method} 在文件 {smali_file}",end='')
 
 
 def get_file_md5(fname):
