@@ -83,8 +83,12 @@ def sed(file, old, new):
 
 
 def insert_after_line(file_path, target_line, text_to_insert):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+    except:
+        with open(file_path, 'r', encoding='gbk') as file:
+            lines = file.readlines()
     index_text = None
     for i, line in enumerate(lines):
         if target_line.strip() == line.strip():
