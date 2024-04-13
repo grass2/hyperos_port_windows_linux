@@ -84,21 +84,10 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-echo "persist.sys.perf.cgroup8250.stune=true" >> build/portrom/images/product/etc/build.prop
 unlock_device_feature "Whether support AI Display"  "bool" "support_AI_display"
 unlock_device_feature "device support screen enhance engine"  "bool" "support_screen_enhance_engine"
 unlock_device_feature "Whether suppot Android Flashlight Controller"  "bool" "support_android_flashlight"
 unlock_device_feature "Whether support SR for image display"  "bool" "support_SR_for_image_display"
-# Unlock MEMC; unlocking the screen enhance engine is a prerequisite.
-# This feature add additional frames to videos to make content appear smooth and transitions lively.
-if  grep -q "ro.vendor.media.video.frc.support" build/portrom/images/vendor/build.prop ;then
-    sed -i "s/ro.vendor.media.video.frc.support=.*/ro.vendor.media.video.frc.support=true/" build/portrom/images/vendor/build.prop
-else
-    echo "ro.vendor.media.video.frc.support=true" >> build/portrom/images/vendor/build.prop
-fi
-# Game splashscreen speed up
-echo "debug.game.video.speed=true" >> build/portrom/images/product/etc/build.prop
-echo "debug.game.video.support=true" >> build/portrom/images/product/etc/build.prop
 # Unlock Smart fps
 maxFps=$(python3 bin/maxfps.py build/portrom/images/product/etc/device_features/${base_rom_code}.xml)
 if [ -z "$maxFps" ]; then

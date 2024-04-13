@@ -698,6 +698,15 @@ def main(baserom, portrom):
         append('build/portrom/images/product/etc/build.prop', ['persist.sys.background_blur_supported=true\n', 'persist.sys.background_blur_version=2\n'])
     else:
         sed('persist.sys.background_blur_version=2', 'persist.sys.background_blur_supported=.*', 'persist.sys.background_blur_supported=true')
+    append('build/portrom/images/product/etc/build.prop', ['persist.sys.perf.cgroup8250.stune=true\n'])
+    if read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.media.video.frc.support'):
+        sed('build/portrom/images/vendor/build.prop', 'ro.vendor.media.video.frc.support=.*', 'ro.vendor.media.video.frc.support=true')
+    else:
+        # Unlock MEMC; unlocking the screen enhance engine is a prerequisite.
+        # This feature add additional frames to videos to make content appear smooth and transitions lively.
+        append('build/portrom/images/vendor/build.prop', ['ro.vendor.media.video.frc.support=true\n'])
+    # Game splashscreen speed up
+    append('build/portrom/images/product/etc/build.prop', ['debug.game.video.speed=true\n', 'debug.game.video.support=true\n'])
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 
