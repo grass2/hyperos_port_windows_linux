@@ -955,7 +955,7 @@ def main(baserom, portrom):
                 else:
                     red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败\nPacking [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
-    if is_ab_device == 'false':
+    if is_ab_device == 'false' or not is_ab_device:
         blue("打包A-only super.img\nPacking super.img for A-only device")
         lpargs = f"-F --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 2 --block-size 4096 --device super:{superSize} --group=qti_dynamic_partitions:{superSize}"
         for pname in ['odm', 'mi_ext', 'system', 'system_ext', 'product', 'vendor']:
@@ -988,7 +988,7 @@ def main(baserom, portrom):
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/', exist_ok=True)
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/')
     blue('正在生成刷机脚本\nGenerating flashing script')
-    if is_ab_device == 'false':
+    if is_ab_device == 'false' or not is_ab_device:
         shutil.move('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/')
         shutil.copytree('bin/flash/platform-tools-windows/',
                         f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/',
