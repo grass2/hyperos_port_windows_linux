@@ -70,7 +70,7 @@ def insert_after_line(file_path, target_line, text_to_insert):
         lines = file.readlines()
     index_text = None
     for i, line in enumerate(lines):
-        if target_line == line:
+        if target_line.strip() == line.strip():
             index_text = i
             break
     if index_text is None:
@@ -1086,6 +1086,41 @@ def main(baserom, portrom):
         shutil.copy2('bin/flash/vab/flash_update.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
         shutil.copy2('bin/flash/vab/flash_and_format.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
         shutil.copy2('bin/flash/zstd', f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/')
+        for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/images/'):
+            fwimg = fwimg.split('.')[0]
+            if fwimg in ['super', 'cust', 'preloader']:
+                continue
+            if 'vbmeta' in fwimg:
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot --disable-verity --disable-verification flash "{fwimg}"_b images\\"{fwimg}".img')
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot --disable-verity --disable-verification flash "{fwimg}"_a images\\"{fwimg}".img')
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot --disable-verity --disable-verification flash "{fwimg}"_b images\\"{fwimg}".img')
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot --disable-verity --disable-verification flash "{fwimg}"_a images\\"{fwimg}".img')
+            else:
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_b images\\"{fwimg}".img')
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_a images\\"{fwimg}".img')
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_b images\\"{fwimg}".img')
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
+                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_a images\\"{fwimg}".img')
+
+            insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_b"')
+            insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_a"')
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'portversion',
+            port_rom_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'baseversion',
+            base_rom_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'andVersion',
+            port_android_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'device_code',
+            base_rom_code)
+        unix_to_dos(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat')
+        unix_to_dos(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat')
 
 
 if __name__ == '__main__':
