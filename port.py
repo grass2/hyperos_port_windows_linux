@@ -1051,12 +1051,6 @@ def main(baserom, portrom):
         shutil.copytree(f'devices/{base_rom_code}/overlay/', 'build/portrom/images/', dirs_exist_ok=True)
     else:
         yellow(f"devices/{base_rom_code}/overlay 未找到\ndevices/{base_rom_code}/overlay not found")
-    # Run Script
-    print("Now, We will use port.sh to handle.")
-    os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash -x ./bin/call ./port.sh")
-    print("Ok, Turned to python！")
-    # Pack The Rom
-
     if pack_type == 'EROFS':
         yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点\nValidating whether adding erofs mount points is needed.")
         with open('build/portrom/images/vendor/etc/fstab.qcom', 'r') as file:
