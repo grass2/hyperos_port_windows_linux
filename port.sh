@@ -101,25 +101,7 @@ unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyeca
 
 if [[ "$is_ab_device" == false ]];then
     if [ -d build/baserom/firmware-update ];then
-        mkdir -p out/${os_type}_${device_code}_${port_rom_version}/firmware-update
-        cp -rf build/baserom/firmware-update/*  out/${os_type}_${device_code}_${port_rom_version}/firmware-update
          for fwimg in $(ls out/${os_type}_${device_code}_${port_rom_version}/firmware-update);do
-            if [[ ${fwimg} == "uefi_sec.mbn" ]];then
-                part="uefisecapp"
-            elif [[ ${fwimg} == "qupv3fw.elf" ]];then
-                part="qupfw"
-            elif [[ ${fwimg} == "NON-HLOS.bin" ]];then
-                part="modem"
-            elif [[ ${fwimg} == "km4.mbn" ]];then
-                part="keymaster"
-            elif [[ ${fwimg} == "BTFM.bin" ]];then
-                part="bluetooth"
-            elif [[ ${fwimg} == "dspso.bin" ]];then
-                part="dsp"
-            else
-                part=${fwimg%.*}                
-            fi
-            sed -i "/# firmware/a fastboot flash ${part} firmware-update/${fwimg}" out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
             sed -i "/REM firmware/a bin\\\windows\\\fastboot.exe flash ${part} %~dp0firmware-update\/${fwimg}" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
          done
     fi

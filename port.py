@@ -993,6 +993,26 @@ def main(baserom, portrom):
     with open(f"out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat", 'w') as file:
         file.write(re.sub(r'^REM SET_ACTION_SLOT_A_BEGIN$.*?^REM SET_ACTION_SLOT_A_END$', '', content,
                           flags=re.DOTALL | re.MULTILINE))
+    if os.path.isdir('build/baserom/firmware-update'):
+        os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', exist_ok=True)
+        shutil.copytree(f'build/baserom/firmware-update/', f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update')
+        for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update'):
+            if fwimg == "uefi_sec.mbn":
+                part = 'uefisecapp'
+            elif fwimg == 'qupv3fw.elf':
+                part = "qupfw"
+            elif fwimg == 'NON-HLOS.bin':
+                part = "modem"
+            elif fwimg == 'km4.mbn':
+                part = 'keymaster'
+            elif fwimg == 'BTFM.bin':
+                part = "bluetooth"
+            elif fwimg == 'dspso.bin':
+                part = "dsp"
+            else:
+                part = fwimg.split('.')[0]
+            insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', '# firmware\n', f'fastboot flash {part} firmware-update/{fwimg}')
+
 
 
 if __name__ == '__main__':
