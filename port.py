@@ -27,8 +27,6 @@ javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFiel
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
-
-
 def append(file, lines):
     with open(file, 'a', encoding='utf-8') as f:
         f.writelines(lines)
