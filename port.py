@@ -209,15 +209,11 @@ def main(baserom, portrom):
     with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
         f.write(f"baserom='{baserom}'\n")
         f.write(f"portrom='{portrom}'\n")
-        f.write(f"port_partition='{read_config('bin/port_config', 'partition_to_port')}'\n")
-        f.write(f"repackext4='{read_config('bin/port_config', 'repack_with_ext4')}'\n")
-        f.write(f"brightness_fix_method='{read_config('bin/port_config', 'brightness_fix_method')}'\n")
         f.write(
             f"compatible_matrix_matches_enabled='{read_config('bin/port_config', 'compatible_matrix_matches_check')}'\n")
         f.write(f"work_dir='{os.getcwd()}'\n")
         f.write(f"tools_dir='{os.getcwd()}/bin/{platform.system()}/{platform.machine()}'\n")
         f.write(f"OSTYPE='{platform.system()}'\n")
-        f.write(f"build_user='Bruce Teng'\n")
         if read_config('bin/port_config', 'repack_with_ext4') == 'true':
             pack_type = 'EXT'
         else:
@@ -237,21 +233,14 @@ def main(baserom, portrom):
 
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
-                f.write("baserom_type='payload'\n")
                 baserom_type = 'payload'
-                f.write(
-                    "super_list='vendor mi_ext odm odm_dlkm system system_dlkm vendor_dlkm product product_dlkm system_ext'\n")
                 super_list = ['vendor', 'mi_ext', 'odm', 'odm_dlkm', 'system', 'system_dlkm', 'vendor_dlkm', 'product',
                               'product_dlkm', 'system_ext']
             elif [True for i in rom.namelist() if '.br' in i]:
-                f.write("baserom_type='br'\n")
                 baserom_type = 'br'
-                f.write("super_list='vendor mi_ext odm system product system_ext'\n")
                 super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
             elif [True for i in rom.namelist() if 'images/super.img' in i]:
-                f.write("is_base_rom_eu='true'\n")
                 is_base_rom_eu = True
-                f.write("super_list='vendor mi_ext odm system product system_ext'\n")
                 super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
             else:
                 red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试\npayload.bin/new.br not found, please use HyperOS official OTA zip package.")
@@ -260,7 +249,6 @@ def main(baserom, portrom):
             if "payload.bin" in rom.namelist():
                 green("ROM初步检测通过\nROM validation passed.")
             elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
-                f.write("is_eu_rom=true\n")
                 is_eu_rom = True
             else:
                 red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
@@ -911,8 +899,10 @@ def main(baserom, portrom):
     else:
         yellow(f"devices/{base_rom_code}/overlay 未找到\ndevices/{base_rom_code}/overlay not found")
     # Run Script
+
     os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
     # Pack The Rom
+
     if pack_type == 'EROFS':
         yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点\nValidating whether adding erofs mount points is needed.")
         with open('build/portrom/images/vendor/etc/fstab.qcom', 'r') as file:
