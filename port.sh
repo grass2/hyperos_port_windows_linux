@@ -100,35 +100,6 @@ unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyeca
 
 
 if [[ "$is_ab_device" == false ]];then
-    if [ -d build/baserom/firmware-update ];then
-         for fwimg in $(ls out/${os_type}_${device_code}_${port_rom_version}/firmware-update);do
-            sed -i "/REM firmware/a bin\\\windows\\\fastboot.exe flash ${part} %~dp0firmware-update\/${fwimg}" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-         done
-    fi
-    #disable vbmeta
-    for img in $(find out/${os_type}_${device_code}_${port_rom_version}/firmware-update -type f -name "vbmeta*.img");do
-        python3 bin/patch-vbmeta.py ${img}
-    done
-    cp -rf bin/flash/a-only/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
-    cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/
-    ksu_bootimg_file=$(find devices/$base_rom_code/ -type f -name "boot_ksu*.img")
-    nonksu_bootimg_file=$(find devices/$base_rom_code/ -type f -name "boot_nonksu*.img")
-    if [[ -f $nonksu_bootimg_file ]];then
-        nonksubootimg=$(basename "$nonksu_bootimg_file")
-        cp -f $nonksu_bootimg_file out/${os_type}_${device_code}_${port_rom_version}/
-        sed -i "s/boot_official.img/$nonksubootimg/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-        sed -i "s/boot_official.img/$nonksubootimg/g" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-        sed -i "s/boot_official.img/$nonksubootimg/g" out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
-    else
-        cp -f build/baserom/boot.img out/${os_type}_${device_code}_${port_rom_version}/boot_official.img
-    fi
-    if [[ -f "$ksu_bootimg_file" ]];then
-        ksubootimg=$(basename "$ksu_bootimg_file")
-        sed -i "s/boot_tv.img/$ksubootimg/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
-        sed -i "s/boot_tv.img/$ksubootimg/g" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-        sed -i "s/boot_tv.img/$ksubootimg/g" out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
-        cp -rf $ksu_bootimg_file out/${os_type}_${device_code}_${port_rom_version}/
-    fi
     busybox unix2dos out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
     sed -i "s/portversion/${port_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary
     sed -i "s/baseversion/${base_rom_version}/g" out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/update-binary

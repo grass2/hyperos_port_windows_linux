@@ -26,6 +26,7 @@ import xml.etree.ElementTree as ET
 from bin.getSuperSize import main as getSuperSize
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
+from bin.patch_vbmeta import main as patch_vbmeta
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
@@ -974,45 +975,89 @@ def main(baserom, portrom):
     blue('正在生成刷机脚本\nGenerating flashing script')
     if is_ab_device == 'false':
         shutil.move('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/')
-    shutil.copytree('bin/flash/platform-tools-windows/', f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/',
-                    dirs_exist_ok=True)
-    shutil.copy2('bin/flash/mac_linux_flash_script.sh', f'out/{os_type}_{device_code}_{port_rom_version}/')
-    shutil.copy2('bin/flash/windows_flash_script.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
-    sed(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', '_ab', '')
-    sed(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat', '_ab', '')
-    with open(f"out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh", 'r',
-              encoding='utf-8') as file:
-        content = file.read()
-    with open(f"out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh", 'w', encoding='utf-8',
-              newline='\n') as file:
-        file.write(re.sub(r'^# SET_ACTION_SLOT_A_BEGIN$.*?^# SET_ACTION_SLOT_A_END$', '', content,
-                          flags=re.DOTALL | re.MULTILINE))
-    with open(f"out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat", 'r',
-              encoding='utf-8') as file:
-        content = file.read()
-    with open(f"out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat", 'w') as file:
-        file.write(re.sub(r'^REM SET_ACTION_SLOT_A_BEGIN$.*?^REM SET_ACTION_SLOT_A_END$', '', content,
-                          flags=re.DOTALL | re.MULTILINE))
-    if os.path.isdir('build/baserom/firmware-update'):
-        os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', exist_ok=True)
-        shutil.copytree(f'build/baserom/firmware-update/', f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update')
-        for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update'):
-            if fwimg == "uefi_sec.mbn":
-                part = 'uefisecapp'
-            elif fwimg == 'qupv3fw.elf':
-                part = "qupfw"
-            elif fwimg == 'NON-HLOS.bin':
-                part = "modem"
-            elif fwimg == 'km4.mbn':
-                part = 'keymaster'
-            elif fwimg == 'BTFM.bin':
-                part = "bluetooth"
-            elif fwimg == 'dspso.bin':
-                part = "dsp"
-            else:
-                part = fwimg.split('.')[0]
-            insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', '# firmware\n', f'fastboot flash {part} firmware-update/{fwimg}')
-
+        shutil.copytree('bin/flash/platform-tools-windows/',
+                        f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/',
+                        dirs_exist_ok=True)
+        shutil.copy2('bin/flash/mac_linux_flash_script.sh', f'out/{os_type}_{device_code}_{port_rom_version}/')
+        shutil.copy2('bin/flash/windows_flash_script.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', '_ab', '')
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat', '_ab', '')
+        with open(f"out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh", 'r',
+                  encoding='utf-8') as file:
+            content = file.read()
+        with open(f"out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh", 'w', encoding='utf-8',
+                  newline='\n') as file:
+            file.write(re.sub(r'^# SET_ACTION_SLOT_A_BEGIN$.*?^# SET_ACTION_SLOT_A_END$', '', content,
+                              flags=re.DOTALL | re.MULTILINE))
+        with open(f"out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat", 'r',
+                  encoding='utf-8') as file:
+            content = file.read()
+        with open(f"out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat", 'w') as file:
+            file.write(re.sub(r'^REM SET_ACTION_SLOT_A_BEGIN$.*?^REM SET_ACTION_SLOT_A_END$', '', content,
+                              flags=re.DOTALL | re.MULTILINE))
+        if os.path.isdir('build/baserom/firmware-update'):
+            os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', exist_ok=True)
+            shutil.copytree(f'build/baserom/firmware-update/',
+                            f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update')
+            for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update'):
+                if fwimg == "uefi_sec.mbn":
+                    part = 'uefisecapp'
+                elif fwimg == 'qupv3fw.elf':
+                    part = "qupfw"
+                elif fwimg == 'NON-HLOS.bin':
+                    part = "modem"
+                elif fwimg == 'km4.mbn':
+                    part = 'keymaster'
+                elif fwimg == 'BTFM.bin':
+                    part = "bluetooth"
+                elif fwimg == 'dspso.bin':
+                    part = "dsp"
+                else:
+                    part = fwimg.split('.')[0]
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh',
+                                  '# firmware\n', f'fastboot flash {part} firmware-update/{fwimg}')
+                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat',
+                                  'REM firmware\n',
+                                  f'bin\\windows\\fastboot.exe flash {part} %~dp0firmware-update\\{fwimg}')
+        for i in find_files_mh(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', 'vbmeta.'):
+            if i.endswith('.img'):
+                patch_vbmeta(i)
+        shutil.copy2('bin/flash/a-only/update-binary',
+                     f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/')
+        shutil.copy2('bin/flash/zstd', f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/')
+        ksu_bootimg_file = nonksu_bootimg_file = ''
+        try:
+            for i in find_files_mh(f'/devices/{base_rom_code}/', 'boot_ksu'):
+                if os.path.isfile(i):
+                    ksu_bootimg_file = i
+                    break
+        except:
+            pass
+        try:
+            for i in find_files_mh(f'/devices/{base_rom_code}/', 'boot_nonksu'):
+                if os.path.isfile(i):
+                    ksu_bootimg_file = i
+                    break
+        except:
+            pass
+        if os.path.isfile(nonksu_bootimg_file):
+            nonksubootimg = os.path.basename(nonksu_bootimg_file)
+            shutil.copy2(nonksu_bootimg_file, f'out/{os_type}_{device_code}_{port_rom_version}/')
+            sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary',
+                'boot_official.img', nonksubootimg)
+            sed(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat', 'boot_official.img',
+                nonksubootimg)
+            sed(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', 'boot_official.img',
+                nonksubootimg)
+        else:
+            os.rename('build/baserom/boot.img', f'out/{os_type}_{device_code}_{port_rom_version}/boot_official.img')
+        if os.path.isfile(ksu_bootimg_file):
+            ksubootimg = os.path.basename(ksu_bootimg_file)
+            shutil.copy2(ksu_bootimg_file, f'out/{os_type}_{device_code}_{port_rom_version}/')
+            sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary',
+                'boot_tv.img', ksubootimg)
+            sed(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat', 'boot_tv.img', ksubootimg)
+            sed(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', 'boot_tv.img', ksubootimg)
 
 
 if __name__ == '__main__':
