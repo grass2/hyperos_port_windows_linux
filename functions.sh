@@ -73,7 +73,7 @@ patch_smali() {
             smalifname=$(echo $smalifname | cut -d "/" -f 3)
             java -jar bin/apktool/baksmali.jar d --api ${port_android_sdk} ${dexfile} -o tmp/$foldername/$smalifname || error " Baksmaling 失败" "Baksmaling failed"
         done
-        if [[ $2 == *"/"* ]];then
+        if echo "$2" | grep -q "/";then
             targetsmali=$(find tmp/$foldername/*/$(dirname $2) -type f -name $(basename $2))
         else
             targetsmali=$(find tmp/$foldername -type f -name $2)
@@ -83,7 +83,7 @@ patch_smali() {
             yellow "I: 开始patch目标 ${smalidir}" "Target ${smalidir} Found"
             search_pattern=$3
             repalcement_pattern=$4
-            if [[ $5 == 'regex' ]];then
+            if [[ "$5" == 'regex' ]];then
                  sed -i "/${search_pattern}/c\\${repalcement_pattern}" $targetsmali
             else
             sed -i "s/$search_pattern/$repalcement_pattern/g" $targetsmali
