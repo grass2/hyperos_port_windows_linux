@@ -1,6 +1,6 @@
 import os.path
 import sys
-from read_config import main as read
+from bin.read_config import main as read
 from echo import blue
 import re
 
