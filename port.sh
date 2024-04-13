@@ -84,7 +84,6 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-echo "ro.miui.cust_erofs=0" >> build/portrom/images/product/etc/build.prop
 #Fix： mi10 boot stuck at the first screen
 sed -i "s/persist\.sys\.millet\.cgroup1/#persist\.sys\.millet\.cgroup1/" build/portrom/images/vendor/build.prop
 #Fix：Fingerprint issue encountered on OS V1.0.18

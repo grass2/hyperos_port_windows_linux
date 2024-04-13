@@ -669,7 +669,8 @@ def main(baserom, portrom):
                 f.write(data)
     if found == 0:
         blue(f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}\nro.fs.lcd_density not found, create a new value {base_rom_density} ")
-        append('build/portrom/images/product/etc/build.prop', [f'ro.sf.lcd_density={base_rom_density}'])
+        append('build/portrom/images/product/etc/build.prop', [f'ro.sf.lcd_density={base_rom_density}\n'])
+    append('build/portrom/images/product/etc/build.prop', ['ro.miui.cust_erofs=0\n'])
 
 
     # Run Script
