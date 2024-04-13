@@ -619,7 +619,7 @@ def main(baserom, portrom):
             replace_method_in_smali(smali_file, target_method)
         blue("重新打包 services.jar\nRepacking services.jar")
         os.system('java -jar bin/apktool/apktool.jar b -q -f -c tmp/services/ -o tmp/services_modified.jar')
-        blue("打包services.jar完成" "Repacking services.jar completed")
+        blue("打包services.jar完成\nRepacking services.jar completed")
         if os.path.exists('build/portrom/images/system/system/framework/services.jar'):
             os.remove('build/portrom/images/system/system/framework/services.jar')
         os.rename('tmp/services_modified.jar', 'build/portrom/images/system/system/framework/services.jar')
