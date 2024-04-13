@@ -369,8 +369,11 @@ def main(baserom, portrom):
         try:
             os.remove(file_path)
             print(f"Removed: {file_path}")
-        except OSError as e:
+        except OSError:
             pass
+    os.makedirs('build/portrom/images/product/etc/displayconfig', exist_ok=True)
+    for i in glob.glob('build/baserom/images/product/etc/displayconfig/display_id*.xml'):
+        shutil.copy2(i, 'build/portrom/images/product/etc/displayconfig/')
 
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")

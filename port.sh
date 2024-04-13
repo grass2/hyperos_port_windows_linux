@@ -41,7 +41,6 @@ else
     is_ab_device=false
 fi
 
-cp -rf build/baserom/images/product/etc/displayconfig/display_id*.xml build/portrom/images/product/etc/displayconfig/
 blue "Copying device_features"   
 rm -rf build/portrom/images/product/etc/device_features/*
 cp -rf build/baserom/images/product/etc/device_features/* build/portrom/images/product/etc/device_features/
