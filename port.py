@@ -888,7 +888,7 @@ def main(baserom, portrom):
         if os.path.isdir(targetMiLinkCirculateMIUI15):
             shutil.rmtree(targetMiLinkCirculateMIUI15)
             os.makedirs(targetMiLinkCirculateMIUI15, exist_ok=True)
-            shutil.copytree(MiLinkCirculateMIUI15, targetMiLinkCirculateMIUI15)
+            shutil.copytree(MiLinkCirculateMIUI15, targetMiLinkCirculateMIUI15, dirs_exist_ok=True)
         else:
             os.makedirs('build/portrom/images/product/app/MiLinkCirculateMIUI15', exist_ok=True)
             shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/')
