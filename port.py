@@ -986,7 +986,7 @@ def main(baserom, portrom):
     call(exe='zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst',
          kz="N" if platform.system() == 'Darwin' else 'Y')
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/', exist_ok=True)
-    os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/')
+    os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/', exist_ok=True)
     blue('正在生成刷机脚本\nGenerating flashing script')
     if is_ab_device == 'false' or not is_ab_device:
         shutil.move('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/')
