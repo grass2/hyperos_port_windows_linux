@@ -522,10 +522,12 @@ def main(baserom, portrom):
                         f"{vndk_version}已存在，跳过修改\nThe file already contains the version {vndk_version}. Skipping modification.")
                     break
         if not find:
-            insert_after_line(targetVintf, '</vendor-ndk>',
+            insert_after_line(targetVintf, '</vendor-ndk>\n',
                               f"<vendor-ndk>\n     <version>{vndk_version}</version>\n </vendor-ndk>\n")
     else:
         blue(f"File {targetVintf} not found.")
+    if os.path.isfile('build/portrom/images/system/system/etc/init/hw/init.rc'):
+        insert_after_line('build/portrom/images/system/system/etc/init/hw/init.rc', 'on boot\n', '    chmod 0731 /data/system/theme\n')
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 
