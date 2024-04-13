@@ -480,8 +480,10 @@ def main(baserom, portrom):
         append('build/portrom/images/vendor/build.prop', ['ro.surface_flinger.enable_frame_rate_override=false\n',
                                                           'ro.vendor.display.mode_change_optimize.enable=true\n'])
         with open('build/portrom/images/product/etc/build.prop', 'r', encoding='utf-8') as f:
-            details = re.sub("persist.sys.miui_animator_sched.bigcores=.*", "persist.sys.miui_animator_sched.bigcores=4-6", f.read())
-            details = re.sub('persist.sys.miui_animator_sched.big_prime_cores=.*', 'persist.sys.miui_animator_sched.big_prime_cores=4-7', details)
+            details = re.sub("persist.sys.miui_animator_sched.bigcores=.*",
+                             "persist.sys.miui_animator_sched.bigcores=4-6", f.read())
+            details = re.sub('persist.sys.miui_animator_sched.big_prime_cores=.*',
+                             'persist.sys.miui_animator_sched.big_prime_cores=4-7', details)
         with open('build/portrom/images/product/etc/build.prop', 'w', encoding='utf-8', newline='\n'):
             f.write(details)
             f.write('persist.sys.miui.sf_cores=4-7\n')
@@ -489,10 +491,35 @@ def main(baserom, portrom):
             f.write('persist.sys.minfree_6g=73728,92160,110592,258048,663552,903168\n')
             f.write('persist.sys.minfree_8g=73728,92160,110592,387072,1105920,1451520\n')
             f.write('persist.vendor.display.miui.composer_boost=4-7\n')
-    append('build/portrom/images/vendor/build.prop', ['persist.vendor.mi_sf.optimize_for_refresh_rate.enable=1\n', "ro.vendor.mi_sf.ultimate.perf.support=true\n", "ro.surface_flinger.use_content_detection_for_refresh_rate=false\n",
-                                                      'ro.surface_flinger.set_touch_timer_ms=0\n', 'ro.surface_flinger.set_idle_timer_ms=0\n'])
-
-
+    append('build/portrom/images/vendor/build.prop',
+           ['persist.vendor.mi_sf.optimize_for_refresh_rate.enable=1\n', "ro.vendor.mi_sf.ultimate.perf.support=true\n",
+            "ro.surface_flinger.use_content_detection_for_refresh_rate=false\n",
+            'ro.surface_flinger.set_touch_timer_ms=0\n', 'ro.surface_flinger.set_idle_timer_ms=0\n'])
+    targetVintf = find_file('build/portrom/images/system_ext/etc/vintf', 'manifest.xml')
+    if os.path.isfile(targetVintf) and targetVintf:
+        find = False
+        with open(targetVintf, 'r') as f:
+            for i in f.readlines():
+                if f'<version>{vndk_version}</version>' in i:
+                    find = True
+                    yellow(
+                        f"{vndk_version}已存在，跳过修改\nThe file already contains the version {vndk_version}. Skipping modification.")
+                    break
+        if not find:
+            ndk_version = f"<vendor-ndk>\n     <version>{vndk_version}</version>\n </vendor-ndk>\n"
+            insert_index = None
+            with open(targetVintf, 'r') as f:
+                lines = f.readlines()
+                for i, line in enumerate(lines):
+                    if "</vendor-ndk>" in line:
+                        insert_index = i
+                        break
+            if insert_index is not None:
+                lines.insert(insert_index, ndk_version)
+            with open(targetVintf, 'w') as file:
+                file.writelines(lines)
+    else:
+        blue(f"File {targetVintf} not found.")
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 

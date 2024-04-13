@@ -44,20 +44,6 @@ else
 fi
 
 #解决开机报错问题
-targetVintf=$(find build/portrom/images/system_ext/etc/vintf -type f -name "manifest.xml")
-if [ -f "$targetVintf" ]; then
-    # Check if the file contains $vndk_version
-    if grep -q "<version>$vndk_version</version>" "$targetVintf"; then
-        yellow "${vndk_version}已存在，跳过修改" "The file already contains the version $vndk_version. Skipping modification."
-    else
-        # If it doesn't contain $vndk_version, then add it
-        ndk_version="<vendor-ndk>\n     <version>$vndk_version</version>\n </vendor-ndk>"
-        sed -i "/<\/vendor-ndk>/a$ndk_version" "$targetVintf"
-        yellow "添加成功" "Version $vndk_version added to $targetVintf"
-    fi
-else
-    blue "File $targetVintf not found."
-fi
 blue "左侧挖孔灵动岛修复" "StrongToast UI fix"
 if [[ "$is_shennong_houji_port" == true ]];then
     patch_smali "MiuiSystemUI.apk" "MIUIStrongToast\$2.smali" "const\/4 v7\, 0x0" "iget-object v7\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7"
