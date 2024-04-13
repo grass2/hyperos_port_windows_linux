@@ -1,7 +1,7 @@
 import os.path
 import sys
 from bin.read_config import main as read
-from echo import blue
+from bin.echo import blue
 import re
 
 
