@@ -857,6 +857,11 @@ def main(baserom, portrom):
         else:
             os.makedirs('build/portrom/images/product/app/MiLinkCirculateMIUI15', exist_ok=True)
             shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/')
+    # Devices/机型代码/overaly 按照镜像的目录结构，可直接替换目标。
+    if os.path.isdir(f'devices/{base_rom_code}/overlay'):
+        shutil.copytree(f'devices/{base_rom_code}/overlay/','build/portrom/images/', dirs_exist_ok=True)
+    else:
+        yellow(f"devices/{base_rom_code}/overlay 未找到\ndevices/{base_rom_code}/overlay not found")
     # Run Script
     os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
 
