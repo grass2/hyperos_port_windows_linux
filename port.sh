@@ -83,8 +83,8 @@ else
     blue "打包services.jar完成" "Repacking services.jar completed"
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
+
 if [[ ${is_eu_rom} == true ]];then
-    rm -rf build/portrom/images/product/app/Updater
     baseXGoogle=$(find build/baserom/images/product/ -type d -name "HotwordEnrollmentXGoogleHEXAGON*")
     portXGoogle=$(find build/portrom/images/product/ -type d -name "HotwordEnrollmentXGoogleHEXAGON*")
     if [ -d "${baseXGoogle}" ] && [ -d "${portXGoogle}" ];then
@@ -129,6 +129,7 @@ else
     rm -rf build/portrom/images/product/media/theme/miui_mod_icons/com.google.android.apps.nbu*
     rm -rf build/portrom/images/product/media/theme/miui_mod_icons/dynamic/com.google.android.apps.nbu*
 fi
+
 # build.prop 修改
 blue "正在修改 build.prop" "Modifying build.prop"
 #change the locale to English

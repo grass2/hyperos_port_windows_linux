@@ -435,7 +435,7 @@ def main(baserom, portrom):
     elif os.path.isdir(baseMiuiBiometric):
         blue("未找到MiuiBiometric，替换为原包\nMiuiBiometric is missing, copying from base...")
         os.makedirs(f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
-        shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
+        shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}', dirs_exist_ok=True)
     targetDevicesAndroidOverlay = find_file('build/portrom/images/product', 'DevicesAndroidOverlay.apk')
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
         os.makedirs('tmp', exist_ok=True)
@@ -528,6 +528,14 @@ def main(baserom, portrom):
         blue(f"File {targetVintf} not found.")
     if os.path.isfile('build/portrom/images/system/system/etc/init/hw/init.rc'):
         insert_after_line('build/portrom/images/system/system/etc/init/hw/init.rc', 'on boot\n', '    chmod 0731 /data/system/theme\n')
+    if is_eu_rom:
+        shutil.rmtree("build/portrom/images/product/app/Updater")
+        baseXGoogle = find_folder_mh('build/baserom/images/product/', 'HotwordEnrollmentXGoogleHEXAGON')
+        portXGoogle = find_folder_mh('build/portrom/images/product/', 'HotwordEnrollmentXGoogleHEXAGON')
+        if os.path.isdir(baseXGoogle) and os.path.isdir(portXGoogle):
+            yellow("查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk\nSearching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk..")
+            shutil.rmtree(portXGoogle)
+
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 
