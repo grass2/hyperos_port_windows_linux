@@ -83,10 +83,6 @@ else
     blue "打包services.jar完成" "Repacking services.jar completed"
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
-# 主题防恢复
-if [ -f build/portrom/images/system/system/etc/init/hw/init.rc ];then
-	sed -i '/on boot/a\'$'\n''    chmod 0731 \/data\/system\/theme' build/portrom/images/system/system/etc/init/hw/init.rc
-fi
 if [[ ${is_eu_rom} == true ]];then
     rm -rf build/portrom/images/product/app/Updater
     baseXGoogle=$(find build/baserom/images/product/ -type d -name "HotwordEnrollmentXGoogleHEXAGON*")
