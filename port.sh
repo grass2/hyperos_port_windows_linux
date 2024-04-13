@@ -41,18 +41,6 @@ else
     is_ab_device=false
 fi
 
-baseMiuiBiometric=$(find build/baserom/images/product/app -type d -name "MiuiBiometric*")
-portMiuiBiometric=$(find build/portrom/images/product/app -type d -name "MiuiBiometric*")
-if [ -d "${baseMiuiBiometric}" ] && [ -d "${portMiuiBiometric}" ];then
-    yellow "查找MiuiBiometric" "Searching and Replacing MiuiBiometric.."
-    rm -rf ./${portMiuiBiometric}/*
-    cp -rf ./${baseMiuiBiometric}/* ${portMiuiBiometric}/
-else
-    if [ -d "${baseMiuiBiometric}" ] && [ ! -d "${portMiuiBiometric}" ];then
-        blue "未找到MiuiBiometric，替换为原包" "MiuiBiometric is missing, copying from base..."
-        cp -rf ${baseMiuiBiometric} build/portrom/images/product/app/
-    fi
-fi
 targetDevicesAndroidOverlay=$(find build/portrom/images/product -type f -name "DevicesAndroidOverlay.apk")
 if [[ -f $targetDevicesAndroidOverlay ]]; then
     mkdir tmp/  

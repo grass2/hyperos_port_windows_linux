@@ -11,7 +11,7 @@ from _socket import gethostname
 from bin.sdat2img import main as sdat2img
 from bin import downloader
 from bin.gettype import gettype
-from bin.echo import blue, red, green
+from bin.echo import blue, red, green, yellow
 import bin.check
 from bin.read_config import main as read_config
 import zipfile
@@ -25,6 +25,14 @@ def find_file(directory, filename):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file == filename:
+                return os.path.join(root, file)
+    return ''
+
+
+def find_folder_mh(directory, filename):
+    for root, dirs, files in os.walk(directory):
+        for file in dirs:
+            if filename in file:
                 return os.path.join(root, file)
     return ''
 
@@ -382,9 +390,21 @@ def main(baserom, portrom):
         shutil.copy2(i, 'build/portrom/images/product/etc/device_features/')
     if is_eu_rom:
         try:
-            shutil.copyfile('build/baserom/images/product/etc/device_info.json', 'build/portrom/images/product/etc/device_info.json')
+            shutil.copyfile('build/baserom/images/product/etc/device_info.json',
+                            'build/portrom/images/product/etc/device_info.json')
         except:
             pass
+    baseMiuiBiometric = find_folder_mh('build/baserom/images/product/app', 'MiuiBiometric')
+    portMiuiBiometric = find_folder_mh('build/portrom/images/product/app', 'MiuiBiometric')
+    if os.path.isdir(baseMiuiBiometric) and os.path.isdir(portMiuiBiometric):
+        yellow("查找MiuiBiometric\nSearching and Replacing MiuiBiometric..")
+        shutil.rmtree(portMiuiBiometric)
+        os.makedirs(portMiuiBiometric, exist_ok=True)
+        shutil.copytree(baseMiuiBiometric, portMiuiBiometric)
+    elif os.path.isdir(baseMiuiBiometric):
+        blue("未找到MiuiBiometric，替换为原包\nMiuiBiometric is missing, copying from base...")
+        os.makedirs(f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
+        shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
 
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
