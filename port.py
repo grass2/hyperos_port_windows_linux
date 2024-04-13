@@ -72,7 +72,11 @@ def append(file, lines):
 
 def sed(file, old, new):
     with open(file, 'r', encoding='utf-8') as f:
-        data = f.read()
+        try:
+            data = f.read()
+        except UnicodeDecodeError:
+            with open(file, 'r', encoding='gbk') as f:
+                data = f.read()
     data = re.sub(old, new, data)
     with open(file, 'w', encoding='utf-8', newline='\n') as f:
         f.write(data)
