@@ -84,52 +84,6 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-if [[ ${is_eu_rom} == true ]];then
-    baseXGoogle=$(find build/baserom/images/product/ -type d -name "HotwordEnrollmentXGoogleHEXAGON*")
-    portXGoogle=$(find build/portrom/images/product/ -type d -name "HotwordEnrollmentXGoogleHEXAGON*")
-    if [ -d "${baseXGoogle}" ] && [ -d "${portXGoogle}" ];then
-        yellow "查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk" "Searching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk.."
-        rm -rf ./${portXGoogle}/*
-       cp -rf ./${baseXGoogle}/* ${portXGoogle}/
-    else
-        if [ -d "${baseXGoogle}" ] && [ ! -d "${portXGoogle}" ];then
-            blue "未找到HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk，替换为原包" "HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk is missing, copying from base..."
-            cp -rf ${baseXGoogle} build/portrom/images/product/priv-app/
-        fi
-    fi
-else
-    yellow "删除多余的App" "Debloating..." 
-    # List of apps to be removed
-    debloat_apps=("MSA" "mab" "Updater" "MiuiUpdater" "MiService" "MIService" "SoterService" "Hybrid" "AnalyticsCore")
-    for debloat_app in "${debloat_apps[@]}"; do
-        # Find the app directory
-        app_dir=$(find build/portrom/images/product -type d -name "*$debloat_app*")
-        # Check if the directory exists before removing
-        if [[ -d "$app_dir" ]]; then
-            yellow "删除目录: $app_dir" "Removing directory: $app_dir"
-            rm -rf "$app_dir"
-        fi
-    done
-    rm -rf build/portrom/images/product/etc/auto-install*
-    rm -rf build/portrom/images/product/data-app/*GalleryLockscreen* 
-    mkdir -p tmp/app
-    kept_data_apps=("DownloadProviderUi" "VirtualSim" "ThirdAppAssistant" "GameCenter" "Video" "Weather" "DeskClock" "Gallery" "SoundRecorder" "ScreenRecorder" "Calculator" "CleanMaster" "Calendar" "Compass" "Notes" "MediaEditor" "Scanner" "SpeechEngine" "wps-lite")
-    for app in "${kept_data_apps[@]}"; do
-        mv build/portrom/images/product/data-app/*"${app}"* tmp/app/ 
-    done
-    rm -rf build/portrom/images/product/data-app/*
-    cp -rf tmp/app/* build/portrom/images/product/data-app
-    rm -rf tmp/app
-    rm -rf build/portrom/images/system/verity_key
-    rm -rf build/portrom/images/vendor/verity_key
-    rm -rf build/portrom/images/product/verity_key
-    rm -rf build/portrom/images/system/recovery-from-boot.p
-    rm -rf build/portrom/images/vendor/recovery-from-boot.p
-    rm -rf build/portrom/images/product/recovery-from-boot.p
-    rm -rf build/portrom/images/product/media/theme/miui_mod_icons/com.google.android.apps.nbu*
-    rm -rf build/portrom/images/product/media/theme/miui_mod_icons/dynamic/com.google.android.apps.nbu*
-fi
-
 # build.prop 修改
 blue "正在修改 build.prop" "Modifying build.prop"
 #change the locale to English

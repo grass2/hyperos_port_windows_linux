@@ -435,7 +435,8 @@ def main(baserom, portrom):
     elif os.path.isdir(baseMiuiBiometric):
         blue("未找到MiuiBiometric，替换为原包\nMiuiBiometric is missing, copying from base...")
         os.makedirs(f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
-        shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}', dirs_exist_ok=True)
+        shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}',
+                        dirs_exist_ok=True)
     targetDevicesAndroidOverlay = find_file('build/portrom/images/product', 'DevicesAndroidOverlay.apk')
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
         os.makedirs('tmp', exist_ok=True)
@@ -527,16 +528,62 @@ def main(baserom, portrom):
     else:
         blue(f"File {targetVintf} not found.")
     if os.path.isfile('build/portrom/images/system/system/etc/init/hw/init.rc'):
-        insert_after_line('build/portrom/images/system/system/etc/init/hw/init.rc', 'on boot\n', '    chmod 0731 /data/system/theme\n')
+        insert_after_line('build/portrom/images/system/system/etc/init/hw/init.rc', 'on boot\n',
+                          '    chmod 0731 /data/system/theme\n')
     if is_eu_rom:
         shutil.rmtree("build/portrom/images/product/app/Updater")
         baseXGoogle = find_folder_mh('build/baserom/images/product/', 'HotwordEnrollmentXGoogleHEXAGON')
         portXGoogle = find_folder_mh('build/portrom/images/product/', 'HotwordEnrollmentXGoogleHEXAGON')
         if os.path.isdir(baseXGoogle) and os.path.isdir(portXGoogle):
-            yellow("查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk\nSearching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk..")
+            yellow(
+                "查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk\nSearching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk..")
             shutil.rmtree(portXGoogle)
+            os.makedirs(portXGoogle, exist_ok=True)
+            shutil.copytree(baseMiuiBiometric, portMiuiBiometric, dirs_exist_ok=True)
+        else:
+            if os.path.isdir(baseXGoogle) and not os.path.isdir(portXGoogle):
+                blue(
+                    "未找到HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk，替换为原包\nHotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk is missing, copying from base...")
+                os.makedirs(f"build/portrom/images/product/priv-app/{os.path.basename(baseMiuiBiometric)}",
+                            exist_ok=True)
+                shutil.copytree(baseMiuiBiometric,
+                                f"build/portrom/images/product/priv-app/{os.path.basename(baseMiuiBiometric)}",
+                                dirs_exist_ok=True)
+    else:
+        yellow("删除多余的App\nDebloating...")
+        for debloat_app in ['MSA', 'mab', 'Updater', 'MiuiUpdater', 'MiService', 'MIService', 'SoterService', 'Hybrid',
+                            'AnalyticsCore']:
+            app_dir = find_folder_mh('build/portrom/images/product', debloat_app)
+            if os.path.isdir(app_dir) and app_dir:
+                yellow(f"删除目录: {app_dir}\nRemoving directory: {app_dir}")
+                shutil.rmtree(app_dir)
+        for i in glob.glob('build/portrom/images/product/etc/auto-install*'):
+            os.remove(i)
+        for i in glob.glob('build/portrom/images/product/data-app/*GalleryLockscreen*'):
+            shutil.rmtree(i)
+        kept_app_list = ['DownloadProviderUi', 'VirtualSim', 'ThirdAppAssistant', 'GameCenter', 'Video', 'Weather',
+                         'DeskClock', 'Gallery', 'SoundRecorder', 'ScreenRecorder', 'Calculator', 'CleanMaster',
+                         'Calendar', 'Compass', 'Notes', 'MediaEditor', 'Scanner', 'SpeechEngine', 'wps-lite']
+        for i in glob.glob('build/portrom/images/product/data-app/*'):
+            if os.path.basename(i) in kept_app_list:
+                continue
+            if os.path.isfile(i):
+                os.remove(i)
+            if os.path.isdir(i):
+                shutil.rmtree(i)
+        for i in ['system/verity_key', 'vendor/verity_key', 'product/verity_key', 'system/recovery-from-boot.p',
+                  'vendor/recovery-from-boot.p', 'product/recovery-from-boot.p',
+                  'product/media/theme/miui_mod_icons/com.google.android.apps.nbu.',
+                  'product/media/theme/miui_mod_icons/dynamic/com.google.android.apps.nbu.']:
+            fi = f'build/portrom/images/{i}'
+            if i.endswith('.') and os.name == 'nt':
+                call(f'mv {fi} {fi[:-1]}')
+            if os.path.isfile(fi):
+                os.remove(fi)
+            if os.path.isdir(fi):
+                shutil.rmtree(fi)
 
-    # Run Script
+        # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 
 
