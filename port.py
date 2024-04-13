@@ -28,7 +28,8 @@ from bin.getSuperSize import main as getSuperSize
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
 from bin.patch_vbmeta import main as patch_vbmeta
-
+from bin.unlock_device_feature import main as unlock_device_feature
+from bin.maxfps import main as maxfps
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
@@ -460,9 +461,11 @@ def main(baserom, portrom):
     else:
         base_device_code = 'U' + base_rom_version.split(".")[4][1:]
         port_rom_version = port_mios_version_incremental.replace(port_device_code, base_device_code)
-    green(f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]\nROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
+    green(
+        f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]\nROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', 'ro.product.vendor.device')
-    green(f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]\nDevice Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
+    green(
+        f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]\nDevice Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
     for cpfile in ['AospFrameworkResOverlay.apk', 'MiuiFrameworkResOverlay.apk', 'DevicesAndroidOverlay.apk',
                    'DevicesOverlay.apk', 'SettingsRroDeviceHideStatusBarOverlay.apk', 'MiuiBiometricResOverlay.apk']:
         base_file = find_file('build/baserom/images/product', cpfile)
@@ -602,6 +605,24 @@ def main(baserom, portrom):
             print('Done!')
     else:
         blue(f"File {targetVintf} not found.")
+    # unlock_device_feature
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
+                          "Whether support AI Display", "bool", "support_AI_display", 'true')
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
+                          "device support screen enhance engine", "bool", "support_screen_enhance_engine", 'true')
+
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
+                          "Whether suppot Android Flashlight Controller",  "bool", "support_android_flashlight",'true')
+
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"Whether support SR for image display",  "bool", "support_SR_for_image_display",'true')
+    maxFps = maxfps(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml')
+    if not maxFps:
+        maxFps = 90
+    maxFps = str(maxFps)
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"whether support fps change ", "bool", "support_smart_fps",'true')
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"smart fps value", "integer", "smart_fps_value", maxFps)
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"default rhythmic eyecare mode", "integer", "default_eyecare_mode", "2")
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"default texture for paper eyecare", "integer", "paper_eyecare_default_texture", "0")
     if os.path.isfile('build/portrom/images/system/system/etc/init/hw/init.rc'):
         insert_after_line('build/portrom/images/system/system/etc/init/hw/init.rc', 'on boot\n',
                           '    chmod 0731 /data/system/theme\n')
@@ -1158,7 +1179,8 @@ def main(baserom, portrom):
               f'out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip')
     green("移植完毕\nPorting completed")
     green("输出包路径：\nOutput: ")
-    green(f"{os.getcwd()}/out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip")
+    green(
+        f"{os.getcwd()}/out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip")
 
 
 if __name__ == '__main__':

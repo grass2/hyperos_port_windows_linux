@@ -108,25 +108,4 @@ patch_smali() {
     else
         error "Failed to find $1,please check it manually".
     fi
-
 }
-
-unlock_device_feature() {
-    feature_type=$2
-    feature_name=$3
-    feature_value=$4
-    if [[ ! -z "$1" ]]; then
-        comment=$1
-    else
-        comment="Whether enable $feature feature"
-    fi
-    if [[ $feature_type == "bool" ]] && [[ $feature_value == "" ]];then
-        feature_value="true"
-    fi
-    if ! grep -q "$feature_name" build/portrom/images/product/etc/device_features/${base_rom_code}.xml;then
-        sed -i "/<features>/a\\\t<!-- ${comment} -->\n\t<${feature_type} name=\"${feature_name}\">${feature_value}</${feature_type}> " build/portrom/images/product/etc/device_features/${base_rom_code}.xml
-    else
-        sed -i "s/<${feature_type} name=\"${feature_name}\">.*<\/${feature_type}>/<${feature_type} name=\"$feature_name\">${feature_value}<\/${feature_type}>/" build/portrom/images/product/etc/device_features/${base_rom_code}.xml
-    fi
-}
-

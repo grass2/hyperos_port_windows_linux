@@ -14,7 +14,6 @@ if [[ "$OSTYPE" == "Windows"* ]]; then
   alias python3=python
 fi
 port_android_sdk=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop 'ro.system.build.version.sdk')
-base_rom_code=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.product.vendor.device")
 blue "左侧挖孔灵动岛修复" "StrongToast UI fix"
 if [[ "$is_shennong_houji_port" == true ]];then
     patch_smali "MiuiSystemUI.apk" "MIUIStrongToast\$2.smali" "const\/4 v7\, 0x0" "iget-object v7\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7"
@@ -48,18 +47,5 @@ else
     blue "打包services.jar完成" "Repacking services.jar completed"
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
-unlock_device_feature "Whether support AI Display"  "bool" "support_AI_display"
-unlock_device_feature "device support screen enhance engine"  "bool" "support_screen_enhance_engine"
-unlock_device_feature "Whether suppot Android Flashlight Controller"  "bool" "support_android_flashlight"
-unlock_device_feature "Whether support SR for image display"  "bool" "support_SR_for_image_display"
-# Unlock Smart fps
-maxFps=$(python3 bin/maxfps.py build/portrom/images/product/etc/device_features/${base_rom_code}.xml)
-if [ -z "$maxFps" ]; then
-    maxFps=90
-fi
-unlock_device_feature "whether support fps change " "bool" "support_smart_fps"
-unlock_device_feature "smart fps value" "integer" "smart_fps_value" "${maxFps}"
 patch_smali "PowerKeeper.apk" "DisplayFrameSetting.smali" "unicorn" "umi"
 patch_smali "MiSettings.apk" "NewRefreshRateFragment.smali" "const-string v1, \"btn_preferce_category\"" "const-string v1, \"btn_preferce_category\"\n\n\tconst\/16 p1, 0x1"
-unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare_mode" "2"
-unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
