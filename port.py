@@ -520,7 +520,7 @@ def main(baserom, portrom):
         with open('build/portrom/images/product/etc/build.prop', 'r', encoding='utf-8') as f:
             details = re.sub("persist.sys.miui_animator_sched.bigcores=.*",
                              "persist.sys.miui_animator_sched.bigcores=4-6", f.read())
-            details = re.sub('persist.sys.miui_animator_sched.big_prime_cores=.*',
+        details = re.sub('persist.sys.miui_animator_sched.big_prime_cores=.*',
                              'persist.sys.miui_animator_sched.big_prime_cores=4-7', details)
         with open('build/portrom/images/product/etc/build.prop', 'w', encoding='utf-8', newline='\n'):
             f.write(details)
