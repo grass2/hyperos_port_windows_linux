@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import platform
+import re
 import shlex
 import shutil
 import subprocess
@@ -17,7 +18,7 @@ from bin.read_config import main as read_config
 import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
-
+javaOpts="-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
@@ -405,6 +406,28 @@ def main(baserom, portrom):
         blue("未找到MiuiBiometric，替换为原包\nMiuiBiometric is missing, copying from base...")
         os.makedirs(f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
         shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
+    targetDevicesAndroidOverlay = find_file('build/portrom/images/product', 'DevicesAndroidOverlay.apk')
+    if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
+        os.makedirs('tmp', exist_ok=True)
+        filename = os.path.basename(targetDevicesAndroidOverlay)
+        yellow(f"修复息屏和屏下指纹问题\nFixing AOD issue: {filename} ...")
+        targetDir = filename.split('.')[0]
+        os.system(f'java {javaOpts} -jar bin/apktool/apktool.jar d {targetDevicesAndroidOverlay} -o tmp/{targetDir} -f')
+        for root, dirs, files in os.walk(targetDir):
+            for file in files:
+                if file.endswith(".xml"):
+                    file_path = os.path.join(root, file)
+                    with open(file_path, 'r') as f:
+                        content = f.read()
+                    new_content = re.sub('com.miui.aod/com.miui.aod.doze.DozeService', "com.android.systemui/com.android.systemui.doze.DozeService", content)
+                    with open(file_path, 'w') as f:
+                        f.write(new_content)
+                    print(f"已替换文件: {file_path}")
+        if os.system(f'java {javaOpts} -jar bin/apktool/apktool.jar b tmp/{targetDir} -o tmp/{filename}') != 0:
+            red('apktool 打包失败\napktool mod failed')
+            sys.exit()
+        shutil.copyfile(f'tmp/{filename}', targetDevicesAndroidOverlay)
+        shutil.rmtree('tmp')
 
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")

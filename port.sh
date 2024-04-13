@@ -41,22 +41,6 @@ else
     is_ab_device=false
 fi
 
-targetDevicesAndroidOverlay=$(find build/portrom/images/product -type f -name "DevicesAndroidOverlay.apk")
-if [[ -f $targetDevicesAndroidOverlay ]]; then
-    mkdir tmp/  
-    filename=$(basename $targetDevicesAndroidOverlay)
-    yellow "修复息屏和屏下指纹问题" "Fixing AOD issue: $filename ..."
-    targetDir=$(echo "$filename" | sed 's/\..*$//')
-    java $javaOpts -jar bin/apktool/apktool.jar d $targetDevicesAndroidOverlay -o tmp/$targetDir -f
-    search_pattern="com\.miui\.aod\/com\.miui\.aod\.doze\.DozeService"
-    replacement_pattern="com\.android\.systemui\/com\.android\.systemui\.doze\.DozeService"
-    for xml in $(find tmp/$targetDir -type f -name "*.xml");do
-        sed -i "s/$search_pattern/$replacement_pattern/g" $xml
-    done
-    java $javaOpts -jar bin/apktool/apktool.jar b tmp/$targetDir -o tmp/$filename  || error "apktool 打包失败" "apktool mod failed"
-    cp -rf tmp/$filename $targetDevicesAndroidOverlay
-    rm -rf tmp
-fi
 # Fix boot up frame drop issue. 
 targetAospFrameworkResOverlay=$(find build/portrom/images/product -type f -name "AospFrameworkResOverlay.apk")
 if [[ -f $targetAospFrameworkResOverlay ]]; then
