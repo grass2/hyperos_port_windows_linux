@@ -989,7 +989,7 @@ def main(baserom, portrom):
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/', exist_ok=True)
     blue('正在生成刷机脚本\nGenerating flashing script')
     if is_ab_device == 'false' or not is_ab_device:
-        shutil.move('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/')
+        os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/super.zst')
         shutil.copytree('bin/flash/platform-tools-windows/',
                         f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/',
                         dirs_exist_ok=True)
@@ -1084,7 +1084,7 @@ def main(baserom, portrom):
             base_rom_code)
     else:
         os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/images/', exist_ok=True)
-        os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/images/')
+        os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/images/super.zst')
         shutil.copytree('bin/flash/platform-tools-windows/',
                         f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/',
                         dirs_exist_ok=True)
