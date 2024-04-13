@@ -58,7 +58,7 @@ def replace_method_in_smali(smali_file, target_method):
 
         print(f"{smali_file} 修改成功")
     else:
-        print(f"未找到目标方法 {target_method} 在文件 {smali_file}")
+        print(f"\r未找到目标方法 {target_method} 在文件 {smali_file}",end='')
 
 
 def get_file_md5(fname):
