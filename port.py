@@ -30,10 +30,10 @@ def append(file, lines):
 
 
 def insert_after_line(file_path, target_line, text_to_insert):
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
     index_text = None
-    for i,line in enumerate(lines):
+    for i, line in enumerate(lines):
         if target_line == line:
             index_text = i
             break
@@ -41,7 +41,7 @@ def insert_after_line(file_path, target_line, text_to_insert):
         print("目标行未找到")
         return
     lines.insert(index_text, text_to_insert)
-    with open(file_path, 'w') as file:
+    with open(file_path, 'w', encoding='utf-8', newline='\n') as file:
         file.writelines(lines)
 
 
@@ -522,18 +522,8 @@ def main(baserom, portrom):
                         f"{vndk_version}已存在，跳过修改\nThe file already contains the version {vndk_version}. Skipping modification.")
                     break
         if not find:
-            ndk_version = f"<vendor-ndk>\n     <version>{vndk_version}</version>\n </vendor-ndk>\n"
-            insert_index = None
-            with open(targetVintf, 'r') as f:
-                lines = f.readlines()
-                for i, line in enumerate(lines):
-                    if "</vendor-ndk>" in line:
-                        insert_index = i
-                        break
-            if insert_index is not None:
-                lines.insert(insert_index, ndk_version)
-            with open(targetVintf, 'w') as file:
-                file.writelines(lines)
+            insert_after_line(targetVintf, '</vendor-ndk>',
+                              f"<vendor-ndk>\n     <version>{vndk_version}</version>\n </vendor-ndk>\n")
     else:
         blue(f"File {targetVintf} not found.")
     # Run Script
