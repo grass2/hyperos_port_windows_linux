@@ -718,7 +718,7 @@ def main(baserom, portrom):
     append('build/portrom/images/product/etc/build.prop',
            ['debug.game.video.speed=true\n', 'debug.game.video.support=true\n'])
     # Run Script
-    os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
+    os.system(f"{'' if os.name == 'posix' else 'D:/test/busybox '}bash ./bin/call ./port.sh")
 
 
 if __name__ == '__main__':
