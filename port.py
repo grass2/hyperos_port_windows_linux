@@ -30,6 +30,7 @@ from bin.contextpatch import main as context_patch
 from bin.patch_vbmeta import main as patch_vbmeta
 from bin.unlock_device_feature import main as unlock_device_feature
 from bin.maxfps import main as maxfps
+
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
@@ -182,6 +183,64 @@ def call(exe, kz='Y', out=0, shstate=False, sp=0):
     return ret.returncode
 
 
+def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
+    targetfilefullpath = find_file('build/portrom/images', file)
+    if os.path.isfile(targetfilefullpath):
+        targetfilename = os.path.basename(targetfilefullpath)
+        yellow(f"正在修改 {targetfilename}\nModifying {targetfilename}")
+        foldername = targetfilename.split(".")[0]
+        try:
+            shutil.rmtree(f'tmp/{foldername}/')
+        except:
+            pass
+        os.makedirs(f'tmp/{foldername}/', exist_ok=True)
+        shutil.copy2(targetfilefullpath, f'tmp/{foldername}/')
+        os.system(f'7z x -y tmp/{foldername}/{targetfilename} *.dex -otmp/{foldername}')
+        for i in glob.glob(f'tmp/{foldername}/*.dex'):
+            smalifname = os.path.basename(i).split('.')[0]
+            os.system(
+                f'java -jar bin/apktool/baksmali.jar d --api {port_android_sdk} {i} -o tmp/{foldername}/{smalifname}')
+        targetsmali = find_file(f'tmp/{foldername}', smail)
+        if os.path.isfile(targetsmali):
+            smalidir = 'classes'
+            for i in targetsmali.replace('\\', '/').split('/'):
+                if 'classes' in i:
+                    smalidir = i
+                    break
+            yellow(f"I: 开始patch目标 {smalidir}\nTarget {smalidir} Found")
+            with open(targetsmali, 'r') as f:
+                content = f.read()
+            if regex:
+                content = re.sub(old, new, content)
+            else:
+                content = content.replace(old, new)
+            with open(targetsmali, 'w') as f:
+                f.write(content)
+            if os.system(
+                    f'java -jar bin/apktool/smali.jar a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex') != 0:
+                red('Smaling 失败\nSmaling failed')
+                sys.exit()
+            old = os.getcwd()
+            os.chdir(f'tmp/{foldername}/')
+            if os.system(f'7z a -y -mx0 -tzip {targetfilename} {smalidir}.dex') != 0:
+                red(f"修改{targetfilename}失败\nFailed to modify {targetfilename}")
+                sys.exit()
+            os.chdir(old)
+            yellow(f"修补{targetfilename} 完成\nFix {targetfilename}completed")
+            if targetfilename.endswith('.apk'):
+                yellow("检测到apk，进行zipalign处理。。\nAPK file detected, initiating ZipAlign process...")
+                os.remove(targetfilefullpath)
+                if call(f'zipalign -p -f -v 4 tmp/{foldername}/{targetfilename} {targetfilefullpath}'):
+                    red("zipalign错误，请检查原因。\nzipalign error,please check for any issues")
+                yellow("apk zipalign处理完成\nAPK ZipAlign process completed.")
+                yellow(f"复制APK到目标位置：{targetfilefullpath}\nCopying APK to target {targetfilefullpath}")
+            else:
+                yellow(f"复制修改文件到目标位置：{targetfilefullpath}\nCopying file to target {targetfilefullpath}")
+                shutil.copy2(f'tmp/{foldername}/{targetfilename}', targetfilefullpath)
+    else:
+        red(f"Failed to find {file},please check it manually")
+
+
 def main(baserom, portrom):
     if not os.path.exists(os.path.basename(baserom)):
         if 'http' in baserom:
@@ -215,14 +274,8 @@ def main(baserom, portrom):
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'Bruce Teng'
     device_code = "YourDevice"
-    with open("bin/call", 'w', encoding='utf-8', newline='\n') as f:
-        f.write(f"baserom='{baserom}'\n")
-        f.write(f"portrom='{portrom}'\n")
-        f.write(
-            f"compatible_matrix_matches_enabled='{read_config('bin/port_config', 'compatible_matrix_matches_check')}'\n")
-        f.write(f"work_dir='{os.getcwd()}'\n")
-        f.write(f"tools_dir='{os.getcwd()}/bin/{platform.system()}/{platform.machine()}'\n")
-        f.write(f"OSTYPE='{platform.system()}'\n")
+    if True:
+        compatible_matrix_matches_enabled = read_config('bin/port_config', 'compatible_matrix_matches_check')
         if read_config('bin/port_config', 'repack_with_ext4') == 'true':
             pack_type = 'EXT'
         else:
@@ -231,13 +284,11 @@ def main(baserom, portrom):
             device_code = baserom.split('_')[1]
         elif "xiaomi.eu_" in baserom:
             device_code = baserom.split('_')[2]
-        f.write(f"device_code='{device_code}'\n")
         print(device_code)
         if [True for i in ['SHENNONG', 'HOUJI'] if i in device_code]:
-            f.write(f'is_shennong_houji_port="true"\n')
+            is_shennong_houji_port = True
         else:
-            f.write(f'is_shennong_houji_port="false"\n')
-        f.write(f"build_host='{gethostname()}'\n")
+            is_shennong_houji_port = False
         blue("正在检测ROM底包\nValidating BASEROM..")
         with zipfile.ZipFile(baserom) as rom:
             if "payload.bin" in rom.namelist():
@@ -258,11 +309,9 @@ def main(baserom, portrom):
                 green("ROM初步检测通过\nROM validation passed.")
             elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
                 is_eu_rom = True
-                f.write("is_eu_rom='true'\n")
             else:
                 red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
                 sys.exit()
-        f.write(f"source $1\n")
     # Clean Up
     blue("正在清理文件\nCleaning up..")
     for i in read_config('bin/port_config', 'partition_to_port').split():
@@ -509,6 +558,32 @@ def main(baserom, portrom):
         os.makedirs(f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
         shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}',
                         dirs_exist_ok=True)
+    # Apk
+    blue("左侧挖孔灵动岛修复\nStrongToast UI fix")
+    if is_shennong_houji_port:
+        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast\$2.smali", "const\/4 v7\, 0x0",
+                    "iget-object v7\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7",
+                    port_android_sdk)
+    else:
+        patch_smali("MiuiSystemUI.apk", "MIUIStrongToast\$2.smali", "const\/4 v9\, 0x0", "iget-object v9\, v1\, Lcom\/android\/systemui\/toast\/MIUIStrongToast;->mRLLeft:Landroid\/widget\/RelativeLayout;\\n\\tinvoke-virtual {v9}, Landroid\/widget\/RelativeLayout;->getLeft()I\\n\\tmove-result v9\\n\\tint-to-float v9,v9",port_android_sdk)
+    if is_eu_rom:
+        patch_smali("miui-services.jar", "SystemServerImpl.smali", ".method public constructor <init>()V/,/.end method", ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom\/android\/server\/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method", port_android_sdk, regex=True)
+    else:
+        if compatible_matrix_matches_enabled:
+            patch_smali("framework.jar", "Build.smali", ".method public static isBuildConsistent()Z", ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst\/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",port_android_sdk)
+        os.makedirs('tmp', exist_ok=True)
+        blue("开始移除 Android 签名校验\nDisalbe Android 14 Apk Signature Verfier")
+        os.makedirs('tmp/services', exist_ok=True)
+        os.rename(
+            'build/portrom/images/system/system/framework/services.jar',
+            'tmp/services.apk'
+        )
+        os.system('java -jar bin/apktool/apktool.jar d -q -f tmp/services.apk -o tmp/services/')
+        target_method = 'getMinimumSignatureSchemeVersionForTargetSdk'
+
+    patch_smali("PowerKeeper.apk", "DisplayFrameSetting.smali", "unicorn", "umi",port_android_sdk)
+    patch_smali("MiSettings.apk", "NewRefreshRateFragment.smali", "const-string v1, \"btn_preferce_category\"", "const-string v1, \"btn_preferce_category\"\n\n\tconst\/16 p1, 0x1",port_android_sdk)
+    #
     targetDevicesAndroidOverlay = find_file('build/portrom/images/product', 'DevicesAndroidOverlay.apk')
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
         os.makedirs('tmp', exist_ok=True)
@@ -612,17 +687,22 @@ def main(baserom, portrom):
                           "device support screen enhance engine", "bool", "support_screen_enhance_engine", 'true')
 
     unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
-                          "Whether suppot Android Flashlight Controller",  "bool", "support_android_flashlight",'true')
+                          "Whether suppot Android Flashlight Controller", "bool", "support_android_flashlight", 'true')
 
-    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"Whether support SR for image display",  "bool", "support_SR_for_image_display",'true')
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
+                          "Whether support SR for image display", "bool", "support_SR_for_image_display", 'true')
     maxFps = maxfps(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml')
     if not maxFps:
         maxFps = 90
     maxFps = str(maxFps)
-    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"whether support fps change ", "bool", "support_smart_fps",'true')
-    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"smart fps value", "integer", "smart_fps_value", maxFps)
-    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"default rhythmic eyecare mode", "integer", "default_eyecare_mode", "2")
-    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',"default texture for paper eyecare", "integer", "paper_eyecare_default_texture", "0")
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
+                          "whether support fps change ", "bool", "support_smart_fps", 'true')
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml', "smart fps value",
+                          "integer", "smart_fps_value", maxFps)
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
+                          "default rhythmic eyecare mode", "integer", "default_eyecare_mode", "2")
+    unlock_device_feature(f'build/portrom/images/product/etc/device_features/{base_rom_code}.xml',
+                          "default texture for paper eyecare", "integer", "paper_eyecare_default_texture", "0")
     if os.path.isfile('build/portrom/images/system/system/etc/init/hw/init.rc'):
         insert_after_line('build/portrom/images/system/system/etc/init/hw/init.rc', 'on boot\n',
                           '    chmod 0731 /data/system/theme\n')
