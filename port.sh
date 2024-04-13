@@ -100,10 +100,6 @@ unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyeca
 
 
 if [[ "$is_ab_device" != false ]];then
-    cp -rf bin/flash/vab/update-binary out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
-    cp -rf bin/flash/vab/flash_update.bat out/${os_type}_${device_code}_${port_rom_version}/
-    cp -rf bin/flash/vab/flash_and_format.bat out/${os_type}_${device_code}_${port_rom_version}/
-    cp -rf bin/flash/zstd out/${os_type}_${device_code}_${port_rom_version}/META-INF/
     for fwImg in $(ls out/${os_type}_${device_code}_${port_rom_version}/images/ |cut -d "." -f 1 |grep -vE "super|cust|preloader");do
         if [ "$(echo ${fwimg} |grep vbmeta)" != "" ];then
             sed -i "/rem/a META-INF\\\platform-tools-windows\\\fastboot --disable-verity --disable-verification flash "${fwimg}"_b images\/"${fwimg}".img" out/${os_type}_${device_code}_${port_rom_version}/flash_update.bat

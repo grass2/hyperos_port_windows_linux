@@ -1077,6 +1077,12 @@ def main(baserom, portrom):
         shutil.copytree('bin/flash/platform-tools-windows/',
                         f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/',
                         dirs_exist_ok=True)
+        shutil.copy2('bin/flash/vab/update-binary', f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/')
+        shutil.copy2('bin/flash/vab/flash_update.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
+        shutil.copy2('bin/flash/vab/flash_and_format.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
+        shutil.copy2('bin/flash/zstd', f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/')
+
+
 
 
 if __name__ == '__main__':
