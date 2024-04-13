@@ -41,12 +41,6 @@ else
     is_ab_device=false
 fi
 
-blue "Copying device_features"   
-rm -rf build/portrom/images/product/etc/device_features/*
-cp -rf build/baserom/images/product/etc/device_features/* build/portrom/images/product/etc/device_features/
-if [[ ${is_eu_rom} == "true" ]];then
-    cp -rf build/baserom/images/product/etc/device_info.json build/portrom/images/product/etc/device_info.json
-fi
 baseMiuiBiometric=$(find build/baserom/images/product/app -type d -name "MiuiBiometric*")
 portMiuiBiometric=$(find build/portrom/images/product/app -type d -name "MiuiBiometric*")
 if [ -d "${baseMiuiBiometric}" ] && [ -d "${portMiuiBiometric}" ];then

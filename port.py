@@ -374,6 +374,17 @@ def main(baserom, portrom):
     os.makedirs('build/portrom/images/product/etc/displayconfig', exist_ok=True)
     for i in glob.glob('build/baserom/images/product/etc/displayconfig/display_id*.xml'):
         shutil.copy2(i, 'build/portrom/images/product/etc/displayconfig/')
+    blue("Copying device_features")
+    for i in glob.glob('build/portrom/images/product/etc/device_features/*'):
+        os.remove(i)
+    os.makedirs('build/portrom/images/product/etc/device_features', exist_ok=True)
+    for i in glob.glob('build/baserom/images/product/etc/device_features/*'):
+        shutil.copy2(i, 'build/portrom/images/product/etc/device_features/')
+    if is_eu_rom:
+        try:
+            shutil.copyfile('build/baserom/images/product/etc/device_info.json', 'build/portrom/images/product/etc/device_info.json')
+        except:
+            pass
 
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
