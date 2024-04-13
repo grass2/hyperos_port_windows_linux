@@ -489,6 +489,8 @@ def main(baserom, portrom):
             f.write('persist.sys.minfree_6g=73728,92160,110592,258048,663552,903168\n')
             f.write('persist.sys.minfree_8g=73728,92160,110592,387072,1105920,1451520\n')
             f.write('persist.vendor.display.miui.composer_boost=4-7\n')
+    append('build/portrom/images/vendor/build.prop', ['persist.vendor.mi_sf.optimize_for_refresh_rate.enable=1\n', "ro.vendor.mi_sf.ultimate.perf.support=true\n", "ro.surface_flinger.use_content_detection_for_refresh_rate=false\n",
+                                                      'ro.surface_flinger.set_touch_timer_ms=0\n', 'ro.surface_flinger.set_idle_timer_ms=0\n'])
 
 
     # Run Script
