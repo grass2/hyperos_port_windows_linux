@@ -22,7 +22,7 @@ from imgextractor import Extractor
 from bin.xmlstarlet import main as xmlstarlet
 from datetime import datetime
 from bin.maxfps import main as maxfps
-
+import xml.etree.ElementTree as ET
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
@@ -545,8 +545,14 @@ def main(baserom, portrom):
                         f"{vndk_version}已存在，跳过修改\nThe file already contains the version {vndk_version}. Skipping modification.")
                     break
         if not find:
-            insert_after_line(targetVintf, '</vendor-ndk>\n',
-                              f"<vendor-ndk>\n     <version>{vndk_version}</version>\n </vendor-ndk>\n")
+            tree = ET.parse(targetVintf)
+            root = tree.getroot()
+            new_vendor_ndk = ET.Element("vendor-ndk")
+            new_version = ET.SubElement(new_vendor_ndk, "version")
+            new_version.text = vndk_version
+            root.append(new_vendor_ndk)
+            tree.write(targetVintf, encoding="utf-8", xml_declaration=True)
+            print('Done!')
     else:
         blue(f"File {targetVintf} not found.")
     if os.path.isfile('build/portrom/images/system/system/etc/init/hw/init.rc'):
