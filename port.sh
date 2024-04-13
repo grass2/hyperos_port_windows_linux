@@ -19,13 +19,8 @@ if [[ ${repackext4} == true ]]; then
 else
     pack_type=EROFS
 fi
-blue "正在获取ROM参数" "Fetching ROM build prop."
 base_android_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.release")
 port_android_version=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop "ro.system.build.version.release")
-green "安卓版本: 底包为[Android ${base_android_version}], 移植包为 [Android ${port_android_version}]" "Android Version: BASEROM:[Android ${base_android_version}], PORTROM [Android ${port_android_version}]"
-base_android_sdk=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.sdk")
-port_android_sdk=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop "ro.system.build.version.sdk")
-green "SDK 版本: 底包为 [SDK ${base_android_sdk}], 移植包为 [SDK ${port_android_sdk}]" "SDK Verson: BASEROM: [SDK ${base_android_sdk}], PORTROM: [SDK ${port_android_sdk}]"
 base_rom_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.incremental")
 port_mios_version_incremental=$(python3 bin/read_config.py build/portrom/images/mi_ext/etc/build.prop "ro.mi.os.version.incremental")
 port_device_code=$(echo $port_mios_version_incremental | cut -d "." -f 5)
@@ -45,15 +40,7 @@ if grep -q "ro.build.ab_update=true" build/portrom/images/vendor/build.prop;  th
 else
     is_ab_device=false
 fi
-for cpfile in "AospFrameworkResOverlay.apk" "MiuiFrameworkResOverlay.apk" "DevicesAndroidOverlay.apk" "DevicesOverlay.apk" "SettingsRroDeviceHideStatusBarOverlay.apk" "MiuiBiometricResOverlay.apk"
-do
-  base_file=$(find build/baserom/images/product -type f -name "$cpfile")
-  port_file=$(find build/portrom/images/product -type f -name "$cpfile")
-  if [ -f "${base_file}" ] && [ -f "${port_file}" ];then
-    blue "正在替换 [$cpfile]" "Replacing [$cpfile]"
-    cp -rf ${base_file} ${port_file}
-  fi
-done
+
 rm -rf build/portrom/images/product/etc/displayconfig/display_id*.xml
 cp -rf build/baserom/images/product/etc/displayconfig/display_id*.xml build/portrom/images/product/etc/displayconfig/
 blue "Copying device_features"   
@@ -493,6 +480,7 @@ if [ "$(python3 bin/read_config.py bin/port_config "remove_data_encryption")" = 
 		sed -i "s/fileencryption/encryptable/g" $fstab
 	done
 fi
+
 for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done

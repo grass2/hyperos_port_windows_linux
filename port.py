@@ -21,6 +21,14 @@ from imgextractor import Extractor
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
+def find_file(directory, filename):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file == filename:
+                return os.path.join(root, file)
+    return ''
+
+
 def simg2img(path):
     with open(path, 'rb') as fd:
         if SparseImage(fd).check():
@@ -336,7 +344,26 @@ def main(baserom, portrom):
                 os.makedirs(f'build/portrom/images/{part}/lost+found', exist_ok=True)
                 os.remove(f'build/portrom/images/{part}.img')
                 green(f"提取移植包[{part}] [erofs]镜像完毕\nExtracting {part} [erofs] done.")
-
+    # Modify The Rom
+    blue("正在获取ROM参数\nFetching ROM build prop.")
+    base_android_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.release')
+    port_android_version = read_config('build/portrom/images/system/system/build.prop',
+                                       'ro.system.build.version.release')
+    green(
+        f"安卓版本: 底包为[Android {base_android_version}], 移植包为 [Android {port_android_version}]\nAndroid Version: BASEROM:[Android {base_android_version}], PORTROM [Android {port_android_version}]")
+    base_android_sdk = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.sdk')
+    port_android_sdk = read_config('build/portrom/images/system/system/build.prop', 'ro.system.build.version.sdk')
+    green(
+        f"SDK 版本: 底包为 [SDK {base_android_sdk}], 移植包为 [SDK {port_android_sdk}]\nSDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
+    for cpfile in ['AospFrameworkResOverlay.apk', 'MiuiFrameworkResOverlay.apk', 'DevicesAndroidOverlay.apk',
+                   'DevicesOverlay.apk', 'SettingsRroDeviceHideStatusBarOverlay.apk', 'MiuiBiometricResOverlay.apk']:
+        base_file = find_file('build/baserom/images/product', cpfile)
+        port_file = find_file('build/portrom/images/product', cpfile)
+        if not all([base_file, port_file]):
+            continue
+        if os.path.isfile(base_file) and os.path.isfile(port_file):
+            blue(f"正在替换 [{cpfile}]\nReplacing [{cpfile}]")
+            shutil.copy2(base_file, port_file)
     # Run Script
     os.system(f"bash ./bin/call ./port.sh")
 
