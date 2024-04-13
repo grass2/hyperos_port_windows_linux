@@ -702,7 +702,7 @@ def main(baserom, portrom):
         append('build/portrom/images/product/etc/build.prop',
                ['persist.sys.background_blur_supported=true\n', 'persist.sys.background_blur_version=2\n'])
     else:
-        sed('persist.sys.background_blur_version=2', 'persist.sys.background_blur_supported=.*',
+        sed('build/portrom/images/product/etc/build.prop', 'persist.sys.background_blur_supported=.*',
             'persist.sys.background_blur_supported=true')
     append('build/portrom/images/product/etc/build.prop', ['persist.sys.perf.cgroup8250.stune=true\n'])
     if read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.media.video.frc.support'):
