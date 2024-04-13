@@ -1067,22 +1067,25 @@ def main(baserom, portrom):
             sed(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat', 'boot_tv.img', ksubootimg)
             sed(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', 'boot_tv.img', ksubootimg)
         unix_to_dos(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat')
-        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'portversion', port_rom_version)
-        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'baseversion', base_rom_version)
-        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'andVersion', port_android_version)
-        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'device_code', base_rom_code)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'portversion',
+            port_rom_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'baseversion',
+            base_rom_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'andVersion',
+            port_android_version)
+        sed(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary', 'device_code',
+            base_rom_code)
     else:
         os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/images/', exist_ok=True)
         os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/images/')
         shutil.copytree('bin/flash/platform-tools-windows/',
                         f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/',
                         dirs_exist_ok=True)
-        shutil.copy2('bin/flash/vab/update-binary', f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/')
+        shutil.copy2('bin/flash/vab/update-binary',
+                     f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/')
         shutil.copy2('bin/flash/vab/flash_update.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
         shutil.copy2('bin/flash/vab/flash_and_format.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
         shutil.copy2('bin/flash/zstd', f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/')
-
-
 
 
 if __name__ == '__main__':
