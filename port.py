@@ -29,6 +29,22 @@ def append(file, lines):
         f.writelines(lines)
 
 
+def insert_after_line(file_path, target_line, text_to_insert):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    index_text = None
+    for i,line in enumerate(lines):
+        if target_line == line:
+            index_text = i
+            break
+    if index_text is None:
+        print("目标行未找到")
+        return
+    lines.insert(index_text, text_to_insert)
+    with open(file_path, 'w') as file:
+        file.writelines(lines)
+
+
 def find_file(directory, filename):
     for root, dirs, files in os.walk(directory):
         for file in files:
