@@ -52,21 +52,6 @@ blue() {
     fi
 }
 
-green() {
-    if [ "$#" -eq 2 ]; then
-        if [[ "$LANG" == zh_CN* ]]; then
-            echo -e \[$(date +%m%d-%T)\] "\033[1;32m"$1"\033[0m"
-        elif [[ "$LANG" == en* ]]; then
-            echo -e \[$(date +%m%d-%T)\] "\033[1;32m"$2"\033[0m"
-        else
-            echo -e \[$(date +%m%d-%T)\] "\033[1;32m"$2"\033[0m"
-        fi
-    elif [ "$#" -eq 1 ]; then
-        echo -e \[$(date +%m%d-%T)\] "\033[1;32m"$1"\033[0m"
-    else
-        echo "Usage: green <Chinese> <English>"
-    fi
-}
 
 #Check for the existence of the requirements command, proceed if it exists, or abort otherwise.
 # Replace Smali code in an APK or JAR file, without supporting resource patches.
