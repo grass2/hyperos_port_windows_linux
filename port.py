@@ -449,7 +449,7 @@ def main(baserom, portrom):
             continue
         if os.path.isfile(base_file) and os.path.isfile(port_file):
             blue(f"正在替换 [{cpfile}]\nReplacing [{cpfile}]")
-            shutil.copy2(base_file, port_file)
+            shutil.copyfile(base_file, port_file)
 
     for file_path in glob.glob("build/portrom/images/product/etc/displayconfig/display_id*.xml"):
         try:
@@ -880,6 +880,7 @@ def main(baserom, portrom):
             os.makedirs('build/portrom/images/product/app/MiLinkCirculateMIUI15', exist_ok=True)
             shutil.copytree(MiLinkCirculateMIUI15, 'build/portrom/images/product/app/')
     # Devices/机型代码/overaly 按照镜像的目录结构，可直接替换目标。
+    is_ab_device = read_config('build/portrom/images/vendor/build.prop', 'ro.build.ab_update')
     if os.path.isdir(f'devices/{base_rom_code}/overlay'):
         shutil.copytree(f'devices/{base_rom_code}/overlay/', 'build/portrom/images/', dirs_exist_ok=True)
     else:
@@ -917,22 +918,81 @@ def main(baserom, portrom):
                     sed(i, r'system_ext\s+erofs', '')
                     sed(i, r'vendor\s+erofs', '')
                     sed(i, r'product\s+erofs', '')
-                thisSize = int(get_dir_size(f"build/portrom/images/{pname}")+addsize.get(pname, addsize.get('other')))
-                blue(f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]\nPacking [{pname}.img]:[{pack_type}] with size [{thisSize}]")
-                call(f'make_ext4fs -J -T {int(time.time())} -S build/portrom/images/config/{pname}_file_contexts -l {thisSize} -C build/portrom/images/config/{pname}_fs_config -L {pname} -a {pname} build/portrom/images/{pname}.img build/portrom/images/{pname}')
+                thisSize = int(get_dir_size(f"build/portrom/images/{pname}") + addsize.get(pname, addsize.get('other')))
+                blue(
+                    f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]\nPacking [{pname}.img]:[{pack_type}] with size [{thisSize}]")
+                call(
+                    f'make_ext4fs -J -T {int(time.time())} -S build/portrom/images/config/{pname}_file_contexts -l {thisSize} -C build/portrom/images/config/{pname}_fs_config -L {pname} -a {pname} build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
-                    green(f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
+                    green(
+                        f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
                 else:
                     red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败\nPacking [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
             else:
                 blue(f'以[{pack_type}]文件系统打包[{pname}.img]\nPacking [{pname}.img] with [{pack_type}] filesystem')
-                call(f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
+                call(
+                    f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
-                    green(f"成功打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}] success")
+                    green(
+                        f"成功打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}] success")
                 else:
                     red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败\nPacking [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
+    if is_ab_device == 'false':
+        blue("打包A-only super.img\nPacking super.img for A-only device")
+        lpargs = f"-F --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 2 --block-size 4096 --device super:{superSize} --group=qti_dynamic_partitions:{superSize}"
+        for pname in ['odm', 'mi_ext', 'system', 'system_ext', 'product', 'vendor']:
+            subsize = os.path.getsize(f'build/portrom/images/{pname}.img')
+            green(f"Super 子分区 [{pname}] 大小 [{subsize}]\nSuper sub-partition [{pname}] size: [{subsize}]")
+            lpargs += f" --partition {pname}:none:{subsize}:qti_dynamic_partitions --image {pname}=build/portrom/images/{pname}.img"
+    else:
+        blue("打包V-A/B机型 super.img\nPacking super.img for V-AB device")
+        lpargs = f"-F --virtual-ab --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 3 --device super:{superSize} --group=qti_dynamic_partitions_a:{superSize} --group=qti_dynamic_partitions_b:{superSize}"
+        for pname in super_list:
+            if os.path.isfile(f'build/portrom/images/{pname}.img'):
+                subsize = os.path.getsize(f'build/portrom/images/{pname}.img')
+                green(f"Super 子分区 [{pname}] 大小 [{subsize}]\nSuper sub-partition [{pname}] size: [{subsize}]")
+                lpargs += f" --partition {pname}_a:none:{subsize}:qti_dynamic_partitions_a --image {pname}_a=build/portrom/images/{pname}.img --partition {pname}_b:none:0:qti_dynamic_partitions_b"
+    call(f'lpmake {lpargs}')
+    if os.path.exists("build/portrom/images/super.img"):
+        green("成功打包 super.img\nPakcing super.img done.")
+    else:
+        red('无法打包 super.img\nUnable to pack super.img.')
+        sys.exit()
+    for pname in super_list:
+        if os.path.exists(f'build/portrom/images/{pname}.img'):
+            os.remove(f'build/portrom/images/{pname}.img')
+    os_type = "hyperos"
+    if is_eu_rom:
+        os_type = "xiaomi.eu"
+    blue("正在压缩 super.img\nComprising super.img")
+    call(exe='zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst',
+         kz="N" if platform.system() == 'Darwin' else 'Y')
+    os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/', exist_ok=True)
+    os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/')
+    blue('正在生成刷机脚本\nGenerating flashing script')
+    if is_ab_device == 'false':
+        shutil.move('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/')
+    shutil.copytree('bin/flash/platform-tools-windows/', f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/',
+                    dirs_exist_ok=True)
+    shutil.copy2('bin/flash/mac_linux_flash_script.sh', f'out/{os_type}_{device_code}_{port_rom_version}/')
+    shutil.copy2('bin/flash/windows_flash_script.bat', f'out/{os_type}_{device_code}_{port_rom_version}/')
+    sed(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh', '_ab', '')
+    sed(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat', '_ab', '')
+    with open(f"out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh", 'r',
+              encoding='utf-8') as file:
+        content = file.read()
+    with open(f"out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh", 'w', encoding='utf-8',
+              newline='\n') as file:
+        file.write(re.sub(r'^# SET_ACTION_SLOT_A_BEGIN$.*?^# SET_ACTION_SLOT_A_END$', '', content,
+                          flags=re.DOTALL | re.MULTILINE))
+    with open(f"out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat", 'r',
+              encoding='utf-8') as file:
+        content = file.read()
+    with open(f"out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat", 'w') as file:
+        file.write(re.sub(r'^REM SET_ACTION_SLOT_A_BEGIN$.*?^REM SET_ACTION_SLOT_A_END$', '', content,
+                          flags=re.DOTALL | re.MULTILINE))
 
 
 if __name__ == '__main__':

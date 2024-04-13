@@ -99,68 +99,7 @@ unlock_device_feature "default rhythmic eyecare mode" "integer" "default_eyecare
 unlock_device_feature "default texture for paper eyecare" "integer" "paper_eyecare_default_texture" "0"
 
 
-# 打包 super.img
 if [[ "$is_ab_device" == false ]];then
-    blue "打包A-only super.img" "Packing super.img for A-only device"
-    lpargs="-F --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 2 --block-size 4096 --device super:$superSize --group=qti_dynamic_partitions:$superSize"
-    for pname in odm mi_ext system system_ext product vendor;do
-        if [ -f "build/portrom/images/${pname}.img" ];then
-            if [[ "$OSTYPE" == "darwin"* ]];then
-               subsize=$(find build/portrom/images/${pname}.img | xargs stat -f%z | awk ' {s+=$1} END { print s }')
-            else
-                subsize=$(du -sb build/portrom/images/${pname}.img |tr -cd 0-9)
-            fi
-            green "Super 子分区 [$pname] 大小 [$subsize]" "Super sub-partition [$pname] size: [$subsize]"
-            args="--partition ${pname}:none:${subsize}:qti_dynamic_partitions --image ${pname}=build/portrom/images/${pname}.img"
-            lpargs="$lpargs $args"
-            unset subsize
-            unset args
-        fi
-    done
-else
-    blue "打包V-A/B机型 super.img" "Packing super.img for V-AB device"
-    lpargs="-F --virtual-ab --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 3 --device super:$superSize --group=qti_dynamic_partitions_a:$superSize --group=qti_dynamic_partitions_b:$superSize"
-    for pname in ${super_list};do
-        if [ -f "build/portrom/images/${pname}.img" ];then
-            subsize=$(du -sb build/portrom/images/${pname}.img |tr -cd 0-9)
-            green "Super 子分区 [$pname] 大小 [$subsize]" "Super sub-partition [$pname] size: [$subsize]"
-            args="--partition ${pname}_a:none:${subsize}:qti_dynamic_partitions_a --image ${pname}_a=build/portrom/images/${pname}.img --partition ${pname}_b:none:0:qti_dynamic_partitions_b"
-            lpargs="$lpargs $args"
-            unset subsize
-            unset args
-        fi
-    done
-fi
-lpmake $lpargs
-#echo "lpmake $lpargs"
-if [ -f "build/portrom/images/super.img" ];then
-    green "成功打包 super.img" "Pakcing super.img done."
-else
-    error "无法打包 super.img"  "Unable to pack super.img."
-    exit 1
-fi
-for pname in ${super_list};do
-    rm -rf build/portrom/images/${pname}.img
-done
-os_type="hyperos"
-if [[ ${is_eu_rom} == true ]];then
-    os_type="xiaomi.eu"
-fi
-blue "正在压缩 super.img" "Comprising super.img"
-zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst
-mkdir -p out/${os_type}_${device_code}_${port_rom_version}/META-INF/com/google/android/
-mkdir -p out/${os_type}_${device_code}_${port_rom_version}/bin/windows/
-blue "正在生成刷机脚本" "Generating flashing script"
-if [[ "$is_ab_device" == false ]];then
-    mv -f build/portrom/images/super.zst out/${os_type}_${device_code}_${port_rom_version}/
-    #firmware
-    cp -rf bin/flash/platform-tools-windows/* out/${os_type}_${device_code}_${port_rom_version}/bin/windows/
-    cp -rf bin/flash/mac_linux_flash_script.sh out/${os_type}_${device_code}_${port_rom_version}/
-    cp -rf bin/flash/windows_flash_script.bat out/${os_type}_${device_code}_${port_rom_version}/
-    sed -i "s/_ab//g" out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
-    sed -i "s/_ab//g" out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
-    sed -i '/^# SET_ACTION_SLOT_A_BEGIN$/,/^# SET_ACTION_SLOT_A_END$/d' out/${os_type}_${device_code}_${port_rom_version}/mac_linux_flash_script.sh
-    sed -i '/^REM SET_ACTION_SLOT_A_BEGIN$/,/^REM SET_ACTION_SLOT_A_END$/d' out/${os_type}_${device_code}_${port_rom_version}/windows_flash_script.bat
     if [ -d build/baserom/firmware-update ];then
         mkdir -p out/${os_type}_${device_code}_${port_rom_version}/firmware-update
         cp -rf build/baserom/firmware-update/*  out/${os_type}_${device_code}_${port_rom_version}/firmware-update
