@@ -1,7 +1,7 @@
 import os.path
 import sys
 import re
-from echo import yellow, blue
+from bin.echo import yellow, blue
 
 
 def main(fstab):

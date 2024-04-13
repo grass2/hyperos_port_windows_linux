@@ -894,7 +894,7 @@ def main(baserom, portrom):
             content = file.read()
         if 'erofs' in content:
             for pname in ['system', 'odm', 'vendor', 'product', 'mi_ext', 'system_ext']:
-                sed('build/portrom/images/vendor/etc/fstab.qcom', f"/{pname}\s+ext4", f"/{pname} erofs")
+                sed('build/portrom/images/vendor/etc/fstab.qcom', rf"/{pname}\s+ext4", f"/{pname} erofs")
                 yellow(f"添加{pname}\nAdding mount point {pname}")
     superSize = getSuperSize(device_code)
     green(f"Super大小为{superSize}\nSuper image size: {superSize}")
