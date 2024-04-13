@@ -694,6 +694,10 @@ def main(baserom, portrom):
     else:
         blue("原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)\nro.millet.netlink property value not found, change it manually(29 by default).")
         update_netlink('29', 'build/portrom/images/product/etc/build.prop')
+    if not read_config('build/portrom/images/product/etc/build.prop', 'persist.sys.background_blur_supported'):
+        append('build/portrom/images/product/etc/build.prop', ['persist.sys.background_blur_supported=true\n', 'persist.sys.background_blur_version=2\n'])
+    else:
+        sed('persist.sys.background_blur_version=2', 'persist.sys.background_blur_supported=.*', 'persist.sys.background_blur_supported=true')
     # Run Script
     os.system(f"{'' if os.name == 'posix' else './busybox '}bash ./bin/call ./port.sh")
 

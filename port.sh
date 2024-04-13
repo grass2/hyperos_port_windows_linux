@@ -84,13 +84,6 @@ else
     cp -rf tmp/services_modified.jar build/portrom/images/system/system/framework/services.jar
 fi
 
-# add advanced texture
-if [ -z $(python3 bin/read_config.py build/portrom/images/product/etc/build.prop persist.sys.background_blur_supported) ]; then
-    echo "persist.sys.background_blur_supported=true" >> build/portrom/images/product/etc/build.prop
-    echo "persist.sys.background_blur_version=2" >> build/portrom/images/product/etc/build.prop
-else
-    sed -i "s/persist.sys.background_blur_supported=.*/persist.sys.background_blur_supported=true/" build/portrom/images/product/etc/build.prop
-fi
 echo "persist.sys.perf.cgroup8250.stune=true" >> build/portrom/images/product/etc/build.prop
 unlock_device_feature "Whether support AI Display"  "bool" "support_AI_display"
 unlock_device_feature "device support screen enhance engine"  "bool" "support_screen_enhance_engine"
