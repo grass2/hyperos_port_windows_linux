@@ -415,11 +415,9 @@ if [ "$(python3 bin/read_config.py bin/port_config "remove_data_encryption")" = 
 		sed -i "s/fileencryption/encryptable/g" $fstab
 	done
 fi
-
 for pname in ${port_partition};do
     rm -rf build/portrom/images/${pname}.img
 done
-
 superSize=$(python3 bin/getSuperSize.py $device_code)
 green "Super大小为${superSize}" "Super image size: ${superSize}"
 green "开始打包镜像" "Packing super.img"
