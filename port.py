@@ -463,6 +463,9 @@ def main(baserom, portrom):
     else:
         base_device_code = 'U' + base_rom_version.split(".")[4][1:]
         port_rom_version = port_mios_version_incremental.replace(port_device_code, base_device_code)
+    green(f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]\nROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
+    base_rom_code = read_config('build/portrom/images/vendor/build.prop', 'ro.product.vendor.device')
+    green(f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]\nDevice Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
     for cpfile in ['AospFrameworkResOverlay.apk', 'MiuiFrameworkResOverlay.apk', 'DevicesAndroidOverlay.apk',
                    'DevicesOverlay.apk', 'SettingsRroDeviceHideStatusBarOverlay.apk', 'MiuiBiometricResOverlay.apk']:
         base_file = find_file('build/baserom/images/product', cpfile)

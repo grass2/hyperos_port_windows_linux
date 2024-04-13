@@ -14,22 +14,8 @@ fi
 if [[ "$OSTYPE" == "Windows"* ]]; then
   alias python3=python
 fi
-
 port_android_sdk=$(python3 bin/read_config.py build/portrom/images/system/system/build.prop 'ro.system.build.version.sdk')
-base_rom_version=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.vendor.build.version.incremental")
-port_mios_version_incremental=$(python3 bin/read_config.py build/portrom/images/mi_ext/etc/build.prop "ro.mi.os.version.incremental")
-port_device_code=$(echo $port_mios_version_incremental | cut -d "." -f 5)
-if [[ $port_mios_version_incremental == *DEV* ]];then
-    yellow "检测到开发板，跳过修改版本代码" "Dev deteced,skip replacing codename"
-    port_rom_version=$(echo $port_mios_version_incremental)
-else
-    base_device_code=U$(echo $base_rom_version | cut -d "." -f 5 | cut -c 2-)
-    port_rom_version=$(echo $port_mios_version_incremental | sed "s/$port_device_code/$base_device_code/")
-fi
-green "ROM 版本: 底包为 [${base_rom_version}], 移植包为 [${port_rom_version}]" "ROM Version: BASEROM: [${base_rom_version}], PORTROM: [${port_rom_version}] "
 base_rom_code=$(python3 bin/read_config.py build/portrom/images/vendor/build.prop "ro.product.vendor.device")
-port_rom_code=$(python3 bin/read_config.py build/portrom/images/product/etc/build.prop "ro.product.product.name")
-green "机型代号: 底包为 [${base_rom_code}], 移植包为 [${port_rom_code}]" "Device Code: BASEROM: [${base_rom_code}], PORTROM: [${port_rom_code}]"
 #解决开机报错问题
 blue "左侧挖孔灵动岛修复" "StrongToast UI fix"
 if [[ "$is_shennong_houji_port" == true ]];then
