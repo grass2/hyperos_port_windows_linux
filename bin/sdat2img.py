@@ -49,7 +49,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
             else:
                 # Skip lines starting with numbers, they are not commands anyway
                 if not cmd[0].isdigit():
-                    print('Command "{}" is not valid.'.format(cmd), file=sys.stderr)
+                    print('Command "{}" is not valid.'.format(cmd))
                     trans_list.close()
                     sys.exit(1)
 
@@ -76,8 +76,8 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
         output_img = open(OUTPUT_IMAGE_FILE, 'wb')
     except IOError as e:
         if e.errno == errno.EEXIST:
-            print('Error: the output file "{}" already exists'.format(e.filename), file=sys.stderr)
-            print('Remove it, rename it, or choose a different file name.', file=sys.stderr)
+            print('Error: the output file "{}" already exists'.format(e.filename))
+            print('Remove it, rename it, or choose a different file name.')
             sys.exit(e.errno)
         else:
             raise
@@ -102,7 +102,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
                     output_img.write(new_data_file.read(BLOCK_SIZE))
                     block_count -= 1
         else:
-            print('Skipping command {}...'.format(command[0]))
+            print('\nSkipping command {}...'.format(command[0]), end='')
 
     # Make file larger if necessary
     if output_img.tell() < max_file_size:
@@ -111,24 +111,3 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     output_img.close()
     new_data_file.close()
     print('Done! Output image: {}'.format(os.path.realpath(output_img.name)))
-
-
-if __name__ == '__main__':
-    try:
-        TRANSFER_LIST_FILE = str(sys.argv[1])
-        NEW_DATA_FILE = str(sys.argv[2])
-    except IndexError:
-        print('\nUsage: sdat2img.py <transfer_list> <system_new_file> [system_img]\n')
-        print('    <transfer_list>: transfer list file')
-        print('    <system_new_file>: system new dat file')
-        print('    [system_img]: output system image\n\n')
-        print('Visit xda thread for more information.\n')
-        input('Press ENTER to exit...')
-        sys.exit()
-
-    try:
-        OUTPUT_IMAGE_FILE = str(sys.argv[3])
-    except IndexError:
-        OUTPUT_IMAGE_FILE = 'system.img'
-
-    main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE)
