@@ -68,6 +68,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
     cd hyperos_port
     # 安装依赖
     sudo ./setup.sh
+    pip3 install -r requirements.txt
     # 开始移植
     sudo python3 ./port.py <底包路径> <移植包路径>
 ```
@@ -80,6 +81,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
     git clone https://github.com/toraidl/hyperos_port.git
     cd hyperos_port
     # 安装依赖
+    pip3 install -r requirements.txt
     sudo ./setup.sh
     # 开始移植
     sudo python3 ./port.py <底包路径> <移植包路径>
@@ -94,6 +96,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
     cd hyperos_port/
     # 安装依赖
     ./setup.sh
+    pip3 install -r requirements.txt
     # 进入root模式
     tsu
     python3 ./port.py <底包路径> <移植包路径>

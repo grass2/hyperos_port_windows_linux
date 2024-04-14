@@ -32,6 +32,18 @@
 - All the above testing is based on Xiaomi 10/10Pro/10 Ultra official/xiaomi.eu MIUI 14 version. for V-AB devices, tester needed. 
 
 ## How to use
+- On Windows
+>[!NOTE]
+> You need install python3 and java  first
+``` shell
+   # Clone project
+   git clone https://github.com/toraidl/hyperos_port.git
+   cd hyperos_port
+   # Install dependencies
+   pip3 install -r requirements.txt
+   # Start porting
+   sudo python3 ./port.py <baserom> <portrom>
+```
 - On WSL、ubuntu、deepin and other Linux
 ```shell
     sudo apt update
@@ -41,6 +53,7 @@
     git clone https://github.com/toraidl/hyperos_port.git
     cd hyperos_port
     # Install dependencies
+    pip3 install -r requirements.txt
     sudo ./setup.sh
     # Start porting
     sudo ./port.sh <baserom> <portrom>
@@ -54,6 +67,7 @@
     git clone https://github.com/toraidl/hyperos_port.git
     cd hyperos_port
     # Install dependencies
+    pip3 install -r requirements.txt
     sudo ./setup.sh
      # Start porting
     sudo ./port.sh <baserom> <portrom>
@@ -67,6 +81,7 @@
     git clone https://github.com/toraidl/hyperos_port.git
     cd hyperos_port/
     # Install depenencies
+    pip3 install -r requirements.txt
     ./setup.sh
     # Enter root mode 
     tsu
