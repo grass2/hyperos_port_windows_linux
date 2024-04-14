@@ -409,8 +409,8 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
                 content = content.replace(old, new)
             with open(targetsmali, 'w') as f:
                 f.write(content)
-            if os.system(
-                    f'java -jar bin/apktool/smali.jar a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex') != 0:
+            if call(
+                    f'java -jar bin/apktool/smali.jar a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex', out=1) != 0:
                 red('Smaling 失败', 'Smaling failed')
                 sys.exit()
             old = os.getcwd()
