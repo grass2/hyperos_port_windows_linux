@@ -9,7 +9,6 @@ import shutil
 import subprocess
 import sys
 import time
-from bin.update_netlink import main as update_netlink
 from _socket import gethostname
 from bin.sdat2img import main as sdat2img
 from bin import downloader
@@ -23,14 +22,70 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
-from bin.patch_vbmeta import main as patch_vbmeta
-from bin.unlock_device_feature import main as unlock_device_feature
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 
-def getSuperSize(device):
+def update_netlink(netlink_version, prop_file):
+    if not os.path.exists(prop_file):
+        return ''
+    if not read_config(prop_file, 'ro.millet.netlink'):
+        blue(
+            f"找到ro.millet.netlink修改值为{netlink_version}\nmillet_netlink propery found, changing value to {netlink_version}")
+        with open(prop_file, "r") as sf:
+            details = re.sub("ro.millet.netlink=.*", f"ro.millet.netlink={netlink_version}", sf.read())
+        with open(prop_file, "w") as tf:
+            tf.write(details)
+    else:
+        blue(
+            f"PORTROM未找到ro.millet.netlink值,添加为{netlink_version}\n millet_netlink not found in portrom, adding new value {netlink_version}")
+        with open(prop_file, "r") as tf:
+            details = tf.readlines()
+            details.append(f"ro.millet.netlink={netlink_version}\n")
+        with open(prop_file, "w") as tf:
+            tf.writelines(details)
+
+
+def unlock_device_feature(file, comment, feature_type, feature_name, feature_value):
+    tree = ET.parse(file)
+    root = tree.getroot()
+    xpath_expr = f"//{feature_type}[@name='{feature_name}']"
+    element = tree.find(xpath_expr)
+    comment_c = None
+    if element is None:
+        element = ET.SubElement(root, feature_type)
+        comment_c = ET.Comment(comment)
+    element.set('name', feature_name)
+    element.text = feature_value
+    if comment_c is not None:
+        root.append(comment_c)
+    root.append(element)
+    xml_string = ET.tostring(root, encoding="utf-8", xml_declaration=True, pretty_print=True).replace(b"><", b">\n<")
+    with open(file, "wb") as f:
+        f.write(xml_string)
+
+
+def patch_vbmeta(file):
+    try:
+        fd = os.open(file, os.O_RDWR)
+    except OSError:
+        print("Patch Fail!")
+        pass
+    if os.read(fd, 4) != b"AVB0":
+        fd.close()
+        print("Error: The provided image is not a valid vbmeta image.\nFile not modified. Exiting...")
+    try:
+        os.lseek(fd, 123, os.SEEK_SET)
+        os.write(fd, b'\x03')
+    except OSError:
+        fd.close()
+        print("Error: Failed when patching the vbmeta image.\nExiting...")
+    os.close(fd)
+    print("Patching successful.")
+
+
+def get_super_size(device):
     device = device.upper()
     # 13 13Pro 13Ultra RedmiNote12Turbo |K60Pro |MIXFold
     if device in ['FUXI', 'NUWA', 'ISHTAR', 'MARBLE', 'SOCRATES', 'BABYLO']:
@@ -1123,7 +1178,7 @@ def main(baserom, portrom):
             for pname in ['system', 'odm', 'vendor', 'product', 'mi_ext', 'system_ext']:
                 sed('build/portrom/images/vendor/etc/fstab.qcom', rf"/{pname}\s+ext4", f"/{pname} erofs")
                 yellow(f"添加{pname}\nAdding mount point {pname}")
-    superSize = getSuperSize(device_code)
+    superSize = get_super_size(device_code)
     green(f"Super大小为{superSize}\nSuper image size: {superSize}")
     green("开始打包镜像\nPacking super.img")
     for pname in super_list:
