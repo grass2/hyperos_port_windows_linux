@@ -1,0 +1,4 @@
+lxml
+Requests
+rich
+pyinstaller
