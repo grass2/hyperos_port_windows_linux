@@ -6,8 +6,6 @@
 #          DATE: 2018-10-27 10:33:21 CEST
 # ====================================================
 
-from __future__ import print_function
-
 import errno
 import os
 import sys
