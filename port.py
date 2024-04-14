@@ -487,19 +487,19 @@ def main(baserom, portrom):
             is_base_rom_eu = True
             super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
         else:
-            red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试\npayload.bin/new.br not found, please use HyperOS official OTA zip package.")
+            red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试", "payload.bin/new.br not found, please use HyperOS official OTA zip package.")
             sys.exit()
     with zipfile.ZipFile(portrom) as rom:
         if "payload.bin" in rom.namelist():
-            green("ROM初步检测通过\nROM validation passed.")
+            green("ROM初步检测通过", "ROM validation passed.")
         elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
             is_eu_rom = True
         else:
-            red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
+            red("目标移植包没有payload.bin，请用MIUI官方包作为移植包", "payload.bin not found, please use HyperOS official OTA zip package.")
             sys.exit()
 
     # Clean Up
-    blue("正在清理文件\nCleaning up..")
+    blue("正在清理文件", "Cleaning up..")
     for i in read_config('bin/port_config', 'partition_to_port').split():
         if os.path.isdir(i):
             try:
@@ -518,39 +518,39 @@ def main(baserom, portrom):
                 shutil.rmtree(i)
             except:
                 pass
-    green("文件清理完毕\nFiles cleaned up.")
+    green("文件清理完毕", "Files cleaned up.")
     for i in ['build/baserom/images/', 'build/portrom/images/']:
         if not os.path.exists(i):
             os.makedirs(i)
     # Extract BaseRom Zip
     if baserom_type == 'payload':
-        blue("正在提取底包 [payload.bin]\nExtracting files from BASEROM [payload.bin]")
+        blue("正在提取底包 [payload.bin]", "Extracting files from BASEROM [payload.bin]")
         with zipfile.ZipFile(baserom) as rom:
             try:
                 rom.extract('payload.bin', path='build/baserom')
             except:
-                red("解压底包 [payload.bin] 时出错\nExtracting [payload.bin] error")
+                red("解压底包 [payload.bin] 时出错", "Extracting [payload.bin] error")
                 sys.exit()
-            green("底包 [payload.bin] 提取完毕\n[payload.bin] extracted.")
+            green("底包 [payload.bin] 提取完毕", "[payload.bin] extracted.")
     elif baserom_type == 'br':
-        blue("正在提取底包 [new.dat.br]\nExtracting files from BASEROM [new.dat.br]")
+        blue("正在提取底包 [new.dat.br]", "Extracting files from BASEROM [new.dat.br]")
         with zipfile.ZipFile(baserom) as rom:
             try:
                 rom.extractall('build/baserom')
             except:
-                red("解压底包 [new.dat.br] 时出错\nExtracting [new.dat.br] error")
+                red("解压底包 [new.dat.br] 时出错", "Extracting [new.dat.br] error")
                 sys.exit()
-            green("底包 [new.dat.br] 提取完毕\n[new.dat.br] extracted.")
+            green("底包 [new.dat.br] 提取完毕", "[new.dat.br] extracted.")
     elif is_base_rom_eu:
-        blue("正在提取底包 [super.img]\nExtracting files from BASEROM [super.img]")
+        blue("正在提取底包 [super.img]", "Extracting files from BASEROM [super.img]")
         with zipfile.ZipFile(baserom) as rom:
             try:
                 rom.extractall('build/baserom')
             except:
-                red("解压底包 [super.img] 时出错\nExtracting [super.img] error")
+                red("解压底包 [super.img] 时出错", "Extracting [super.img] error")
                 sys.exit()
-            green("底包 [super.img] 提取完毕\n[super.img] extracted.")
-        blue("合并super.img* 到super.img\nMerging super.img.* into super.img")
+            green("底包 [super.img] 提取完毕", "[super.img] extracted.")
+        blue("合并super.img* 到super.img", "Merging super.img.* into super.img")
         os.system('simg2img build/baserom/images/super.img.* build/baserom/images/super.img')
         files = glob.glob('build/baserom/images/super.img.*')
         for file in files:
@@ -574,34 +574,34 @@ def main(baserom, portrom):
                 try:
                     rom.extract(i, path='build/portrom')
                 except:
-                    red("解压移植包 [super.img] 时出错\nExtracting [super.img] error")
+                    red("解压移植包 [super.img] 时出错", "Extracting [super.img] error")
                     sys.exit()
-        blue("合并super.img* 到super.img\nMerging super.img.* into super.img")
+        blue("合并super.img* 到super.img", "Merging super.img.* into super.img")
         os.system('simg2img build/portrom/images/super.img.* build/portrom/images/super.img')
         for i in glob.glob(' build/portrom/images/super.img.*'):
             os.remove(i)
         shutil.move('build/portrom/images/super.img', 'build/portrom/super.img')
-        green("移植包 [super.img] 提取完毕\n[super.img] extracted.")
+        green("移植包 [super.img] 提取完毕", "[super.img] extracted.")
     else:
-        blue("正在提取移植包 [payload.bin]\nExtracting files from PORTROM [payload.bin]")
+        blue("正在提取移植包 [payload.bin]", "Extracting files from PORTROM [payload.bin]")
         with zipfile.ZipFile(portrom) as rom:
             try:
                 rom.extract('payload.bin', path='build/portrom')
             except:
-                red("解压移植包 [payload.bin] 时出错\nExtracting [payload.bin] error")
+                red("解压移植包 [payload.bin] 时出错", "Extracting [payload.bin] error")
                 sys.exit()
-        green("移植包 [payload.bin] 提取完毕\n[payload.bin] extracted.")
+        green("移植包 [payload.bin] 提取完毕", "[payload.bin] extracted.")
     # Extract BaseRom Partition
     if baserom_type == 'payload':
-        blue("开始分解底包 [payload.bin]\nUnpacking BASEROM [payload.bin]")
+        blue("开始分解底包 [payload.bin]", "Unpacking BASEROM [payload.bin]")
         if call('payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin'):
-            red("分解底包 [payload.bin] 时出错\nUnpacking [payload.bin] failed")
+            red("分解底包 [payload.bin] 时出错", "Unpacking [payload.bin] failed")
             sys.exit()
     elif is_base_rom_eu:
-        blue("开始分解底包 [super.img]\nUnpacking BASEROM [super.img]")
+        blue("开始分解底包 [super.img]", "Unpacking BASEROM [super.img]")
         lpunpack("build/baserom/super.img", 'build/baserom/images', super_list)
     elif baserom_type == 'br':
-        blue("开始分解底包 [new.dat.br]\nUnpacking BASEROM[new.dat.br]")
+        blue("开始分解底包 [new.dat.br]", "Unpacking BASEROM[new.dat.br]")
         for i in super_list:
             call(f'brotli -d build/baserom/{i}.new.dat.br')
             sdat2img(f'build/baserom/{i}.transfer.list', f'build/baserom/{i}.new.dat', f'build/baserom/images/{i}.img')
@@ -616,40 +616,40 @@ def main(baserom, portrom):
             if gettype(img) == 'sparse':
                 simg2img(img)
             if gettype(img) == 'ext':
-                blue(f"正在分解底包 {part}.img [ext]\nExtracing {part}.img [ext] from BASEROM")
+                blue(f"正在分解底包 {part}.img [ext]", "Extracing {part}.img [ext] from BASEROM")
                 Extractor().main(img, ('build/baserom/images/' + os.path.basename(img).split('.')[0]))
-                blue(f"分解底包 [{part}.img] 完成\nBASEROM {part}.img [ext] extracted.")
+                blue(f"分解底包 [{part}.img] 完成", "BASEROM {part}.img [ext] extracted.")
                 os.remove(img)
             elif gettype(img) == 'erofs':
                 pack_type = 'EROFS'
-                blue(f"正在分解底包 {part}.img [erofs]\nExtracing {part}.img [erofs] from BASEROM")
+                blue(f"正在分解底包 {part}.img [erofs]", "Extracing {part}.img [erofs] from BASEROM")
                 if call(f'extract.erofs -x -i build/baserom/images/{part}.img  -o build/baserom/images/'):
-                    red(f"分解 {part}.img 失败\nExtracting {part}.img failed.")
+                    red(f"分解 {part}.img 失败", "Extracting {part}.img failed.")
                     sys.exit()
-                blue(f"分解底包 [{part}.img][erofs] 完成\nBASEROM {part}.img [erofs] extracted.")
+                blue(f"分解底包 [{part}.img][erofs] 完成", "BASEROM {part}.img [erofs] extracted.")
                 os.remove(img)
 
     for image in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm']:
         source_file = f'build/baserom/images/{image}.img'
         if os.path.isfile(source_file):
             shutil.copy(source_file, f'build/portrom/images/{image}.img')
-    green("开始提取逻辑分区镜像\nStarting extract partition from img")
+    green("开始提取逻辑分区镜像", "Starting extract partition from img")
     for part in super_list:
         if part in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm'] and os.path.isfile(f"build/portrom/images/{part}.img"):
-            blue(f"从底包中提取 [{part}]分区 ...\nExtracting [{part}] from BASEROM")
+            blue(f"从底包中提取 [{part}]分区 ...", "Extracting [{part}] from BASEROM")
         else:
             if is_eu_rom:
-                blue(f"PORTROM super.img 提取 [{part}] 分区...\nExtracting [{part}] from PORTROM super.img")
+                blue(f"PORTROM super.img 提取 [{part}] 分区...", "Extracting [{part}] from PORTROM super.img")
                 lpunpack('build/portrom/super.img', 'build/portrom/images', [f"{part}_a"])
                 shutil.move(f"build/portrom/images/{part}_a.img", f"build/portrom/images/{part}.img")
             else:
-                blue(f"payload.bin 提取 [{part}] 分区...\nExtracting [{part}] from PORTROM payload.bin")
+                blue(f"payload.bin 提取 [{part}] 分区...", "Extracting [{part}] from PORTROM payload.bin")
                 if call(f'payload-dumper-go -p {part} -o build/portrom/images/ build/portrom/payload.bin'):
-                    red(f"提取移植包 [{part}] 分区时出错\nExtracting partition [{part}] error.")
+                    red(f"提取移植包 [{part}] 分区时出错", "Extracting partition [{part}] error.")
                     sys.exit()
         img = f'build/portrom/images/{part}.img'
         if os.path.isfile(img):
-            blue(f"开始提取 {part}.img\nExtracting {part}.img")
+            blue(f"开始提取 {part}.img", "Extracting {part}.img")
             if gettype(img) == 'sparse':
                 simg2img(img)
             if gettype(img) == 'ext':
@@ -657,49 +657,49 @@ def main(baserom, portrom):
                 try:
                     Extractor().main(img, ('build/portrom/images/' + os.sep + os.path.basename(img).split('.')[0]))
                 except:
-                    red(f"提取{part}失败\nExtracting partition {part} failed")
+                    red(f"提取{part}失败", "Extracting partition {part} failed")
                     sys.exit()
                 os.makedirs(f'build/portrom/images/{part}/lost+found', exist_ok=True)
                 os.remove(f'build/portrom/images/{part}.img')
-                green(f"提取 [{part}] [ext]镜像完毕\nExtracting [{part}].img [ext] done")
+                green(f"提取 [{part}] [ext]镜像完毕", "Extracting [{part}].img [ext] done")
             elif gettype(img) == 'erofs':
                 pack_type = 'EROFS'
-                green("移植包为 [erofs] 文件系统\nPORTROM filesystem: [erofs]. ")
+                green("移植包为 [erofs] 文件系统", "PORTROM filesystem: [erofs]. ")
                 if read_config('bin/port_config', 'repack_with_ext4') == "true":
                     pack_type = 'EXT'
                 if call(f'extract.erofs -x -i build/portrom/images/{part}.img -o build/portrom/images/'):
-                    red(f"提取{part}失败\nExtracting {part} failed")
+                    red(f"提取{part}失败", "Extracting {part} failed")
                 os.makedirs(f'build/portrom/images/{part}/lost+found', exist_ok=True)
                 os.remove(f'build/portrom/images/{part}.img')
-                green(f"提取移植包[{part}] [erofs]镜像完毕\nExtracting {part} [erofs] done.")
+                green(f"提取移植包[{part}] [erofs]镜像完毕", "Extracting {part} [erofs] done.")
     # Modify The Rom
-    blue("正在获取ROM参数\nFetching ROM build prop.")
+    blue("正在获取ROM参数", "Fetching ROM build prop.")
     is_ab_device = read_config('build/portrom/images/vendor/build.prop', 'ro.build.ab_update')
     base_android_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.release')
     port_android_version = read_config('build/portrom/images/system/system/build.prop',
                                        'ro.system.build.version.release')
     port_rom_code = read_config('build/portrom/images/product/etc/build.prop', 'ro.product.product.name')
     green(
-        f"安卓版本: 底包为[Android {base_android_version}], 移植包为 [Android {port_android_version}]\nAndroid Version: BASEROM:[Android {base_android_version}], PORTROM [Android {port_android_version}]")
+        f"安卓版本: 底包为[Android {base_android_version}], 移植包为 [Android {port_android_version}]", "Android Version: BASEROM:[Android {base_android_version}], PORTROM [Android {port_android_version}]")
     base_android_sdk = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.sdk')
     port_android_sdk = read_config('build/portrom/images/system/system/build.prop', 'ro.system.build.version.sdk')
     green(
-        f"SDK 版本: 底包为 [SDK {base_android_sdk}], 移植包为 [SDK {port_android_sdk}]\nSDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
+        f"SDK 版本: 底包为 [SDK {base_android_sdk}], 移植包为 [SDK {port_android_sdk}]", "SDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
     base_rom_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.incremental')
     port_mios_version_incremental = read_config('build/portrom/images/mi_ext/etc/build.prop',
                                                 'ro.mi.os.version.incremental')
     port_device_code = port_mios_version_incremental.split(".")[4]
     if 'DEV' in port_mios_version_incremental:
-        yellow("检测到开发板，跳过修改版本代码\nDev deteced,skip replacing codename")
+        yellow("检测到开发板，跳过修改版本代码", "Dev deteced,skip replacing codename")
         port_rom_version = port_mios_version_incremental
     else:
         base_device_code = 'U' + base_rom_version.split(".")[4][1:]
         port_rom_version = port_mios_version_incremental.replace(port_device_code, base_device_code)
     green(
-        f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]\nROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
+        f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]", "ROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', 'ro.product.vendor.device')
     green(
-        f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]\nDevice Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
+        f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]", "Device Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
     for cpfile in ['AospFrameworkResOverlay.apk', 'MiuiFrameworkResOverlay.apk', 'DevicesAndroidOverlay.apk',
                    'DevicesOverlay.apk', 'SettingsRroDeviceHideStatusBarOverlay.apk', 'MiuiBiometricResOverlay.apk']:
         base_file = find_file('build/baserom/images/product', cpfile)
@@ -707,7 +707,7 @@ def main(baserom, portrom):
         if not all([base_file, port_file]):
             continue
         if os.path.isfile(base_file) and os.path.isfile(port_file):
-            blue(f"正在替换 [{cpfile}]\nReplacing [{cpfile}]")
+            blue(f"正在替换 [{cpfile}]", "Replacing [{cpfile}]")
             shutil.copyfile(base_file, port_file)
 
     for file_path in glob.glob("build/portrom/images/product/etc/displayconfig/display_id*.xml"):
@@ -734,17 +734,17 @@ def main(baserom, portrom):
     baseMiuiBiometric = find_folder_mh('build/baserom/images/product/app', 'MiuiBiometric')
     portMiuiBiometric = find_folder_mh('build/portrom/images/product/app', 'MiuiBiometric')
     if os.path.isdir(baseMiuiBiometric) and os.path.isdir(portMiuiBiometric):
-        yellow("查找MiuiBiometric\nSearching and Replacing MiuiBiometric..")
+        yellow("查找MiuiBiometric", "Searching and Replacing MiuiBiometric..")
         shutil.rmtree(portMiuiBiometric)
         os.makedirs(portMiuiBiometric, exist_ok=True)
         shutil.copytree(baseMiuiBiometric, portMiuiBiometric, dirs_exist_ok=True)
     elif os.path.isdir(baseMiuiBiometric):
-        blue("未找到MiuiBiometric，替换为原包\nMiuiBiometric is missing, copying from base...")
+        blue("未找到MiuiBiometric，替换为原包", "MiuiBiometric is missing, copying from base...")
         os.makedirs(f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}')
         shutil.copytree(baseMiuiBiometric, f'build/portrom/images/product/app/{os.path.basename(baseMiuiBiometric)}',
                         dirs_exist_ok=True)
     # Apk
-    blue("左侧挖孔灵动岛修复\nStrongToast UI fix")
+    blue("左侧挖孔灵动岛修复", "StrongToast UI fix")
     if is_shennong_houji_port:
         patch_smali("MiuiSystemUI.apk", "MIUIStrongToast$2.smali", "const/4 v7, 0x0",
                     "iget-object v7, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\n\tinvoke-virtual {v7}, Landroid/widget/RelativeLayout;->getLeft()I\n\tmove-result v7\n\tint-to-float v7,v7",
