@@ -1552,7 +1552,6 @@ def main(baserom, portrom):
                                   f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_b images\\"{fwimg}".img')
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
                                   f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_a images\\"{fwimg}".img')
-
             insert_after_line(
                 f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary',
                 '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_b"')
