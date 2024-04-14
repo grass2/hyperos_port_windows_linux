@@ -1,4 +1,3 @@
-lxml
 Requests
 rich
 pyinstaller
