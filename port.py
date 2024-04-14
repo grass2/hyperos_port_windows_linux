@@ -1251,7 +1251,7 @@ def main(baserom, portrom):
                     red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败", "Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
             else:
-                blue(f'以[{pack_type}]文件系统打包[{pname}.img]", "Packing [{pname}.img] with [{pack_type}] filesystem')
+                blue(f'以[{pack_type}]文件系统打包[{pname}.img]', 'Packing [{pname}.img] with [{pack_type}] filesystem')
                 call(
                     f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
