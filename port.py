@@ -23,6 +23,7 @@ from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
 import locale
 from rich.progress import track
+from dumper import Dumper
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
@@ -600,9 +601,12 @@ def main(baserom, portrom):
     # Extract BaseRom Partition
     if baserom_type == 'payload':
         blue("开始分解底包 [payload.bin]", "Unpacking BASEROM [payload.bin]")
-        if call('payload-dumper-go -o build/baserom/images/ build/baserom/payload.bin'):
-            red("分解底包 [payload.bin] 时出错", "Unpacking [payload.bin] failed")
-            sys.exit()
+        with open('build/baserom/payload.bin', 'rb') as f:
+            try:
+                Dumper(f, 'build/baserom/images/', False, old='old').run()
+            except:
+                red("分解底包 [payload.bin] 时出错", "Unpacking [payload.bin] failed")
+                sys.exit()
     elif is_base_rom_eu:
         blue("开始分解底包 [super.img]", "Unpacking BASEROM [super.img]")
         lpunpack("build/baserom/super.img", 'build/baserom/images', super_list)
@@ -650,9 +654,16 @@ def main(baserom, portrom):
                 shutil.move(f"build/portrom/images/{part}_a.img", f"build/portrom/images/{part}.img")
             else:
                 blue(f"payload.bin 提取 [{part}] 分区...", "Extracting [{part}] from PORTROM payload.bin")
-                if call(f'payload-dumper-go -p {part} -o build/portrom/images/ build/portrom/payload.bin'):
-                    red(f"提取移植包 [{part}] 分区时出错", "Extracting partition [{part}] error.")
-                    sys.exit()
+                with open('build/portrom/payload.bin', 'rb') as f:
+                    try:
+                        Dumper(f,
+                               'build/portrom/images/',
+                               diff=False,
+                               old='old',
+                               images=[part]).run()
+                    except:
+                        red(f"提取移植包 [{part}] 分区时出错", "Extracting partition [{part}] error.")
+                        sys.exit()
         img = f'build/portrom/images/{part}.img'
         if os.path.isfile(img):
             blue(f"开始提取 {part}.img", "Extracting {part}.img")
