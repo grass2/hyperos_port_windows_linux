@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#====================================================
+# ====================================================
 #          FILE: sdat2img.py
 #       AUTHORS: xpirt - luxi78 - howellzhu
 #          DATE: 2018-10-27 10:33:21 CEST
-#====================================================
+# ====================================================
 
 from __future__ import print_function
-import sys, os, errno
+
+import errno
+import os
+import sys
 
 
 def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
-    __version__ = '1.2'
-
-    print('sdat2img binary - version: {}\n'.format(__version__))
-
     def rangeset(src):
         src_set = src.split(',')
         num_set = [int(item) for item in src_set]
@@ -24,7 +23,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
 
         return tuple([(num_set[i], num_set[i + 1]) for i in range(1, len(num_set), 2)])
 
-    def parse_transfer_list_file(path):
+    def parse_transfer_list_file():
         trans_list = open(TRANSFER_LIST_FILE, 'r')
 
         # First line in transfer list is the version number
@@ -58,7 +57,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
 
     BLOCK_SIZE = 4096
 
-    version, new_blocks, commands = parse_transfer_list_file(TRANSFER_LIST_FILE)
+    version, new_blocks, commands = parse_transfer_list_file()
 
     if version == 1:
         print('Android Lollipop 5.0 detected!\n')
@@ -93,7 +92,6 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
                 end = block[1]
                 block_count = end - begin
                 print('\rCopying {} blocks into position {}...'.format(block_count, begin), end='')
-
                 # Position output file
                 output_img.seek(begin * BLOCK_SIZE)
 
@@ -101,13 +99,10 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
                 while block_count > 0:
                     output_img.write(new_data_file.read(BLOCK_SIZE))
                     block_count -= 1
-        else:
-            print('\nSkipping command {}...'.format(command[0]), end='')
 
     # Make file larger if necessary
     if output_img.tell() < max_file_size:
         output_img.truncate(max_file_size)
-
     output_img.close()
     new_data_file.close()
-    print('Done! Output image: {}'.format(os.path.realpath(output_img.name)))
+    print('\nDone! Output image: {}'.format(os.path.realpath(output_img.name)))
