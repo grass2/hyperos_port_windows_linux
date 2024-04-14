@@ -18,7 +18,7 @@ from bin.read_config import main as read_config
 import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
-from datetime import datetime
+from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
@@ -921,7 +921,7 @@ def main(baserom, portrom):
             if os.path.isdir(fi):
                 shutil.rmtree(fi)
     blue("正在修改 build.prop\nModifying build.prop")
-    buildDate = datetime.utcnow().strftime("%a %b %d %H:%M:%S UTC %Y")
+    buildDate = datetime.now(timezone.utc).strftime("%a %b %d %H:%M:%S UTC %Y")
     buildUtc = int(time.time())
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', "ro.product.vendor.device")
     for i in find_files('build/portrom/images', 'build.prop'):
