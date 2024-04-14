@@ -1,6 +1,7 @@
 <div align="center">
 
 # HyperOS 移植项目
+## 使用Python重新实现
 ### 基于 https://github.com/ljc-fight/miui_port
 
 简体中文&nbsp;&nbsp;|&nbsp;&nbsp;[English](/README_en-US.md) 
