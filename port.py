@@ -36,7 +36,7 @@ tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 
 def check():
     for i in ['7z', 'zip', 'java', 'zipalign', 'zstd']:
-        if os.path.exists(os.path.join(tools_dir, i)):
+        if os.path.exists(os.path.join(tools_dir, (i + '.exe' if os.name == 'nt' else ''))):
             return
         if not shutil.which(i):
             red(f"--> Missing {i} abort! please run ./setup.sh first (sudo is required on Linux system)")
