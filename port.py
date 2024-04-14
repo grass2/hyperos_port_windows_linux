@@ -21,15 +21,46 @@ from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
 from datetime import datetime
 import xml.etree.ElementTree as ET
-from bin.getSuperSize import main as getSuperSize
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
 from bin.patch_vbmeta import main as patch_vbmeta
 from bin.unlock_device_feature import main as unlock_device_feature
-from bin.maxfps import main as maxfps
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
+def getSuperSize(device):
+    device = device.upper()
+    # 13 13Pro 13Ultra RedmiNote12Turbo |K60Pro |MIXFold
+    if device in ['FUXI', 'NUWA', 'ISHTAR', 'MARBLE', 'SOCRATES', 'BABYLO']:
+        return 9663676416
+    # Redmi Note 12 5G
+    elif device == 'SUNSTONE':
+        return 9122611200
+    # PAD6Max
+    elif device == 'YUDI':
+        return 11811160064
+    # Others
+    else:
+        return 9126805504
+
+
+def maxfps(file):
+    if not os.path.exists(file) or not os.path.isfile(file):
+        return '90'
+    fps_list_element = ET.parse(file).getroot().find(".//integer-array[@name='fpsList']")
+    if fps_list_element is not None:
+        # 从 fpsList 元素中提取所有 item 元素的值
+        items = [int(item.text) for item in fps_list_element.findall("item")]
+        sorted_items = sorted(items, reverse=True)
+        if sorted_items:
+            return max(sorted_items)
+        else:
+            return "90"
+    else:
+        return "90"
+
 
 def disavb(fstab):
     blue(f"Disabling avb_verify: {fstab}")
@@ -44,6 +75,8 @@ def disavb(fstab):
     details = re.sub(",avb", "", details)
     with open(fstab, "w") as tf:
         tf.write(details)
+
+
 def xmlstarlet(file, rule, new_value):
     if not os.path.exists(file) or not os.path.isfile(file):
         return ''
