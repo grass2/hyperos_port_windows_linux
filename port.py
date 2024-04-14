@@ -55,8 +55,8 @@ def unlock_device_feature(file, comment, feature_type, feature_name, feature_val
     element = tree.find(xpath_expr)
     comment_c = None
     if element is None:
-        element = ET.SubElement(root, feature_type)
-        comment_c = ET.Comment(comment)
+        element = ET2.SubElement(root, feature_type)
+        comment_c = ET2.Comment(comment)
     element.set('name', feature_name)
     element.text = feature_value
     if comment_c is not None:
