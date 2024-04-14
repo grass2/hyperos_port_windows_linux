@@ -889,7 +889,7 @@ def main(baserom, portrom):
                     find = True
                     yellow(
                         f"{vndk_version}已存在，跳过修改",
-                        "The file already contains the version {vndk_version}. Skipping modification.")
+                        f"The file already contains the version {vndk_version}. Skipping modification.")
                     break
         if not find:
             tree = ET.parse(targetVintf)
