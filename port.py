@@ -462,43 +462,43 @@ def main(baserom, portrom):
     build_user = 'Bruce Teng'
     device_code = "YourDevice"
     compatible_matrix_matches_enabled = read_config('bin/port_config', 'compatible_matrix_matches_check')
-    if True:
-        if read_config('bin/port_config', 'repack_with_ext4') == 'true':
-            pack_type = 'EXT'
+    if read_config('bin/port_config', 'repack_with_ext4') == 'true':
+        pack_type = 'EXT'
+    else:
+        pack_type = 'EROFS'
+    if "miui_" in baserom:
+        device_code = baserom.split('_')[1]
+    elif "xiaomi.eu_" in baserom:
+        device_code = baserom.split('_')[2]
+    print(device_code)
+    if [True for i in ['SHENNONG', 'HOUJI'] if i in device_code]:
+        is_shennong_houji_port = True
+    else:
+        is_shennong_houji_port = False
+    blue("正在检测ROM底包\nValidating BASEROM..")
+    with zipfile.ZipFile(baserom) as rom:
+        if "payload.bin" in rom.namelist():
+            baserom_type = 'payload'
+            super_list = ['vendor', 'mi_ext', 'odm', 'odm_dlkm', 'system', 'system_dlkm', 'vendor_dlkm', 'product',
+                          'product_dlkm', 'system_ext']
+        elif [True for i in rom.namelist() if '.br' in i]:
+            baserom_type = 'br'
+            super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
+        elif [True for i in rom.namelist() if 'images/super.img' in i]:
+            is_base_rom_eu = True
+            super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
         else:
-            pack_type = 'EROFS'
-        if "miui_" in baserom:
-            device_code = baserom.split('_')[1]
-        elif "xiaomi.eu_" in baserom:
-            device_code = baserom.split('_')[2]
-        print(device_code)
-        if [True for i in ['SHENNONG', 'HOUJI'] if i in device_code]:
-            is_shennong_houji_port = True
+            red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试\npayload.bin/new.br not found, please use HyperOS official OTA zip package.")
+            sys.exit()
+    with zipfile.ZipFile(portrom) as rom:
+        if "payload.bin" in rom.namelist():
+            green("ROM初步检测通过\nROM validation passed.")
+        elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
+            is_eu_rom = True
         else:
-            is_shennong_houji_port = False
-        blue("正在检测ROM底包\nValidating BASEROM..")
-        with zipfile.ZipFile(baserom) as rom:
-            if "payload.bin" in rom.namelist():
-                baserom_type = 'payload'
-                super_list = ['vendor', 'mi_ext', 'odm', 'odm_dlkm', 'system', 'system_dlkm', 'vendor_dlkm', 'product',
-                              'product_dlkm', 'system_ext']
-            elif [True for i in rom.namelist() if '.br' in i]:
-                baserom_type = 'br'
-                super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
-            elif [True for i in rom.namelist() if 'images/super.img' in i]:
-                is_base_rom_eu = True
-                super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
-            else:
-                red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试\npayload.bin/new.br not found, please use HyperOS official OTA zip package.")
-                sys.exit()
-        with zipfile.ZipFile(portrom) as rom:
-            if "payload.bin" in rom.namelist():
-                green("ROM初步检测通过\nROM validation passed.")
-            elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
-                is_eu_rom = True
-            else:
-                red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
-                sys.exit()
+            red("目标移植包没有payload.bin，请用MIUI官方包作为移植包\npayload.bin not found, please use HyperOS official OTA zip package.")
+            sys.exit()
+
     # Clean Up
     blue("正在清理文件\nCleaning up..")
     for i in read_config('bin/port_config', 'partition_to_port').split():
