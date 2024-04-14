@@ -517,7 +517,6 @@ def main(baserom, portrom):
                 shutil.rmtree(i)
             except:
                 pass
-
     green("文件清理完毕\nFiles cleaned up.")
     for i in ['build/baserom/images/', 'build/portrom/images/']:
         if not os.path.exists(i):
