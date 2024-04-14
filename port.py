@@ -408,7 +408,8 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
             with open(targetsmali, 'w') as f:
                 f.write(content)
             if call(
-                    f'java -jar bin/apktool/smali.jar a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex', out=1, kz='N') != 0:
+                    f'java -jar bin/apktool/smali.jar a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex',
+                    out=1, kz='N') != 0:
                 red('Smaling 失败', 'Smaling failed')
                 sys.exit()
             old = os.getcwd()
@@ -1281,7 +1282,8 @@ def main(baserom, portrom):
                         f"Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
             else:
-                blue(f'以[{pack_type}]文件系统打包[{pname}.img]', f'Packing [{pname}.img] with [{pack_type}] filesystem')
+                blue(f'以[{pack_type}]文件系统打包[{pname}.img]',
+                     f'Packing [{pname}.img] with [{pack_type}] filesystem')
                 call(
                     f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
