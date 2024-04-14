@@ -453,11 +453,9 @@ def main(baserom, portrom):
         else:
             red("PORTROM: Invalid parameter")
             sys.exit()
-    pack_type = 'EXT'
     is_base_rom_eu: bool = False
     baserom_type: str = ''
     is_eu_rom: bool = False
-    super_list: list = []
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'Bruce Teng'
     device_code = "YourDevice"
