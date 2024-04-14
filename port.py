@@ -76,14 +76,14 @@ def update_netlink(netlink_version, prop_file):
         return ''
     if not read_config(prop_file, 'ro.millet.netlink'):
         blue(
-            f"找到ro.millet.netlink修改值为{netlink_version}\nmillet_netlink propery found, changing value to {netlink_version}")
+            f"找到ro.millet.netlink修改值为{netlink_version}", "millet_netlink propery found, changing value to {netlink_version}")
         with open(prop_file, "r") as sf:
             details = re.sub("ro.millet.netlink=.*", f"ro.millet.netlink={netlink_version}", sf.read())
         with open(prop_file, "w") as tf:
             tf.write(details)
     else:
         blue(
-            f"PORTROM未找到ro.millet.netlink值,添加为{netlink_version}\n millet_netlink not found in portrom, adding new value {netlink_version}")
+            f"PORTROM未找到ro.millet.netlink值,添加为{netlink_version}", "millet_netlink not found in portrom, adding new value {netlink_version}")
         with open(prop_file, "r") as tf:
             details = tf.readlines()
             details.append(f"ro.millet.netlink={netlink_version}\n")
@@ -118,13 +118,13 @@ def patch_vbmeta(file):
         return
     if os.read(fd, 4) != b"AVB0":
         os.close(fd)
-        print("Error: The provided image is not a valid vbmeta image.\nFile not modified. Exiting...")
+        print("Error: The provided image is not a valid vbmeta image.")
     try:
         os.lseek(fd, 123, os.SEEK_SET)
         os.write(fd, b'\x03')
     except OSError:
         os.close(fd)
-        print("Error: Failed when patching the vbmeta image.\nExiting...")
+        print("Error: Failed when patching the vbmeta image")
     os.close(fd)
     print("Patching successful.")
 
