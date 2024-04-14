@@ -54,7 +54,7 @@ def gettype(file) -> str:
             if compare(f_[0], f_[2]):
                 return f_[1]
     try:
-        if LOGO_DUMPER(file, str(None)).check_img(file):
+        if LogoDumper(file, str(None)).check_img(file):
             return 'logo'
     except AssertionError:
         ...
@@ -88,7 +88,7 @@ class BMPHEAD:
         ) = struct.unpack(self.structstr, buf)
 
 
-class XIAOMI_BLKSTRUCT:
+class XiaomiBlkstruct:
     def __init__(self, buf: bytes):
         self.structstr = "2I"
         (
@@ -97,7 +97,7 @@ class XIAOMI_BLKSTRUCT:
         ) = struct.unpack(self.structstr, buf)
 
 
-class LOGO_DUMPER:
+class LogoDumper:
     def __init__(self, img: str, out: str, dir__: str = "pic"):
         self.magic = None
         self.out = out
@@ -115,7 +115,7 @@ class LOGO_DUMPER:
                 self.struct_str, f.read(struct.calcsize(self.struct_str))
             )[0]
             while True:
-                m = XIAOMI_BLKSTRUCT(f.read(8))
+                m = XiaomiBlkstruct(f.read(8))
                 if m.img_offset != 0:
                     self.cfg.imgblkszs.append(m.blksz << 0xc)
                     self.cfg.imgblkoffs.append(m.img_offset << 0xc)
