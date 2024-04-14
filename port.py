@@ -473,7 +473,7 @@ def main(baserom, portrom):
         is_shennong_houji_port = True
     else:
         is_shennong_houji_port = False
-    blue("正在检测ROM底包\nValidating BASEROM..")
+    blue("正在检测ROM底包", "Validating BASEROM..")
     with zipfile.ZipFile(baserom) as rom:
         if "payload.bin" in rom.namelist():
             baserom_type = 'payload'
