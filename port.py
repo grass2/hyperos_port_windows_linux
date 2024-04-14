@@ -411,7 +411,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
             old = os.getcwd()
             os.chdir(f'tmp/{foldername}/')
             if call(f'7z a -y -mx0 -tzip {targetfilename} {smalidir}.dex', kz='Y' if os.name == 'nt' else 'N') != 0:
-                red(f"修改{targetfilename}失败\nFailed to modify {targetfilename}")
+                red(f"修改{targetfilename}失败", "Failed to modify {targetfilename}")
                 sys.exit()
             os.chdir(old)
             yellow(f"修补{targetfilename} 完成\nFix {targetfilename}completed")
@@ -1259,7 +1259,7 @@ def main(baserom, portrom):
                     green(
                         f"成功打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}] success")
                 else:
-                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败\nPacking [{pname}] with[{pack_type}] filesystem failed!")
+                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败", "Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
     if is_ab_device == 'false' or not is_ab_device:
         blue("打包A-only super.img\nPacking super.img for A-only device")
@@ -1280,7 +1280,7 @@ def main(baserom, portrom):
     if os.path.exists("build/portrom/images/super.img"):
         green("成功打包 super.img\nPakcing super.img done.")
     else:
-        red('无法打包 super.img\nUnable to pack super.img.')
+        red('无法打包 super.img', 'Unable to pack super.img.')
         sys.exit()
     for pname in super_list:
         if os.path.exists(f'build/portrom/images/{pname}.img'):
