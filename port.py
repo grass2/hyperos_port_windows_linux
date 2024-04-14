@@ -61,7 +61,7 @@ def unlock_device_feature(file, comment, feature_type, feature_name, feature_val
     if comment_c is not None:
         root.append(comment_c)
     root.append(element)
-    xml_string = ET.tostring(root, encoding="utf-8", xml_declaration=True, pretty_print=True).replace(b"><", b">\n<")
+    xml_string = ET.tostring(root, encoding="utf-8", xml_declaration=True).replace(b"><", b">\n<")
     with open(file, "wb") as f:
         f.write(xml_string)
 
