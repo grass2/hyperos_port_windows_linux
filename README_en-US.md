@@ -42,7 +42,7 @@
    # Install dependencies
    pip3 install -r requirements.txt
    # Start porting
-   sudo python3 ./port.py <baserom> <portrom>
+   python ./port.py <baserom> <portrom>
 ```
 - On WSL、ubuntu、deepin and other Linux
 ```shell
@@ -56,7 +56,7 @@
     pip3 install -r requirements.txt
     sudo ./setup.sh
     # Start porting
-    sudo ./port.sh <baserom> <portrom>
+    sudo python3 ./port.py <baserom> <portrom>
 ```
 - on macOS (AMD64)
 ```shell
@@ -70,7 +70,7 @@
     pip3 install -r requirements.txt
     sudo ./setup.sh
      # Start porting
-    sudo ./port.sh <baserom> <portrom>
+    sudo python3 ./port.py <baserom> <portrom>
 ```
 - On Termux Android (not tested)
 ```shell
@@ -85,7 +85,7 @@
     ./setup.sh
     # Enter root mode 
     tsu
-    ./port.sh <baserom> <portrom>
+    python3 ./port.py <baserom> <portrom>
 ```
 - baserom and portrom can be a direct download link. you can get the ota download link  from third-party websites.
 

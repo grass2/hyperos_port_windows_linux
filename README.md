@@ -56,7 +56,7 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
    # 安装依赖
    pip3 install -r requirements.txt
    # 开始移植
-   sudo python3 ./port.py <底包路径> <移植包路径>
+   python ./port.py <底包路径> <移植包路径>
 ```
 - 在WSL、ubuntu、deepin等Linux下
 ```shell
