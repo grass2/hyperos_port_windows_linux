@@ -22,7 +22,7 @@ import lxml.etree as ET2
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
 import locale
-
+from rich.progress import track
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 is_chinese_language = 'Chinese' in locale.getlocale()[0]
@@ -601,7 +601,7 @@ def main(baserom, portrom):
         lpunpack("build/baserom/super.img", 'build/baserom/images', super_list)
     elif baserom_type == 'br':
         blue("开始分解底包 [new.dat.br]", "Unpacking BASEROM[new.dat.br]")
-        for i in super_list:
+        for i in track(super_list):
             call(f'brotli -d build/baserom/{i}.new.dat.br')
             sdat2img(f'build/baserom/{i}.transfer.list', f'build/baserom/{i}.new.dat', f'build/baserom/images/{i}.img')
             for v in glob.glob(f'build/baserom/{i}.new.dat*') + \
@@ -609,7 +609,7 @@ def main(baserom, portrom):
                      glob.glob(f'build/baserom/{i}.patch.*'):
                 os.remove(v)
 
-    for part in ['system', 'system_dlkm', 'system_ext', 'product', 'product_dlkm', 'mi_ext']:
+    for part in track(['system', 'system_dlkm', 'system_ext', 'product', 'product_dlkm', 'mi_ext']):
         img = f'build/baserom/images/{part}.img'
         if os.path.isfile(img):
             if gettype(img) == 'sparse':
@@ -633,7 +633,7 @@ def main(baserom, portrom):
         if os.path.isfile(source_file):
             shutil.copy(source_file, f'build/portrom/images/{image}.img')
     green("开始提取逻辑分区镜像", "Starting extract partition from img")
-    for part in super_list:
+    for part in track(super_list):
         if part in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm'] and os.path.isfile(f"build/portrom/images/{part}.img"):
             blue(f"从底包中提取 [{part}]分区 ...", "Extracting [{part}] from BASEROM")
         else:
