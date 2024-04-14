@@ -1020,24 +1020,24 @@ def main(baserom, portrom):
                 break
             else:
                 base_rom_density = '440'
-    found = 0
+    found = False
     for prop1, prop2 in zip(find_files('build/portrom/images/system', 'build.prop'),
                             find_files('build/portrom/images/product', 'build.prop')):
         if read_config(prop1, 'ro.sf.lcd_density'):
             with open(prop1, 'r', encoding='utf-8') as f:
                 data = re.sub('ro.sf.lcd_density=.*', f'ro.sf.lcd_density={base_rom_density}', f.read())
-                found = 1
+                found = True
                 data = re.sub('persist.miui.density_v2=.*', f'persist.miui.density_v2={base_rom_density}', data)
             with open(prop1, 'w', encoding='utf-8', newline='\n') as f:
                 f.write(data)
         if read_config(prop2, 'ro.sf.lcd_density'):
             with open(prop2, 'r', encoding='utf-8') as f:
                 data = re.sub('ro.sf.lcd_density=.*', f'ro.sf.lcd_density={base_rom_density}', f.read())
-                found = 1
+                found = True
                 data = re.sub('persist.miui.density_v2=.*', f'persist.miui.density_v2={base_rom_density}', data)
             with open(prop2, 'w', encoding='utf-8', newline='\n') as f:
                 f.write(data)
-    if found == 0:
+    if not found:
         blue(
             f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}", "ro.fs.lcd_density not found, create a new value {base_rom_density} ")
         append('build/portrom/images/product/etc/build.prop', [f'ro.sf.lcd_density={base_rom_density}\n'])
@@ -1448,17 +1448,17 @@ def main(baserom, portrom):
     os.chdir(old)
     now = datetime.now()
     pack_timestamp = now.strftime("%m%d%H%M")
-    hash = get_file_md5(f'out/{os_type}_{device_code}_{port_rom_version}.zip')[:10]
+    hash_ = get_file_md5(f'out/{os_type}_{device_code}_{port_rom_version}.zip')[:10]
     if pack_type == 'EROFS':
         pack_type = "ROOT_" + pack_type
         yellow(
             "检测到打包类型为EROFS,请确保官方内核支持，或者在devices机型目录添加有支持EROFS的内核，否者将无法开机！", "EROFS filesystem detected. Ensure compatibility with the official boot.img or ensure a supported boot_tv.img is placed in the device folder.")
     os.rename(f'out/{os_type}_{device_code}_{port_rom_version}.zip',
-              f'out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip')
+              f'out/{os_type}_{device_code}_{port_rom_version}_{hash_}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip')
     green("移植完毕", "Porting completed")
     green("输出包路径：", "Output: ")
     green(
-        f"{os.getcwd()}/out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip")
+        f"{os.getcwd()}/out/{os_type}_{device_code}_{port_rom_version}_{hash_}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip")
 
 
 if __name__ == '__main__':
