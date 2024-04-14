@@ -19,9 +19,7 @@ from bin.read_config import main as read_config
 import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
-from bin.xmlstarlet import main as xmlstarlet
 from datetime import datetime
-from bin.disable_avb_verify import main as disavb
 import xml.etree.ElementTree as ET
 from bin.getSuperSize import main as getSuperSize
 from bin.fspatch import main as fspatch
@@ -32,6 +30,31 @@ from bin.maxfps import main as maxfps
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+def disavb(fstab):
+    blue(f"Disabling avb_verify: {fstab}")
+    if not os.path.exists(fstab):
+        yellow(f"{fstab} not found, please check it manually")
+        sys.exit()
+    with open(fstab, "r") as sf:
+        details = re.sub(",avb_keys=.*avbpubkey", "", sf.read())
+    details = re.sub(",avb=vbmeta_system", ",", details)
+    details = re.sub(",avb=vbmeta_vendor", "", details)
+    details = re.sub(",avb=vbmeta", "", details)
+    details = re.sub(",avb", "", details)
+    with open(fstab, "w") as tf:
+        tf.write(details)
+def xmlstarlet(file, rule, new_value):
+    if not os.path.exists(file) or not os.path.isfile(file):
+        return ''
+    tree = ET.parse(file)
+    root = tree.getroot()
+    target_element = root.find(f".//integer[@name='{rule}']")
+    if target_element is not None:
+        target_element.text = new_value
+    else:
+        print("Target element not found.")
+    tree.write(file)
 
 
 def check():

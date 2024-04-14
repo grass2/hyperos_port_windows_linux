@@ -6,7 +6,6 @@ def main(file, comment, feature_type, feature_name, feature_value):
     tree = ET.parse(file)
     root = tree.getroot()
     xpath_expr = f"//{feature_type}[@name='{feature_name}']"
-
     element = tree.find(xpath_expr)
     comment_c = None
     if element is None:
