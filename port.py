@@ -437,7 +437,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
 def main(baserom, portrom):
     if not os.path.exists(os.path.basename(baserom)):
         if 'http' in baserom:
-            blue("底包为一个链接，正在下载\nDownload link detected, start downloding.")
+            blue("底包为一个链接，正在下载", "Download link detected, start downloding.")
             try:
                 downloader.download([baserom], os.getcwd())
             except:
@@ -449,7 +449,7 @@ def main(baserom, portrom):
             sys.exit()
     if not os.path.exists(os.path.basename(portrom)):
         if 'http' in portrom:
-            blue("移植包为一个链接，正在下载\nDownload link detected, start downloding.")
+            blue("移植包为一个链接，正在下载", "Download link detected, start downloding.")
             try:
                 downloader.download([portrom], os.getcwd())
             except:
@@ -463,7 +463,7 @@ def main(baserom, portrom):
     baserom_type: str = ''
     is_eu_rom: bool = False
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
-    build_user = 'Bruce Teng'
+    build_user = 'ColdWindScholar'
     device_code = "YourDevice"
     compatible_matrix_matches_enabled = read_config('bin/port_config', 'compatible_matrix_matches_check')
     if read_config('bin/port_config', 'repack_with_ext4') == 'true':
@@ -626,17 +626,17 @@ def main(baserom, portrom):
             if gettype(img) == 'sparse':
                 simg2img(img)
             if gettype(img) == 'ext':
-                blue(f"正在分解底包 {part}.img [ext]", "Extracing {part}.img [ext] from BASEROM")
+                blue(f"正在分解底包 {part}.img [ext]", f"Extracing {part}.img [ext] from BASEROM")
                 Extractor().main(img, ('build/baserom/images/' + os.path.basename(img).split('.')[0]))
                 blue(f"分解底包 [{part}.img] 完成", "BASEROM {part}.img [ext] extracted.")
                 os.remove(img)
             elif gettype(img) == 'erofs':
                 pack_type = 'EROFS'
-                blue(f"正在分解底包 {part}.img [erofs]", "Extracing {part}.img [erofs] from BASEROM")
+                blue(f"正在分解底包 {part}.img [erofs]", f"Extracing {part}.img [erofs] from BASEROM")
                 if call(f'extract.erofs -x -i build/baserom/images/{part}.img  -o build/baserom/images/'):
                     red(f"分解 {part}.img 失败", "Extracting {part}.img failed.")
                     sys.exit()
-                blue(f"分解底包 [{part}.img][erofs] 完成", "BASEROM {part}.img [erofs] extracted.")
+                blue(f"分解底包 [{part}.img][erofs] 完成", f"BASEROM {part}.img [erofs] extracted.")
                 os.remove(img)
 
     for image in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm']:
@@ -646,14 +646,14 @@ def main(baserom, portrom):
     green("开始提取逻辑分区镜像", "Starting extract partition from img")
     for part in track(super_list):
         if part in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm'] and os.path.isfile(f"build/portrom/images/{part}.img"):
-            blue(f"从底包中提取 [{part}]分区 ...", "Extracting [{part}] from BASEROM")
+            blue(f"从底包中提取 [{part}]分区 ...", f"Extracting [{part}] from BASEROM")
         else:
             if is_eu_rom:
-                blue(f"PORTROM super.img 提取 [{part}] 分区...", "Extracting [{part}] from PORTROM super.img")
+                blue(f"PORTROM super.img 提取 [{part}] 分区...", f"Extracting [{part}] from PORTROM super.img")
                 lpunpack('build/portrom/super.img', 'build/portrom/images', [f"{part}_a"])
                 shutil.move(f"build/portrom/images/{part}_a.img", f"build/portrom/images/{part}.img")
             else:
-                blue(f"payload.bin 提取 [{part}] 分区...", "Extracting [{part}] from PORTROM payload.bin")
+                blue(f"payload.bin 提取 [{part}] 分区...", f"Extracting [{part}] from PORTROM payload.bin")
                 with open('build/portrom/payload.bin', 'rb') as f:
                     try:
                         Dumper(f,
@@ -662,11 +662,11 @@ def main(baserom, portrom):
                                old='old',
                                images=[part]).run()
                     except:
-                        red(f"提取移植包 [{part}] 分区时出错", "Extracting partition [{part}] error.")
+                        red(f"提取移植包 [{part}] 分区时出错", f"Extracting partition [{part}] error.")
                         sys.exit()
         img = f'build/portrom/images/{part}.img'
         if os.path.isfile(img):
-            blue(f"开始提取 {part}.img", "Extracting {part}.img")
+            blue(f"开始提取 {part}.img", f"Extracting {part}.img")
             if gettype(img) == 'sparse':
                 simg2img(img)
             if gettype(img) == 'ext':
@@ -674,11 +674,11 @@ def main(baserom, portrom):
                 try:
                     Extractor().main(img, ('build/portrom/images/' + os.sep + os.path.basename(img).split('.')[0]))
                 except:
-                    red(f"提取{part}失败", "Extracting partition {part} failed")
+                    red(f"提取{part}失败", f"Extracting partition {part} failed")
                     sys.exit()
                 os.makedirs(f'build/portrom/images/{part}/lost+found', exist_ok=True)
                 os.remove(f'build/portrom/images/{part}.img')
-                green(f"提取 [{part}] [ext]镜像完毕", "Extracting [{part}].img [ext] done")
+                green(f"提取 [{part}] [ext]镜像完毕", f"Extracting [{part}].img [ext] done")
             elif gettype(img) == 'erofs':
                 pack_type = 'EROFS'
                 green("移植包为 [erofs] 文件系统", "PORTROM filesystem: [erofs]. ")
@@ -688,7 +688,7 @@ def main(baserom, portrom):
                     red(f"提取{part}失败", "Extracting {part} failed")
                 os.makedirs(f'build/portrom/images/{part}/lost+found', exist_ok=True)
                 os.remove(f'build/portrom/images/{part}.img')
-                green(f"提取移植包[{part}] [erofs]镜像完毕", "Extracting {part} [erofs] done.")
+                green(f"提取移植包[{part}] [erofs]镜像完毕", f"Extracting {part} [erofs] done.")
     # Modify The Rom
     blue("正在获取ROM参数", "Fetching ROM build prop.")
     is_ab_device = read_config('build/portrom/images/vendor/build.prop', 'ro.build.ab_update')
@@ -703,7 +703,7 @@ def main(baserom, portrom):
     port_android_sdk = read_config('build/portrom/images/system/system/build.prop', 'ro.system.build.version.sdk')
     green(
         f"SDK 版本: 底包为 [SDK {base_android_sdk}], 移植包为 [SDK {port_android_sdk}]",
-        "SDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
+        f"SDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
     base_rom_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.incremental')
     port_mios_version_incremental = read_config('build/portrom/images/mi_ext/etc/build.prop',
                                                 'ro.mi.os.version.incremental')
@@ -716,11 +716,11 @@ def main(baserom, portrom):
         port_rom_version = port_mios_version_incremental.replace(port_device_code, base_device_code)
     green(
         f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]",
-        "ROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
+        f"ROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', 'ro.product.vendor.device')
     green(
         f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]",
-        "Device Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
+        f"Device Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
     for cpfile in ['AospFrameworkResOverlay.apk', 'MiuiFrameworkResOverlay.apk', 'DevicesAndroidOverlay.apk',
                    'DevicesOverlay.apk', 'SettingsRroDeviceHideStatusBarOverlay.apk', 'MiuiBiometricResOverlay.apk']:
         base_file = find_file('build/baserom/images/product', cpfile)
@@ -849,7 +849,7 @@ def main(baserom, portrom):
     for i in glob.glob('build/portrom/images/vendor/*.prop'):
         vndk_version = read_config(i, 'ro.vndk.version')
         if vndk_version:
-            yellow(f"ro.vndk.version为{vndk_version}", "ro.vndk.version found in {i}: {vndk_version}")
+            yellow(f"ro.vndk.version为{vndk_version}", f"ro.vndk.version found in {i}: {vndk_version}")
             break
     if vndk_version:
         base_vndk = find_file('build/baserom/images/system_ext/apex', f'com.android.vndk.v{vndk_version}.apex')
@@ -957,7 +957,7 @@ def main(baserom, portrom):
                             'AnalyticsCore']:
             app_dir = find_folder_mh('build/portrom/images/product', debloat_app)
             if os.path.isdir(app_dir) and app_dir:
-                yellow(f"删除目录: {app_dir}", "Removing directory: {app_dir}")
+                yellow(f"删除目录: {app_dir}", f"Removing directory: {app_dir}")
                 shutil.rmtree(app_dir)
         for i in glob.glob('build/portrom/images/product/etc/auto-install*'):
             os.remove(i)
