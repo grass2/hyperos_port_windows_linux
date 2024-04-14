@@ -1236,7 +1236,7 @@ def main(baserom, portrom):
     if os.path.isdir(f'devices/{base_rom_code}/overlay'):
         shutil.copytree(f'devices/{base_rom_code}/overlay/', 'build/portrom/images/', dirs_exist_ok=True)
     else:
-        yellow(f"devices/{base_rom_code}/overlay 未找到", "devices/{base_rom_code}/overlay not found")
+        yellow(f"devices/{base_rom_code}/overlay 未找到", f"devices/{base_rom_code}/overlay not found")
     if pack_type == 'EROFS':
         yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点",
                "Validating whether adding erofs mount points is needed.")
@@ -1245,9 +1245,9 @@ def main(baserom, portrom):
         if 'erofs' in content:
             for pname in ['system', 'odm', 'vendor', 'product', 'mi_ext', 'system_ext']:
                 sed('build/portrom/images/vendor/etc/fstab.qcom', rf"/{pname}\s+ext4", f"/{pname} erofs")
-                yellow(f"添加{pname}", "Adding mount point {pname}")
+                yellow(f"添加{pname}", f"Adding mount point {pname}")
     superSize = get_super_size(device_code)
-    green(f"Super大小为{superSize}", "Super image size: {superSize}")
+    green(f"Super大小为{superSize}", f"Super image size: {superSize}")
     green("开始打包镜像", "Packing super.img")
     for pname in super_list:
         if os.path.isdir(f"build/portrom/images/{pname}"):
@@ -1271,35 +1271,35 @@ def main(baserom, portrom):
                 thisSize = int(get_dir_size(f"build/portrom/images/{pname}") + addsize.get(pname, addsize.get('other')))
                 blue(
                     f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]",
-                    "Packing [{pname}.img]:[{pack_type}] with size [{thisSize}]")
+                    f"Packing [{pname}.img]:[{pack_type}] with size [{thisSize}]")
                 call(
                     f'make_ext4fs -J -T {int(time.time())} -S build/portrom/images/config/{pname}_file_contexts -l {thisSize} -C build/portrom/images/config/{pname}_fs_config -L {pname} -a {pname} build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
                     green(
                         f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统",
-                        "Packing [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
+                        f"Packing [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
                 else:
                     red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败",
-                        "Packing [{pname}] with[{pack_type}] filesystem failed!")
+                        f"Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
             else:
-                blue(f'以[{pack_type}]文件系统打包[{pname}.img]', 'Packing [{pname}.img] with [{pack_type}] filesystem')
+                blue(f'以[{pack_type}]文件系统打包[{pname}.img]', f'Packing [{pname}.img] with [{pack_type}] filesystem')
                 call(
                     f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
                     green(
                         f"成功打包 [{pname}.img] [{pack_type}] 文件系统",
-                        "Packing [{pname}.img] with [{pack_type}] success")
+                        f"Packing [{pname}.img] with [{pack_type}] success")
                 else:
                     red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败",
-                        "Packing [{pname}] with[{pack_type}] filesystem failed!")
+                        f"Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
     if is_ab_device == 'false' or not is_ab_device:
         blue("打包A-only super.img", "Packing super.img for A-only device")
         lpargs = f"-F --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 2 --block-size 4096 --device super:{superSize} --group=qti_dynamic_partitions:{superSize}"
         for pname in ['odm', 'mi_ext', 'system', 'system_ext', 'product', 'vendor']:
             subsize = os.path.getsize(f'build/portrom/images/{pname}.img')
-            green(f"Super 子分区 [{pname}] 大小 [{subsize}]", "Super sub-partition [{pname}] size: [{subsize}]")
+            green(f"Super 子分区 [{pname}] 大小 [{subsize}]", f"Super sub-partition [{pname}] size: [{subsize}]")
             lpargs += f" --partition {pname}:none:{subsize}:qti_dynamic_partitions --image {pname}=build/portrom/images/{pname}.img"
     else:
         blue("打包V-A/B机型 super.img", "Packing super.img for V-AB device")
@@ -1307,7 +1307,7 @@ def main(baserom, portrom):
         for pname in super_list:
             if os.path.isfile(f'build/portrom/images/{pname}.img'):
                 subsize = os.path.getsize(f'build/portrom/images/{pname}.img')
-                green(f"Super 子分区 [{pname}] 大小 [{subsize}]", "Super sub-partition [{pname}] size: [{subsize}]")
+                green(f"Super 子分区 [{pname}] 大小 [{subsize}]", f"Super sub-partition [{pname}] size: [{subsize}]")
                 lpargs += f" --partition {pname}_a:none:{subsize}:qti_dynamic_partitions_a --image {pname}_a=build/portrom/images/{pname}.img --partition {pname}_b:none:0:qti_dynamic_partitions_b"
     call(f'lpmake {lpargs}')
     if os.path.exists("build/portrom/images/super.img"):
