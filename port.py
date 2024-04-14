@@ -156,7 +156,7 @@ def maxfps(file):
     if fps_list_element is not None:
         sorted_items = sorted([int(item.text) for item in fps_list_element.findall("item")], reverse=True)
         if sorted_items:
-            return max(sorted_items)
+            return str(max(sorted_items))
         else:
             return "90"
     else:
