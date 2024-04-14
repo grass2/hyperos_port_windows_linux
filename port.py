@@ -79,7 +79,7 @@ def update_netlink(netlink_version, prop_file):
     if not read_config(prop_file, 'ro.millet.netlink'):
         blue(
             f"找到ro.millet.netlink修改值为{netlink_version}",
-            "millet_netlink propery found, changing value to {netlink_version}")
+            f"millet_netlink propery found, changing value to {netlink_version}")
         with open(prop_file, "r") as sf:
             details = re.sub("ro.millet.netlink=.*", f"ro.millet.netlink={netlink_version}", sf.read())
         with open(prop_file, "w") as tf:
@@ -87,7 +87,7 @@ def update_netlink(netlink_version, prop_file):
     else:
         blue(
             f"PORTROM未找到ro.millet.netlink值,添加为{netlink_version}",
-            "millet_netlink not found in portrom, adding new value {netlink_version}")
+            f"millet_netlink not found in portrom, adding new value {netlink_version}")
         with open(prop_file, "r") as tf:
             details = tf.readlines()
             details.append(f"ro.millet.netlink={netlink_version}\n")
