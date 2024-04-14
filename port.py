@@ -27,29 +27,28 @@ javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFiel
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 is_chinese_language = 'Chinese' in locale.getlocale()[0]
 
-
-def red(en='', cn=''):
+def red(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
     print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;31m{cn if is_chinese_language else en}\033[0m')
 
 
-def blue(en='', cn=''):
+def blue(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
     print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;34m{cn if is_chinese_language else en}\033[0m')
 
 
-def yellow(en='', cn=''):
+def yellow(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
     print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;33m{cn if is_chinese_language else en}\033[0m')
 
 
-def green(en='', cn=''):
+def green(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
