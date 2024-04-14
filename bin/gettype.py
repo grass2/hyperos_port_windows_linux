@@ -1,6 +1,5 @@
-import struct
-import sys
 import os
+import struct
 
 formats = ([b'PK', "zip"], [b'OPPOENCRYPT!', "ozip"], [b'7z', "7z"], [b'\x53\xef', 'ext', 1080],
            [b'\x3a\xff\x26\xed', "sparse"], [b'\xe2\xe1\xf5\xe0', "erofs", 1024], [b"CrAU", "payload"],
@@ -124,7 +123,3 @@ class LogoDumper:
                     break
         assert self.magic == b"LOGO!!!!", "File does not match xiaomi logo magic!"
         return True
-
-
-if __name__ == '__main__':
-    print(gettype(sys.argv[1]))
