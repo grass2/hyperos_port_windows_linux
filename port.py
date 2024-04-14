@@ -15,7 +15,6 @@ from bin.sdat2img import main as sdat2img
 from bin import downloader
 from bin.gettype import gettype
 from bin.echo import blue, red, green, yellow
-import bin.check
 from bin.read_config import main as read_config
 import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
@@ -33,6 +32,16 @@ from bin.maxfps import main as maxfps
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
+def check():
+    for i in ['7z', 'zip', 'java', 'zipalign', 'zstd']:
+        if os.path.exists(os.path.join(tools_dir, i)):
+            return
+        if not shutil.which(i):
+            red(f"--> Missing {i} abort! please run ./setup.sh first (sudo is required on Linux system)")
+            red(f"--> 命令 {i} 缺失!请重新运行setup.sh (Linux系统sudo ./setup.sh)")
+            sys.exit(1)
 
 
 def replace_method_in_smali(smali_file, target_method):
@@ -1300,7 +1309,7 @@ def main(baserom, portrom):
 
 
 if __name__ == '__main__':
-    bin.check.main()
+    check()
     parser = argparse.ArgumentParser(description='HyperOS stock/xiaomi.eu ROM port for Android 13 based ROM')
     parser.add_argument('baserom', type=str, help='baserom')
     parser.add_argument('portrom', type=str, help='portrom')
