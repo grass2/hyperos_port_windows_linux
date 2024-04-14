@@ -11,7 +11,7 @@ from __future__ import print_function
 import errno
 import os
 import sys
-
+from rich.progress import track
 
 def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     def rangeset(src):
@@ -85,7 +85,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     all_block_sets = [i for command in commands for i in command[1]]
     max_file_size = max(pair[1] for pair in all_block_sets) * BLOCK_SIZE
 
-    for command in commands:
+    for command in track(commands):
         if command[0] == 'new':
             for block in command[1]:
                 begin = block[0]
