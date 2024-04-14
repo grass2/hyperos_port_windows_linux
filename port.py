@@ -463,7 +463,7 @@ def main(baserom, portrom):
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'ColdWindScholar'
     device_code = "YourDevice"
-    compatible_matrix_matches_enabled = read_config('bin/port_config', 'compatible_matrix_matches_check')
+    compatible_matrix_matches_enabled = read_config('bin/port_config', 'compatible_matrix_matches_check') == 'true'
     if read_config('bin/port_config', 'repack_with_ext4') == 'true':
         pack_type = 'EXT'
     else:
@@ -777,7 +777,7 @@ def main(baserom, portrom):
                     ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom/android/server/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method",
                     port_android_sdk, regex=True)
     else:
-        if compatible_matrix_matches_enabled == 'true':
+        if compatible_matrix_matches_enabled:
             patch_smali("framework.jar", "Build.smali", ".method public static isBuildConsistent()Z",
                         ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",
                         port_android_sdk)
@@ -809,7 +809,7 @@ def main(baserom, portrom):
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
         os.makedirs('tmp', exist_ok=True)
         filename = os.path.basename(targetDevicesAndroidOverlay)
-        yellow(f"修复息屏和屏下指纹问题", "Fixing AOD issue: {filename} ...")
+        yellow(f"修复息屏和屏下指纹问题", f"Fixing AOD issue: {filename} ...")
         targetDir = filename.split('.')[0]
         os.system(f'java {javaOpts} -jar bin/apktool/apktool.jar d {targetDevicesAndroidOverlay} -o tmp/{targetDir} -f')
         for root, dirs, files in os.walk(targetDir):
