@@ -21,16 +21,18 @@ import xml.etree.ElementTree as ET
 import lxml.etree as ET2
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
+import locale
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+is_chinese_language = 'Chinese' in locale.getlocale()[0]
 
 
-def red(message):
-    timestamp = datetime.now().strftime('%m%d-%H:%M:%S')
-    colored_message = f'\033[1;31m{message}\033[0m'
-    output = f'[{timestamp}] {colored_message}'
-    print(output)
+def red(en='', cn=''):
+    message = cn if is_chinese_language else en
+    if not message:
+        message = cn if cn else en
+    print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;31m{cn if is_chinese_language else en}\033[0m')
 
 
 def blue(message):
@@ -192,8 +194,7 @@ def check():
         if os.path.exists(os.path.join(tools_dir, (i + '.exe' if os.name == 'nt' else ''))):
             return
         if not shutil.which(i):
-            red(f"--> Missing {i} abort! please run ./setup.sh first (sudo is required on Linux system)")
-            red(f"--> 命令 {i} 缺失!请重新运行setup.sh (Linux系统sudo ./setup.sh)")
+            red(f"--> Missing {i} abort! please run ./setup.sh first (sudo is required on Linux system)", f"--> 命令 {i} 缺失!请重新运行setup.sh (Linux系统sudo ./setup.sh)")
             sys.exit(1)
 
 
@@ -405,7 +406,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
                 f.write(content)
             if os.system(
                     f'java -jar bin/apktool/smali.jar a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex') != 0:
-                red('Smaling 失败\nSmaling failed')
+                red('Smaling 失败', 'Smaling failed')
                 sys.exit()
             old = os.getcwd()
             os.chdir(f'tmp/{foldername}/')
@@ -418,7 +419,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
                 yellow("检测到apk，进行zipalign处理。。\nAPK file detected, initiating ZipAlign process...")
                 os.remove(targetfilefullpath)
                 if call(f'zipalign -p -f -v 4 tmp/{foldername}/{targetfilename} {targetfilefullpath}', out=1):
-                    red("zipalign错误，请检查原因。\nzipalign error,please check for any issues")
+                    red("zipalign错误，请检查原因。", "zipalign error,please check for any issues")
                 yellow("apk zipalign处理完成\nAPK ZipAlign process completed.")
                 yellow(f"复制APK到目标位置：{targetfilefullpath}\nCopying APK to target {targetfilefullpath}")
             else:
