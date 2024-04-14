@@ -47,8 +47,17 @@ Contacts MIUIAod MiuiHome MIUISecurityCenter  Mms  MIUIContentExtension  MIUIPac
 
 ## 如何使用
 - 在Windows上
-自行设置环境变量
-- 需要包含 ZIP 7Z java zipalign
+>[!NOTE]
+> 您需要自行安装java和python
+``` shell
+   # 克隆项目
+   git clone https://github.com/toraidl/hyperos_port.git
+   cd hyperos_port
+   # 安装依赖
+   pip3 install -r requirements.txt
+   # 开始移植
+   sudo python3 ./port.py <底包路径> <移植包路径>
+```
 - 在WSL、ubuntu、deepin等Linux下
 ```shell
     sudo apt update
