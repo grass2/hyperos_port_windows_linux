@@ -18,7 +18,7 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
         src_set = src.split(',')
         num_set = [int(item) for item in src_set]
         if len(num_set) != num_set[0] + 1:
-            print('Error on parsing following data to rangeset:\n{}'.format(src), file=sys.stderr)
+            print('Error on parsing following data to rangeset:\n{}'.format(src))
             sys.exit(1)
 
         return tuple([(num_set[i], num_set[i + 1]) for i in range(1, len(num_set), 2)])
@@ -60,15 +60,15 @@ def main(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     version, new_blocks, commands = parse_transfer_list_file()
 
     if version == 1:
-        print('Android Lollipop 5.0 detected!\n')
+        print('Android Lollipop 5.0 detected!')
     elif version == 2:
-        print('Android Lollipop 5.1 detected!\n')
+        print('Android Lollipop 5.1 detected!')
     elif version == 3:
-        print('Android Marshmallow 6.x detected!\n')
+        print('Android Marshmallow 6.x detected!')
     elif version == 4:
-        print('Android Nougat 7.x / Oreo 8.x detected!\n')
+        print('Android Nougat 7.x / Oreo 8.x detected!')
     else:
-        print('Unknown Android version!\n')
+        print('Unknown Android version!')
 
     # Don't clobber existing files to avoid accidental data loss
     try:
