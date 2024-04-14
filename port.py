@@ -23,9 +23,11 @@ from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
 import locale
 from rich.progress import track
+
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 is_chinese_language = 'Chinese' in locale.getlocale()[0]
+
 
 def red(cn='', en=''):
     message = cn if is_chinese_language else en
@@ -75,14 +77,16 @@ def update_netlink(netlink_version, prop_file):
         return ''
     if not read_config(prop_file, 'ro.millet.netlink'):
         blue(
-            f"找到ro.millet.netlink修改值为{netlink_version}", "millet_netlink propery found, changing value to {netlink_version}")
+            f"找到ro.millet.netlink修改值为{netlink_version}",
+            "millet_netlink propery found, changing value to {netlink_version}")
         with open(prop_file, "r") as sf:
             details = re.sub("ro.millet.netlink=.*", f"ro.millet.netlink={netlink_version}", sf.read())
         with open(prop_file, "w") as tf:
             tf.write(details)
     else:
         blue(
-            f"PORTROM未找到ro.millet.netlink值,添加为{netlink_version}", "millet_netlink not found in portrom, adding new value {netlink_version}")
+            f"PORTROM未找到ro.millet.netlink值,添加为{netlink_version}",
+            "millet_netlink not found in portrom, adding new value {netlink_version}")
         with open(prop_file, "r") as tf:
             details = tf.readlines()
             details.append(f"ro.millet.netlink={netlink_version}\n")
@@ -193,7 +197,8 @@ def check():
         if os.path.exists(os.path.join(tools_dir, (i + '.exe' if os.name == 'nt' else ''))):
             return
         if not shutil.which(i):
-            red(f"--> Missing {i} abort! please run ./setup.sh first (sudo is required on Linux system)", f"--> 命令 {i} 缺失!请重新运行setup.sh (Linux系统sudo ./setup.sh)")
+            red(f"--> Missing {i} abort! please run ./setup.sh first (sudo is required on Linux system)",
+                f"--> 命令 {i} 缺失!请重新运行setup.sh (Linux系统sudo ./setup.sh)")
             sys.exit(1)
 
 
@@ -486,7 +491,8 @@ def main(baserom, portrom):
             is_base_rom_eu = True
             super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
         else:
-            red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试", "payload.bin/new.br not found, please use HyperOS official OTA zip package.")
+            red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试",
+                "payload.bin/new.br not found, please use HyperOS official OTA zip package.")
             sys.exit()
     with zipfile.ZipFile(portrom) as rom:
         if "payload.bin" in rom.namelist():
@@ -494,7 +500,8 @@ def main(baserom, portrom):
         elif [True for i in rom.namelist() if 'xiaomi.eu' in i]:
             is_eu_rom = True
         else:
-            red("目标移植包没有payload.bin，请用MIUI官方包作为移植包", "payload.bin not found, please use HyperOS official OTA zip package.")
+            red("目标移植包没有payload.bin，请用MIUI官方包作为移植包",
+                "payload.bin not found, please use HyperOS official OTA zip package.")
             sys.exit()
 
     # Clean Up
@@ -679,11 +686,13 @@ def main(baserom, portrom):
                                        'ro.system.build.version.release')
     port_rom_code = read_config('build/portrom/images/product/etc/build.prop', 'ro.product.product.name')
     green(
-        f"安卓版本: 底包为[Android {base_android_version}], 移植包为 [Android {port_android_version}]", "Android Version: BASEROM:[Android {base_android_version}], PORTROM [Android {port_android_version}]")
+        f"安卓版本: 底包为[Android {base_android_version}], 移植包为 [Android {port_android_version}]",
+        "Android Version: BASEROM:[Android {base_android_version}], PORTROM [Android {port_android_version}]")
     base_android_sdk = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.sdk')
     port_android_sdk = read_config('build/portrom/images/system/system/build.prop', 'ro.system.build.version.sdk')
     green(
-        f"SDK 版本: 底包为 [SDK {base_android_sdk}], 移植包为 [SDK {port_android_sdk}]", "SDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
+        f"SDK 版本: 底包为 [SDK {base_android_sdk}], 移植包为 [SDK {port_android_sdk}]",
+        "SDK Verson: BASEROM: [SDK {base_android_sdk}], PORTROM: [SDK {port_android_sdk}]")
     base_rom_version = read_config('build/portrom/images/vendor/build.prop', 'ro.vendor.build.version.incremental')
     port_mios_version_incremental = read_config('build/portrom/images/mi_ext/etc/build.prop',
                                                 'ro.mi.os.version.incremental')
@@ -695,10 +704,12 @@ def main(baserom, portrom):
         base_device_code = 'U' + base_rom_version.split(".")[4][1:]
         port_rom_version = port_mios_version_incremental.replace(port_device_code, base_device_code)
     green(
-        f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]", "ROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
+        f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]",
+        "ROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', 'ro.product.vendor.device')
     green(
-        f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]", "Device Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
+        f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]",
+        "Device Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
     for cpfile in ['AospFrameworkResOverlay.apk', 'MiuiFrameworkResOverlay.apk', 'DevicesAndroidOverlay.apk',
                    'DevicesOverlay.apk', 'SettingsRroDeviceHideStatusBarOverlay.apk', 'MiuiBiometricResOverlay.apk']:
         base_file = find_file('build/baserom/images/product', cpfile)
@@ -868,7 +879,8 @@ def main(baserom, portrom):
                 if f'<version>{vndk_version}</version>' in i:
                     find = True
                     yellow(
-                        f"{vndk_version}已存在，跳过修改", "The file already contains the version {vndk_version}. Skipping modification.")
+                        f"{vndk_version}已存在，跳过修改",
+                        "The file already contains the version {vndk_version}. Skipping modification.")
                     break
         if not find:
             tree = ET.parse(targetVintf)
@@ -913,14 +925,16 @@ def main(baserom, portrom):
         portXGoogle = find_folder_mh('build/portrom/images/product/', 'HotwordEnrollmentXGoogleHEXAGON')
         if os.path.isdir(baseXGoogle) and os.path.isdir(portXGoogle):
             yellow(
-                "查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk", "Searching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk..")
+                "查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk",
+                "Searching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk..")
             shutil.rmtree(portXGoogle)
             os.makedirs(portXGoogle, exist_ok=True)
             shutil.copytree(baseMiuiBiometric, portMiuiBiometric, dirs_exist_ok=True)
         else:
             if os.path.isdir(baseXGoogle) and not os.path.isdir(portXGoogle):
                 blue(
-                    "未找到HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk，替换为原包", "HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk is missing, copying from base...")
+                    "未找到HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk，替换为原包",
+                    "HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk is missing, copying from base...")
                 os.makedirs(f"build/portrom/images/product/priv-app/{os.path.basename(baseMiuiBiometric)}",
                             exist_ok=True)
                 shutil.copytree(baseMiuiBiometric,
@@ -1039,7 +1053,8 @@ def main(baserom, portrom):
                 f.write(data)
     if not found:
         blue(
-            f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}", "ro.fs.lcd_density not found, create a new value {base_rom_density} ")
+            f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}",
+            "ro.fs.lcd_density not found, create a new value {base_rom_density} ")
         append('build/portrom/images/product/etc/build.prop', [f'ro.sf.lcd_density={base_rom_density}\n'])
     append('build/portrom/images/product/etc/build.prop', ['ro.miui.cust_erofs=0\n'])
     # Fix： mi10 boot stuck at the first screen
@@ -1052,7 +1067,8 @@ def main(baserom, portrom):
         update_netlink(millet_netlink_version, 'build/portrom/images/product/etc/build.prop')
     else:
         blue(
-            "原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)", "ro.millet.netlink property value not found, change it manually(29 by default).")
+            "原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)",
+            "ro.millet.netlink property value not found, change it manually(29 by default).")
         update_netlink('29', 'build/portrom/images/product/etc/build.prop')
     if not read_config('build/portrom/images/product/etc/build.prop', 'persist.sys.background_blur_supported'):
         append('build/portrom/images/product/etc/build.prop',
@@ -1189,7 +1205,8 @@ def main(baserom, portrom):
                             'build/portrom/images/system_ext/framework/', dirs_exist_ok=True)
         if base_android_version == '13' and os.path.isfile(commonCamera):
             yellow(
-                "替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ", "Replacing a compatible MiuiCamera.apk verson 4.5.003000.2")
+                "替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ",
+                "Replacing a compatible MiuiCamera.apk verson 4.5.003000.2")
             shutil.rmtree(targetCamera)
             os.makedirs(targetCamera, exist_ok=True)
             shutil.copy2(commonCamera, targetCamera)
@@ -1210,7 +1227,8 @@ def main(baserom, portrom):
     else:
         yellow(f"devices/{base_rom_code}/overlay 未找到", "devices/{base_rom_code}/overlay not found")
     if pack_type == 'EROFS':
-        yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点", "Validating whether adding erofs mount points is needed.")
+        yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点",
+               "Validating whether adding erofs mount points is needed.")
         with open('build/portrom/images/vendor/etc/fstab.qcom', 'r') as file:
             content = file.read()
         if 'erofs' in content:
@@ -1241,14 +1259,17 @@ def main(baserom, portrom):
                     sed(i, r'product\s+erofs', '')
                 thisSize = int(get_dir_size(f"build/portrom/images/{pname}") + addsize.get(pname, addsize.get('other')))
                 blue(
-                    f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]", "Packing [{pname}.img]:[{pack_type}] with size [{thisSize}]")
+                    f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]",
+                    "Packing [{pname}.img]:[{pack_type}] with size [{thisSize}]")
                 call(
                     f'make_ext4fs -J -T {int(time.time())} -S build/portrom/images/config/{pname}_file_contexts -l {thisSize} -C build/portrom/images/config/{pname}_fs_config -L {pname} -a {pname} build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
                     green(
-                        f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统", "Packing [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
+                        f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统",
+                        "Packing [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
                 else:
-                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败", "Packing [{pname}] with[{pack_type}] filesystem failed!")
+                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败",
+                        "Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
             else:
                 blue(f'以[{pack_type}]文件系统打包[{pname}.img]', 'Packing [{pname}.img] with [{pack_type}] filesystem')
@@ -1256,9 +1277,11 @@ def main(baserom, portrom):
                     f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
                     green(
-                        f"成功打包 [{pname}.img] [{pack_type}] 文件系统", "Packing [{pname}.img] with [{pack_type}] success")
+                        f"成功打包 [{pname}.img] [{pack_type}] 文件系统",
+                        "Packing [{pname}.img] with [{pack_type}] success")
                 else:
-                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败", "Packing [{pname}] with[{pack_type}] filesystem failed!")
+                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败",
+                        "Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
     if is_ab_device == 'false' or not is_ab_device:
         blue("打包A-only super.img", "Packing super.img for A-only device")
@@ -1452,7 +1475,8 @@ def main(baserom, portrom):
     if pack_type == 'EROFS':
         pack_type = "ROOT_" + pack_type
         yellow(
-            "检测到打包类型为EROFS,请确保官方内核支持，或者在devices机型目录添加有支持EROFS的内核，否者将无法开机！", "EROFS filesystem detected. Ensure compatibility with the official boot.img or ensure a supported boot_tv.img is placed in the device folder.")
+            "检测到打包类型为EROFS,请确保官方内核支持，或者在devices机型目录添加有支持EROFS的内核，否者将无法开机！",
+            "EROFS filesystem detected. Ensure compatibility with the official boot.img or ensure a supported boot_tv.img is placed in the device folder.")
     os.rename(f'out/{os_type}_{device_code}_{port_rom_version}.zip',
               f'out/{os_type}_{device_code}_{port_rom_version}_{hash_}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip')
     green("移植完毕", "Porting completed")
