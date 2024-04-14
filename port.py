@@ -20,6 +20,7 @@ from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
+import lxml.etree as ET2
 from bin.fspatch import main as fspatch
 from bin.contextpatch import main as context_patch
 
@@ -48,7 +49,7 @@ def update_netlink(netlink_version, prop_file):
 
 
 def unlock_device_feature(file, comment, feature_type, feature_name, feature_value):
-    tree = ET.parse(file)
+    tree = ET2.parse(file)
     root = tree.getroot()
     xpath_expr = f"//{feature_type}[@name='{feature_name}']"
     element = tree.find(xpath_expr)
