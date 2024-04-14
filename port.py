@@ -13,8 +13,6 @@ from _socket import gethostname
 from bin.sdat2img import main as sdat2img
 from bin import downloader
 from bin.gettype import gettype
-from bin.echo import blue, red, green, yellow
-from bin.read_config import main as read_config
 import zipfile
 from bin.lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
@@ -26,6 +24,49 @@ from bin.contextpatch import main as context_patch
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
+
+
+def red(message):
+    timestamp = datetime.now().strftime('%m%d-%H:%M:%S')
+    colored_message = f'\033[1;31m{message}\033[0m'
+    output = f'[{timestamp}] {colored_message}'
+    print(output)
+
+
+def blue(message):
+    timestamp = datetime.now().strftime('%m%d-%H:%M:%S')
+    colored_message = f'\033[1;34m{message}\033[0m'
+    output = f'[{timestamp}] {colored_message}'
+    print(output)
+
+
+def yellow(message):
+    timestamp = datetime.now().strftime('%m%d-%H:%M:%S')
+    colored_message = f'\033[1;33m{message}\033[0m'
+    output = f'[{timestamp}] {colored_message}'
+    print(output)
+
+
+def green(message):
+    timestamp = datetime.now().strftime('%m%d-%H:%M:%S')
+    colored_message = f'\033[1;32m{message}\033[0m'
+    output = f'[{timestamp}] {colored_message}'
+    print(output)
+
+
+def read_config(file, name):
+    if not os.path.exists(file) or not os.path.isfile(file):
+        return ''
+    with open(file, 'r+', encoding='utf-8') as f:
+        for i in f.readlines():
+            if i.startswith('#'):
+                continue
+            elif name + "=" in i:
+                try:
+                    return i.split("=")[1].strip()
+                except IndexError:
+                    return ''
+    return ""
 
 
 def update_netlink(netlink_version, prop_file):
