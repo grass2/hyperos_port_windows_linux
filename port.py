@@ -398,7 +398,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
                 if 'classes' in i:
                     smalidir = i
                     break
-            yellow(f"I: 开始patch目标 {smalidir}\nTarget {smalidir} Found")
+            yellow(f"I: 开始patch目标 {smalidir}", f"Target {smalidir} Found")
             with open(targetsmali, 'r') as f:
                 content = f.read()
             if regex:
