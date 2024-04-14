@@ -416,19 +416,19 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
             old = os.getcwd()
             os.chdir(f'tmp/{foldername}/')
             if call(f'7z a -y -mx0 -tzip {targetfilename} {smalidir}.dex', kz='Y' if os.name == 'nt' else 'N') != 0:
-                red(f"修改{targetfilename}失败", "Failed to modify {targetfilename}")
+                red(f"修改{targetfilename}失败", f"Failed to modify {targetfilename}")
                 sys.exit()
             os.chdir(old)
-            yellow(f"修补{targetfilename} 完成\nFix {targetfilename}completed")
+            yellow(f"修补{targetfilename} 完成", f"Fix {targetfilename}completed")
             if targetfilename.endswith('.apk'):
-                yellow("检测到apk，进行zipalign处理。。\nAPK file detected, initiating ZipAlign process...")
+                yellow("检测到apk，进行zipalign处理。。", "APK file detected, initiating ZipAlign process...")
                 os.remove(targetfilefullpath)
                 if call(f'zipalign -p -f -v 4 tmp/{foldername}/{targetfilename} {targetfilefullpath}', out=1):
                     red("zipalign错误，请检查原因。", "zipalign error,please check for any issues")
-                yellow("apk zipalign处理完成\nAPK ZipAlign process completed.")
-                yellow(f"复制APK到目标位置：{targetfilefullpath}\nCopying APK to target {targetfilefullpath}")
+                yellow("apk zipalign处理完成", "APK ZipAlign process completed.")
+                yellow(f"复制APK到目标位置：{targetfilefullpath}", f"Copying APK to target {targetfilefullpath}")
             else:
-                yellow(f"复制修改文件到目标位置：{targetfilefullpath}\nCopying file to target {targetfilefullpath}")
+                yellow(f"复制修改文件到目标位置：{targetfilefullpath}", f"Copying file to target {targetfilefullpath}")
                 shutil.copy2(f'tmp/{foldername}/{targetfilename}', targetfilefullpath)
     else:
         red(f"Failed to find {file},please check it manually")
