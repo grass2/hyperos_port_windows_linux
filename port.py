@@ -763,7 +763,7 @@ def main(baserom, portrom):
                         ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",
                         port_android_sdk)
         os.makedirs('tmp', exist_ok=True)
-        blue("开始移除 Android 签名校验\nDisalbe Android 14 Apk Signature Verfier")
+        blue("开始移除 Android 签名校验", "Disalbe Android 14 Apk Signature Verfier")
         os.makedirs('tmp/services', exist_ok=True)
         os.rename(
             'build/portrom/images/system/system/framework/services.jar',
@@ -775,9 +775,9 @@ def main(baserom, portrom):
                        file.endswith(".smali")]
         for smali_file in smali_files:
             replace_method_in_smali(smali_file, target_method)
-        blue("重新打包 services.jar\nRepacking services.jar")
+        blue("重新打包 services.jar", "Repacking services.jar")
         os.system('java -jar bin/apktool/apktool.jar b -q -f -c tmp/services/ -o tmp/services_modified.jar')
-        blue("打包services.jar完成\nRepacking services.jar completed")
+        blue("打包services.jar完成", "Repacking services.jar completed")
         if os.path.exists('build/portrom/images/system/system/framework/services.jar'):
             os.remove('build/portrom/images/system/system/framework/services.jar')
         os.rename('tmp/services_modified.jar', 'build/portrom/images/system/system/framework/services.jar')
@@ -790,7 +790,7 @@ def main(baserom, portrom):
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
         os.makedirs('tmp', exist_ok=True)
         filename = os.path.basename(targetDevicesAndroidOverlay)
-        yellow(f"修复息屏和屏下指纹问题\nFixing AOD issue: {filename} ...")
+        yellow(f"修复息屏和屏下指纹问题", "Fixing AOD issue: {filename} ...")
         targetDir = filename.split('.')[0]
         os.system(f'java {javaOpts} -jar bin/apktool/apktool.jar d {targetDevicesAndroidOverlay} -o tmp/{targetDir} -f')
         for root, dirs, files in os.walk(targetDir):
@@ -805,7 +805,7 @@ def main(baserom, portrom):
                         f.write(new_content)
                     print(f"已替换文件: {file_path}")
         if os.system(f'java {javaOpts} -jar bin/apktool/apktool.jar b tmp/{targetDir} -o tmp/{filename}') != 0:
-            red('apktool 打包失败\napktool mod failed')
+            red('apktool 打包失败", "apktool mod failed')
             sys.exit()
         shutil.copyfile(f'tmp/{filename}', targetDevicesAndroidOverlay)
         shutil.rmtree('tmp')
@@ -821,20 +821,20 @@ def main(baserom, portrom):
         for xml in find_files(f'tmp/{targetDir}', 'integers.xml'):
             xmlstarlet(xml, 'config_defaultPeakRefreshRate', '60')
         if os.system(f"java {javaOpts} -jar bin/apktool/apktool.jar b tmp/{targetDir} -o tmp/{filename}") != 0:
-            red("apktool 打包失败\napktool mod failed")
+            red("apktool 打包失败", "apktool mod failed")
             sys.exit()
         shutil.copyfile(f'tmp/{filename}', targetAospFrameworkResOverlay)
     vndk_version = ''
     for i in glob.glob('build/portrom/images/vendor/*.prop'):
         vndk_version = read_config(i, 'ro.vndk.version')
         if vndk_version:
-            yellow(f"ro.vndk.version为{vndk_version}\nro.vndk.version found in {i}: {vndk_version}")
+            yellow(f"ro.vndk.version为{vndk_version}", "ro.vndk.version found in {i}: {vndk_version}")
             break
     if vndk_version:
         base_vndk = find_file('build/baserom/images/system_ext/apex', f'com.android.vndk.v{vndk_version}.apex')
         port_vndk = find_file('build/portrom/images/system_ext/apex', f'com.android.vndk.v{vndk_version}.apex')
         if not os.path.isfile(port_vndk) and os.path.isfile(base_vndk):
-            yellow("apex不存在，从原包复制\ntarget apex is missing, copying from baserom")
+            yellow("apex不存在，从原包复制", "target apex is missing, copying from baserom")
             shutil.copy2(base_vndk, 'build/portrom/images/system_ext/apex/')
     sm8250 = False
     with open('build/portrom/images/vendor/build.prop', 'r', encoding='utf-8') as f:
@@ -869,7 +869,7 @@ def main(baserom, portrom):
                 if f'<version>{vndk_version}</version>' in i:
                     find = True
                     yellow(
-                        f"{vndk_version}已存在，跳过修改\nThe file already contains the version {vndk_version}. Skipping modification.")
+                        f"{vndk_version}已存在，跳过修改", "The file already contains the version {vndk_version}. Skipping modification.")
                     break
         if not find:
             tree = ET.parse(targetVintf)
@@ -914,26 +914,26 @@ def main(baserom, portrom):
         portXGoogle = find_folder_mh('build/portrom/images/product/', 'HotwordEnrollmentXGoogleHEXAGON')
         if os.path.isdir(baseXGoogle) and os.path.isdir(portXGoogle):
             yellow(
-                "查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk\nSearching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk..")
+                "查找并替换HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk", "Searching and Replacing HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk..")
             shutil.rmtree(portXGoogle)
             os.makedirs(portXGoogle, exist_ok=True)
             shutil.copytree(baseMiuiBiometric, portMiuiBiometric, dirs_exist_ok=True)
         else:
             if os.path.isdir(baseXGoogle) and not os.path.isdir(portXGoogle):
                 blue(
-                    "未找到HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk，替换为原包\nHotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk is missing, copying from base...")
+                    "未找到HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk，替换为原包", "HotwordEnrollmentXGoogleHEXAGON_WIDEBAND.apk is missing, copying from base...")
                 os.makedirs(f"build/portrom/images/product/priv-app/{os.path.basename(baseMiuiBiometric)}",
                             exist_ok=True)
                 shutil.copytree(baseMiuiBiometric,
                                 f"build/portrom/images/product/priv-app/{os.path.basename(baseMiuiBiometric)}",
                                 dirs_exist_ok=True)
     else:
-        yellow("删除多余的App\nDebloating...")
+        yellow("删除多余的App", "Debloating...")
         for debloat_app in ['MSA', 'mab', 'Updater', 'MiuiUpdater', 'MiService', 'MIService', 'SoterService', 'Hybrid',
                             'AnalyticsCore']:
             app_dir = find_folder_mh('build/portrom/images/product', debloat_app)
             if os.path.isdir(app_dir) and app_dir:
-                yellow(f"删除目录: {app_dir}\nRemoving directory: {app_dir}")
+                yellow(f"删除目录: {app_dir}", "Removing directory: {app_dir}")
                 shutil.rmtree(app_dir)
         for i in glob.glob('build/portrom/images/product/etc/auto-install*'):
             os.remove(i)
@@ -960,12 +960,12 @@ def main(baserom, portrom):
                 os.remove(fi)
             if os.path.isdir(fi):
                 shutil.rmtree(fi)
-    blue("正在修改 build.prop\nModifying build.prop")
+    blue("正在修改 build.prop", "Modifying build.prop")
     buildDate = datetime.now(timezone.utc).strftime("%a %b %d %H:%M:%S UTC %Y")
     buildUtc = int(time.time())
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', "ro.product.vendor.device")
     for i in find_files('build/portrom/images', 'build.prop'):
-        blue(f"正在处理 {i}\nmodifying {i}")
+        blue(f"正在处理 {i}", "modifying {i}")
         with open(i, 'r', encoding='utf-8') as f:
             details = f.read()
         details = re.sub('ro.build.date=.*', f'ro.build.date={buildDate}', details)
@@ -1011,13 +1011,13 @@ def main(baserom, portrom):
     for prop in find_files('build/baserom/images/product', 'build.prop'):
         base_rom_density = read_config(prop, 'ro.sf.lcd_density')
         if baserom_type:
-            green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
+            green(f"底包屏幕密度值 {base_rom_density}", "Screen density: {base_rom_density}")
             break
     if not base_rom_density:
         for prop in find_files('build/baserom/images/system', 'build.prop'):
             base_rom_density = read_config(prop, 'ro.sf.lcd_density')
             if base_rom_density:
-                green(f"底包屏幕密度值 {base_rom_density}\nScreen density: {base_rom_density}")
+                green(f"底包屏幕密度值 {base_rom_density}", "Screen density: {base_rom_density}")
                 break
             else:
                 base_rom_density = '440'
@@ -1040,20 +1040,20 @@ def main(baserom, portrom):
                 f.write(data)
     if found == 0:
         blue(
-            f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}\nro.fs.lcd_density not found, create a new value {base_rom_density} ")
+            f"未找到ro.fs.lcd_density，build.prop新建一个值{base_rom_density}", "ro.fs.lcd_density not found, create a new value {base_rom_density} ")
         append('build/portrom/images/product/etc/build.prop', [f'ro.sf.lcd_density={base_rom_density}\n'])
     append('build/portrom/images/product/etc/build.prop', ['ro.miui.cust_erofs=0\n'])
     # Fix： mi10 boot stuck at the first screen
     sed('build/portrom/images/vendor/build.prop', 'persist.sys.millet.cgroup1', '#persist.sys.millet.cgroup1')
     # Fix：Fingerprint issue encountered on OS V1.0.18
     append("build/portrom/images/vendor/build.prop", ['vendor.perf.framepacing.enable=false\n'])
-    blue("修复Millet\nFix Millet")
+    blue("修复Millet", "Fix Millet")
     millet_netlink_version = read_config('build/baserom/images/product/etc/build.prop', 'ro.millet.netlink')
     if millet_netlink_version:
         update_netlink(millet_netlink_version, 'build/portrom/images/product/etc/build.prop')
     else:
         blue(
-            "原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)\nro.millet.netlink property value not found, change it manually(29 by default).")
+            "原包未发现ro.millet.netlink值，请手动赋值修改(默认为29)", "ro.millet.netlink property value not found, change it manually(29 by default).")
         update_netlink('29', 'build/portrom/images/product/etc/build.prop')
     if not read_config('build/portrom/images/product/etc/build.prop', 'persist.sys.background_blur_supported'):
         append('build/portrom/images/product/etc/build.prop',
@@ -1098,7 +1098,7 @@ def main(baserom, portrom):
                         sed(xml, '<bool name="config_voice_capable">false</bool>',
                             '<bool name="config_voice_capable">true</bool>')
             if os.system(f'java {javaOpts} -jar bin/apktool/apktool.jar b tmp/{targetDir} -o tmp/{filename}') != 0:
-                red("apktool 打包失败\napktool mod failed")
+                red("apktool 打包失败", "apktool mod failed")
                 sys.exit()
             shutil.copyfile(f"tmp/{filename}", targetAospFrameworkTelephonyResOverlay)
         blue("Replace Pad Software")
@@ -1145,7 +1145,7 @@ def main(baserom, portrom):
             new_permissions)
         sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>',
             new_permissions2)
-    blue("去除avb校验\nDisable avb verification.")
+    blue("去除avb校验", "Disable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
         for file in files:
             if file.startswith("fstab."):
@@ -1190,12 +1190,12 @@ def main(baserom, portrom):
                             'build/portrom/images/system_ext/framework/', dirs_exist_ok=True)
         if base_android_version == '13' and os.path.isfile(commonCamera):
             yellow(
-                "替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ\nReplacing a compatible MiuiCamera.apk verson 4.5.003000.2")
+                "替换相机为10S HyperOS A13 相机，MI10可用, thanks to 酷安 @PedroZ", "Replacing a compatible MiuiCamera.apk verson 4.5.003000.2")
             shutil.rmtree(targetCamera)
             os.makedirs(targetCamera, exist_ok=True)
             shutil.copy2(commonCamera, targetCamera)
         if os.path.isfile(bootAnimationZIP):
-            yellow("替换开机第二屏动画\nRepacling bootanimation.zip")
+            yellow("替换开机第二屏动画", "Repacling bootanimation.zip")
             shutil.copyfile(bootAnimationZIP, targetAnimationZIP)
         if os.path.isdir(targetMiLinkCirculateMIUI15):
             shutil.rmtree(targetMiLinkCirculateMIUI15)
@@ -1209,18 +1209,18 @@ def main(baserom, portrom):
     if os.path.isdir(f'devices/{base_rom_code}/overlay'):
         shutil.copytree(f'devices/{base_rom_code}/overlay/', 'build/portrom/images/', dirs_exist_ok=True)
     else:
-        yellow(f"devices/{base_rom_code}/overlay 未找到\ndevices/{base_rom_code}/overlay not found")
+        yellow(f"devices/{base_rom_code}/overlay 未找到", "devices/{base_rom_code}/overlay not found")
     if pack_type == 'EROFS':
-        yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点\nValidating whether adding erofs mount points is needed.")
+        yellow("检查 vendor fstab.qcom是否需要添加erofs挂载点", "Validating whether adding erofs mount points is needed.")
         with open('build/portrom/images/vendor/etc/fstab.qcom', 'r') as file:
             content = file.read()
         if 'erofs' in content:
             for pname in ['system', 'odm', 'vendor', 'product', 'mi_ext', 'system_ext']:
                 sed('build/portrom/images/vendor/etc/fstab.qcom', rf"/{pname}\s+ext4", f"/{pname} erofs")
-                yellow(f"添加{pname}\nAdding mount point {pname}")
+                yellow(f"添加{pname}", "Adding mount point {pname}")
     superSize = get_super_size(device_code)
-    green(f"Super大小为{superSize}\nSuper image size: {superSize}")
-    green("开始打包镜像\nPacking super.img")
+    green(f"Super大小为{superSize}", "Super image size: {superSize}")
+    green("开始打包镜像", "Packing super.img")
     for pname in super_list:
         if os.path.isdir(f"build/portrom/images/{pname}"):
             addsize = {
@@ -1242,43 +1242,43 @@ def main(baserom, portrom):
                     sed(i, r'product\s+erofs', '')
                 thisSize = int(get_dir_size(f"build/portrom/images/{pname}") + addsize.get(pname, addsize.get('other')))
                 blue(
-                    f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]\nPacking [{pname}.img]:[{pack_type}] with size [{thisSize}]")
+                    f"以[{pack_type}]文件系统打包[{pname}.img]大小[{thisSize}]", "Packing [{pname}.img]:[{pack_type}] with size [{thisSize}]")
                 call(
                     f'make_ext4fs -J -T {int(time.time())} -S build/portrom/images/config/{pname}_file_contexts -l {thisSize} -C build/portrom/images/config/{pname}_fs_config -L {pname} -a {pname} build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
                     green(
-                        f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
+                        f"成功以大小 [{thisSize}] 打包 [{pname}.img] [{pack_type}] 文件系统", "Packing [{pname}.img] with [{pack_type}], size: [{thisSize}] success")
                 else:
-                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败\nPacking [{pname}] with[{pack_type}] filesystem failed!")
+                    red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败", "Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
             else:
-                blue(f'以[{pack_type}]文件系统打包[{pname}.img]\nPacking [{pname}.img] with [{pack_type}] filesystem')
+                blue(f'以[{pack_type}]文件系统打包[{pname}.img]", "Packing [{pname}.img] with [{pack_type}] filesystem')
                 call(
                     f'mkfs.erofs --mount-point {pname} --fs-config-file build/portrom/images/config/{pname}_fs_config --file-contexts build/portrom/images/config/{pname}_file_contexts build/portrom/images/{pname}.img build/portrom/images/{pname}')
                 if os.path.isfile(f"build/portrom/images/{pname}.img"):
                     green(
-                        f"成功打包 [{pname}.img] [{pack_type}] 文件系统\nPacking [{pname}.img] with [{pack_type}] success")
+                        f"成功打包 [{pname}.img] [{pack_type}] 文件系统", "Packing [{pname}.img] with [{pack_type}] success")
                 else:
                     red(f"以 [{pack_type}] 文件系统打包 [{pname}] 分区失败", "Packing [{pname}] with[{pack_type}] filesystem failed!")
                     sys.exit()
     if is_ab_device == 'false' or not is_ab_device:
-        blue("打包A-only super.img\nPacking super.img for A-only device")
+        blue("打包A-only super.img", "Packing super.img for A-only device")
         lpargs = f"-F --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 2 --block-size 4096 --device super:{superSize} --group=qti_dynamic_partitions:{superSize}"
         for pname in ['odm', 'mi_ext', 'system', 'system_ext', 'product', 'vendor']:
             subsize = os.path.getsize(f'build/portrom/images/{pname}.img')
-            green(f"Super 子分区 [{pname}] 大小 [{subsize}]\nSuper sub-partition [{pname}] size: [{subsize}]")
+            green(f"Super 子分区 [{pname}] 大小 [{subsize}]", "Super sub-partition [{pname}] size: [{subsize}]")
             lpargs += f" --partition {pname}:none:{subsize}:qti_dynamic_partitions --image {pname}=build/portrom/images/{pname}.img"
     else:
-        blue("打包V-A/B机型 super.img\nPacking super.img for V-AB device")
+        blue("打包V-A/B机型 super.img", "Packing super.img for V-AB device")
         lpargs = f"-F --virtual-ab --output build/portrom/images/super.img --metadata-size 65536 --super-name super --metadata-slots 3 --device super:{superSize} --group=qti_dynamic_partitions_a:{superSize} --group=qti_dynamic_partitions_b:{superSize}"
         for pname in super_list:
             if os.path.isfile(f'build/portrom/images/{pname}.img'):
                 subsize = os.path.getsize(f'build/portrom/images/{pname}.img')
-                green(f"Super 子分区 [{pname}] 大小 [{subsize}]\nSuper sub-partition [{pname}] size: [{subsize}]")
+                green(f"Super 子分区 [{pname}] 大小 [{subsize}]", "Super sub-partition [{pname}] size: [{subsize}]")
                 lpargs += f" --partition {pname}_a:none:{subsize}:qti_dynamic_partitions_a --image {pname}_a=build/portrom/images/{pname}.img --partition {pname}_b:none:0:qti_dynamic_partitions_b"
     call(f'lpmake {lpargs}')
     if os.path.exists("build/portrom/images/super.img"):
-        green("成功打包 super.img\nPakcing super.img done.")
+        green("成功打包 super.img", "Pakcing super.img done.")
     else:
         red('无法打包 super.img', 'Unable to pack super.img.')
         sys.exit()
@@ -1288,12 +1288,12 @@ def main(baserom, portrom):
     os_type = "hyperos"
     if is_eu_rom:
         os_type = "xiaomi.eu"
-    blue("正在压缩 super.img\nComprising super.img")
+    blue("正在压缩 super.img", "Comprising super.img")
     call(exe='zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst',
          kz="N" if platform.system() == 'Darwin' else 'Y')
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/', exist_ok=True)
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/', exist_ok=True)
-    blue('正在生成刷机脚本\nGenerating flashing script')
+    blue('正在生成刷机脚本", "Generating flashing script')
     if is_ab_device == 'false' or not is_ab_device:
         if os.path.isfile(f'out/{os_type}_{device_code}_{port_rom_version}/super.zst'):
             if print(f'out/{os_type}_{device_code}_{port_rom_version}/super.zst已存在 是否删除？[1/0]') == '1':
@@ -1453,11 +1453,11 @@ def main(baserom, portrom):
     if pack_type == 'EROFS':
         pack_type = "ROOT_" + pack_type
         yellow(
-            "检测到打包类型为EROFS,请确保官方内核支持，或者在devices机型目录添加有支持EROFS的内核，否者将无法开机！\nEROFS filesystem detected. Ensure compatibility with the official boot.img or ensure a supported boot_tv.img is placed in the device folder.")
+            "检测到打包类型为EROFS,请确保官方内核支持，或者在devices机型目录添加有支持EROFS的内核，否者将无法开机！", "EROFS filesystem detected. Ensure compatibility with the official boot.img or ensure a supported boot_tv.img is placed in the device folder.")
     os.rename(f'out/{os_type}_{device_code}_{port_rom_version}.zip',
               f'out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip')
-    green("移植完毕\nPorting completed")
-    green("输出包路径：\nOutput: ")
+    green("移植完毕", "Porting completed")
+    green("输出包路径：", "Output: ")
     green(
         f"{os.getcwd()}/out/{os_type}_{device_code}_{port_rom_version}_{hash}_{port_android_version}_{port_rom_code}_{pack_timestamp}_{pack_type}.zip")
 
