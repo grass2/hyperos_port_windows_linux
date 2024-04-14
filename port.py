@@ -707,11 +707,11 @@ def main(baserom, portrom):
     blue("左侧挖孔灵动岛修复\nStrongToast UI fix")
     if is_shennong_houji_port:
         patch_smali("MiuiSystemUI.apk", "MIUIStrongToast$2.smali", "const/4 v7, 0x0",
-                    "iget-object v7, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\\n\\tinvoke-virtual {v7}, Landroid/widget/RelativeLayout;->getLeft()I\\n\\tmove-result v7\\n\\tint-to-float v7,v7",
+                    "iget-object v7, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\n\tinvoke-virtual {v7}, Landroid/widget/RelativeLayout;->getLeft()I\n\tmove-result v7\n\tint-to-float v7,v7",
                     port_android_sdk)
     else:
         patch_smali("MiuiSystemUI.apk", "MIUIStrongToast$2.smali", "const/4 v9, 0x0",
-                    "iget-object v9, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\\n\\tinvoke-virtual {v9}, Landroid/widget/RelativeLayout;->getLeft()I\\n\\tmove-result v9\\n\\tint-to-float v9,v9",
+                    "iget-object v9, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\n\tinvoke-virtual {v9}, Landroid/widget/RelativeLayout;->getLeft()I\n\tmove-result v9\n\tint-to-float v9,v9",
                     port_android_sdk)
     if is_eu_rom:
         patch_smali("miui-services.jar", "SystemServerImpl.smali", ".method public constructor <init>()V/,/.end method",
@@ -743,8 +743,8 @@ def main(baserom, portrom):
         os.rename('tmp/services_modified.jar', 'build/portrom/images/system/system/framework/services.jar')
 
     patch_smali("PowerKeeper.apk", "DisplayFrameSetting.smali", "unicorn", "umi", port_android_sdk)
-    patch_smali("MiSettings.apk", "NewRefreshRateFragment.smali", "const-string v1, \"btn_preferce_category\"",
-                "const-string v1, \"btn_preferce_category\"\n\n\tconst/16 p1, 0x1", port_android_sdk)
+    patch_smali("MiSettings.apk", "NewRefreshRateFragment.smali", 'const-string v1, "btn_preferce_category"',
+                'const-string v1, "btn_preferce_category"\n\n\tconst/16 p1, 0x1', port_android_sdk)
     #
     targetDevicesAndroidOverlay = find_file('build/portrom/images/product', 'DevicesAndroidOverlay.apk')
     if os.path.exists(targetDevicesAndroidOverlay) and targetDevicesAndroidOverlay:
