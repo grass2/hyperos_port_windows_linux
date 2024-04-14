@@ -375,7 +375,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
             if targetfilename.endswith('.apk'):
                 yellow("检测到apk，进行zipalign处理。。\nAPK file detected, initiating ZipAlign process...")
                 os.remove(targetfilefullpath)
-                if call(f'zipalign -p -f -v 4 tmp/{foldername}/{targetfilename} {targetfilefullpath}'):
+                if call(f'zipalign -p -f -v 4 tmp/{foldername}/{targetfilename} {targetfilefullpath}', out=1):
                     red("zipalign错误，请检查原因。\nzipalign error,please check for any issues")
                 yellow("apk zipalign处理完成\nAPK ZipAlign process completed.")
                 yellow(f"复制APK到目标位置：{targetfilefullpath}\nCopying APK to target {targetfilefullpath}")
