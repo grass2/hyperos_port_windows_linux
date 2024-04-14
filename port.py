@@ -1296,7 +1296,7 @@ def main(baserom, portrom):
     blue('正在生成刷机脚本", "Generating flashing script')
     if is_ab_device == 'false' or not is_ab_device:
         if os.path.isfile(f'out/{os_type}_{device_code}_{port_rom_version}/super.zst'):
-            if print(f'out/{os_type}_{device_code}_{port_rom_version}/super.zst已存在 是否删除？[1/0]') == '1':
+            if input(f'out/{os_type}_{device_code}_{port_rom_version}/super.zst已存在 是否删除？[1/0]') == '1':
                 os.remove(f'out/{os_type}_{device_code}_{port_rom_version}/super.zst')
         os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/super.zst')
         shutil.copytree('bin/flash/platform-tools-windows/',
