@@ -987,7 +987,7 @@ def main(baserom, portrom):
     buildUtc = int(time.time())
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', "ro.product.vendor.device")
     for i in find_files('build/portrom/images', 'build.prop'):
-        blue(f"正在处理 {i}", "modifying {i}")
+        blue(f"正在处理 {i}", f"modifying {i}")
         with open(i, 'r', encoding='utf-8') as f:
             details = f.read()
         details = re.sub('ro.build.date=.*', f'ro.build.date={buildDate}', details)
