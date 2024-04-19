@@ -32,8 +32,7 @@ is_chinese_language = 'Chinese' in locale.getlocale()[0]
 
 def sdat2img(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     def rangeset(src):
-        src_set = src.split(',')
-        num_set = [int(item) for item in src_set]
+        num_set = [int(item) for item in src.split(',')]
         if len(num_set) != num_set[0] + 1:
             print('Error on parsing following data to rangeset:\n{}'.format(src))
             sys.exit(1)
