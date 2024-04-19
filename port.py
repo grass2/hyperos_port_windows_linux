@@ -128,28 +128,28 @@ def red(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
-    print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;31m{message}\033[0m')
+    print(f'[{datetime.now().strftime("%m%d-%H:%M:%S")}] \033[1;31m{message}\033[0m')
 
 
 def blue(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
-    print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;34m{message}\033[0m')
+    print(f'[{datetime.now().strftime("%m%d-%H:%M:%S")}] \033[1;34m{message}\033[0m')
 
 
 def yellow(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
-    print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;33m{message}\033[0m')
+    print(f'[{datetime.now().strftime("%m%d-%H:%M:%S")}] \033[1;33m{message}\033[0m')
 
 
 def green(cn='', en=''):
     message = cn if is_chinese_language else en
     if not message:
         message = cn if cn else en
-    print(f'[{datetime.now().strftime('%m%d-%H:%M:%S')}] \033[1;32m{message}\033[0m')
+    print(f'[{datetime.now().strftime("%m%d-%H:%M:%S")}] \033[1;32m{message}\033[0m')
 
 
 def read_config(file, name):
