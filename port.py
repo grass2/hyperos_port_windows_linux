@@ -564,11 +564,7 @@ def main(baserom, portrom):
         device_code = baserom.split('_')[1]
     elif "xiaomi.eu_" in baserom:
         device_code = baserom.split('_')[2]
-    print(device_code)
-    if [True for i in ['SHENNONG', 'HOUJI'] if i in device_code]:
-        is_shennong_houji_port = True
-    else:
-        is_shennong_houji_port = False
+    is_shennong_houji_port = device_code.upper() in ['SHENNONG', 'HOUJI']
     blue("正在检测ROM底包", "Validating BASEROM..")
     with zipfile.ZipFile(baserom) as rom:
         if "payload.bin" in rom.namelist():
