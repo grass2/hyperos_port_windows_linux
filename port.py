@@ -1403,9 +1403,7 @@ def main(baserom, portrom):
     for pname in super_list:
         if os.path.exists(f'build/portrom/images/{pname}.img'):
             os.remove(f'build/portrom/images/{pname}.img')
-    os_type = "hyperos"
-    if is_eu_rom:
-        os_type = "xiaomi.eu"
+    os_type = "xiaomi.eu" if is_eu_rom else "hyperos"
     blue("正在压缩 super.img", "Comprising super.img")
     call(exe='zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst',
          kz="N" if platform.system() == 'Darwin' else 'Y')
