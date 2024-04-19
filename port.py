@@ -1437,9 +1437,8 @@ def main(baserom, portrom):
             shutil.copytree(f'build/baserom/firmware-update/',
                             f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', dirs_exist_ok=True)
             for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update'):
-                parts = {"uefi_sec.mbn": "uefisecapp", "qupv3fw.elf": "qupfw", "NON-HLOS.bin": "modem",
-                         "km4.mbn": "keymaster", "BTFM.bin": "bluetooth", "dspso.bin": "dsp"}
-                part = parts.get(fwimg, fwimg.split('.')[0])
+                part = {"uefi_sec.mbn": "uefisecapp", "qupv3fw.elf": "qupfw", "NON-HLOS.bin": "modem",
+                         "km4.mbn": "keymaster", "BTFM.bin": "bluetooth", "dspso.bin": "dsp"}.get(fwimg, fwimg.split('.')[0])
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh',
                                   '# firmware\n', f'fastboot flash {part} firmware-update/{fwimg}')
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat',
