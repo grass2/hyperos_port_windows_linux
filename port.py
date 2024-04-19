@@ -559,10 +559,7 @@ def main(baserom, portrom):
     build_user = 'ColdWindScholar'
     device_code = "YourDevice"
     compatible_matrix_matches_enabled = read_config('bin/port_config', 'compatible_matrix_matches_check') == 'true'
-    if read_config('bin/port_config', 'repack_with_ext4') == 'true':
-        pack_type = 'EXT'
-    else:
-        pack_type = 'EROFS'
+    pack_type = 'EXT' if read_config('bin/port_config', 'repack_with_ext4') == 'true' else 'EROFS'
     if "miui_" in baserom:
         device_code = baserom.split('_')[1]
     elif "xiaomi.eu_" in baserom:
