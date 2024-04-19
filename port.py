@@ -276,8 +276,7 @@ def xmlstarlet(file, rule, new_value):
     if not os.path.exists(file) or not os.path.isfile(file):
         return ''
     tree = ET.parse(file)
-    root = tree.getroot()
-    target_element = root.find(f".//integer[@name='{rule}']")
+    target_element = tree.getroot().find(f".//integer[@name='{rule}']")
     if target_element is not None:
         target_element.text = new_value
     else:
