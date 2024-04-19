@@ -1411,9 +1411,6 @@ def main(baserom, portrom):
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/', exist_ok=True)
     blue('正在生成刷机脚本", "Generating flashing script')
     if is_ab_device == 'false' or not is_ab_device:
-        if os.path.isdir(f'out/{os_type}_{device_code}_{port_rom_version}'):
-            if input(f'out/{os_type}_{device_code}_{port_rom_version}已存在 是否删除？[1/0]') == '1':
-                shutil.rmtree(f'out/{os_type}_{device_code}_{port_rom_version}')
         os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/super.zst')
         shutil.copytree('bin/flash/platform-tools-windows/',
                         f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/',
@@ -1440,20 +1437,8 @@ def main(baserom, portrom):
             shutil.copytree(f'build/baserom/firmware-update/',
                             f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', dirs_exist_ok=True)
             for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update'):
-                if fwimg == "uefi_sec.mbn":
-                    part = 'uefisecapp'
-                elif fwimg == 'qupv3fw.elf':
-                    part = "qupfw"
-                elif fwimg == 'NON-HLOS.bin':
-                    part = "modem"
-                elif fwimg == 'km4.mbn':
-                    part = 'keymaster'
-                elif fwimg == 'BTFM.bin':
-                    part = "bluetooth"
-                elif fwimg == 'dspso.bin':
-                    part = "dsp"
-                else:
-                    part = fwimg.split('.')[0]
+                parts = {"uefi_sec.mbn":"uefisecapp","qupv3fw.elf":"qupfw", "NON-HLOS.bin":"modem", "km4.mbn":"keymaster","BTFM.bin":"bluetooth","dspso.bin":"dsp"}
+                part = parts.get(fwimg, fwimg.split('.')[0])
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh',
                                   '# firmware\n', f'fastboot flash {part} firmware-update/{fwimg}')
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat',
