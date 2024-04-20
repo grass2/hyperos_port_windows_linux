@@ -1476,7 +1476,7 @@ def main(baserom, portrom):
         shutil.rmtree(f'out/{os_type}_{device_code}_{port_rom_version}')
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/', exist_ok=True)
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/', exist_ok=True)
-    blue('正在生成刷机脚本", "Generating flashing script')
+    blue('正在生成刷机脚本', 'Generating flashing script')
     if is_ab_device == 'false' or not is_ab_device:
         os.rename('build/portrom/images/super.zst', f'out/{os_type}_{device_code}_{port_rom_version}/super.zst')
         shutil.copytree('bin/flash/platform-tools-windows/',
