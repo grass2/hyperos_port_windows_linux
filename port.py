@@ -980,7 +980,7 @@ def main(baserom, portrom):
                         f"The file already contains the version {vndk_version}. Skipping modification.")
                     break
         if not find:
-            tree = ET2.parse(targetVintf)
+            tree = ET.parse(targetVintf)
             root = tree.getroot()
             new_vendor_ndk = ET.Element("vendor-ndk")
             new_version = ET.SubElement(new_vendor_ndk, "version")
