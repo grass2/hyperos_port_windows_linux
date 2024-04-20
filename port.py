@@ -1295,7 +1295,11 @@ def main(baserom, portrom):
             pass
         shutil.move('build/portrom/images/product/media/theme/default/icons',
                     'build/portrom/images/product/media/theme/default/icons.zip')
-        os.remove('build/portrom/images/product/media/theme/default/dynamicicons')
+        try:
+            os.remove('build/portrom/images/product/media/theme/default/dynamicicons')
+            os.remove('build/portrom/images/product/media/theme/default/icons')
+        except:
+            pass
         os.makedirs('icons/res', exist_ok=True)
         os.makedirs('icons/res/drawable-xxhdpi', exist_ok=True)
         shutil.copytree('icons/icons', 'icons/res/drawable-xxhdpi')
