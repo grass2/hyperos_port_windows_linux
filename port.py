@@ -1257,6 +1257,10 @@ def main(baserom, portrom):
             new_permissions)
         sed('build/portrom/images/product/etc/permissions/privapp-permissions-product.xml', '</permissions>',
             new_permissions2)
+    # Add missing camera permission android.permission.TURN_SCREEN_ON
+    # this missing permission will cause device stuck on boot with higher custom Camera(eg: 5.2.0.XX) integrated
+    if port_rom_code == 'munch_cn':
+        sed("build/portrom/images/product/etc/permissions/privapp-permissions-product.xml", '<permission name="android.permission.SYSTEM_CAMERA" />', '<permission name="android.permission.SYSTEM_CAMERA" />\n\t\t<permission name="android.permission.TURN_SCREEN_ON" />')
     blue("去除avb校验", "Disable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
         for file in files:
