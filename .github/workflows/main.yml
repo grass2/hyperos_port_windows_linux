@@ -16,11 +16,11 @@ jobs:
       - name: Rename Tool
         run: |
           cd Hyperos_Port_Tool-win
-          move ./Hyperos_Port_Tool-win.zip ../Hyperos_Port_Tool-4-${{ github.run_number }}-win.zip
+          move ./Hyperos_Port_Tool-win.zip ../Hyperos_Port_Tool-${{ github.run_number }}-win.zip
           cd ..
           cd Hyperos_Port_Tool-linux
           ls
-          move ./Hyperos_Port_Tool-linux.zip ../Hyperos_Port_Tool-4-${{ github.run_number }}-linux.zip
+          move ./Hyperos_Port_Tool-linux.zip ../Hyperos_Port_Tool-${{ github.run_number }}-linux.zip
           cd ..
       - name: Upload release
         uses: ncipollo/release-action@v1
