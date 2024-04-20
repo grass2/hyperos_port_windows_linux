@@ -6,6 +6,7 @@ on:
   push:
     paths:
       - "build.py"
+  workflow_dispatch:
 jobs:
   build:
     needs: [build-win,build-linux]
