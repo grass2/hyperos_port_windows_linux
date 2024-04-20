@@ -504,7 +504,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
                 f.write(content)
             if call(
                     f'java -jar bin/apktool/{"smali.jar" if not is_eu_rom else "smali-3.0.5.jar"} a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex',
-                    out=0, kz='N') != 0:
+                    out=1, kz='N') != 0:
                 red('Smaling 失败', 'Smaling failed')
                 sys.exit()
             old = os.getcwd()
