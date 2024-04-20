@@ -554,7 +554,7 @@ def main(baserom, portrom):
     is_base_rom_eu: bool = False
     baserom_type: str = ''
     global is_eu_rom
-    is_eu_rom: bool = False
+    is_eu_rom = False
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'ColdWindScholar'
     device_code = "YourDevice"
