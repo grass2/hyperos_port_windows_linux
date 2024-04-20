@@ -3,3 +3,4 @@ Requests
 rich
 pyinstaller
 protobuf==3.20.1
+GitPython

@@ -24,7 +24,7 @@ from contextpatch import main as context_patch
 from locale import getlocale
 from rich.progress import track
 from dumper import Dumper
-
+from git import Repo
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 is_chinese_language = 'Chinese' in getlocale()[0]
@@ -1269,6 +1269,45 @@ def main(baserom, portrom):
             shutil.copy2(fbo_native_service_bin, 'build/portrom/images/system/system/bin/')
         if fbo_native_service_rc:
             shutil.copy2(fbo_native_service_rc, 'build/portrom/images/system/system/etc/init/')
+    #
+    blue("Integrating perfect icons")
+    try:
+        Repo.clone_from(url='git@github.com/pzcn/Perfect-Icons-Completion-Project.git', to_path='./icons')
+    except:
+        pass
+    else:
+        if os.path.exists('icons'):
+            for i in os.listdir('build/portrom/images/product/media/theme/miui_mod_icons/dynamic/'):
+                if os.path.isdir(f'icons/icons/{i}'):
+                    try:
+                        shutil.rmtree(f'icons/icons/{i}')
+                    except:
+                        pass
+        try:
+            shutil.rmtree('icons/icons/com.xiaomi.scanner')
+        except:
+            pass
+        shutil.move('build/portrom/images/product/media/theme/default/icons', 'build/portrom/images/product/media/theme/default/icons.zip')
+        shutil.rmtree('build/portrom/images/product/media/theme/default/dynamicicons')
+        os.makedirs('icons/res', exist_ok=True)
+        os.makedirs('icons/res/drawable-xxhdpi', exist_ok=True)
+        shutil.copytree('icons/icons', 'icons/res/drawable-xxhdpi')
+        old = os.getcwd()
+        os.chdir('icons')
+        call('zip -qr build/portrom/images/product/media/theme/default/icons.zip res')
+        os.chdir(old)
+        os.chdir('icons/themes/Hyper/')
+        call('zip -qr build/portrom/images/product/media/theme/default/dynamicicons.zip layer_animating_icons')
+        os.chdir(old)
+        os.chdir('icons/themes/common/')
+        call('zip -qr build/portrom/images/product/media/theme/default/dynamicicons.zip layer_animating_icons')
+        os.chdir(old)
+        shutil.move('build/portrom/images/product/media/theme/default/icons.zip', 'build/portrom/images/product/media/theme/default/icons')
+        shutil.move('build/portrom/images/product/media/theme/default/dynamicicons.zip', 'build/portrom/images/product/media/theme/default/dynamicicons')
+        try:
+            shutil.rmtree('icons')
+        except:
+            pass
     blue("去除avb校验", "Disable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
         for file in files:
