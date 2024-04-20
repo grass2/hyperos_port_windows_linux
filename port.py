@@ -1509,13 +1509,13 @@ def main(baserom, portrom):
                 continue
             if 'vbmeta' in fwimg:
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
-                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_b images\"{fwimg}".img')
+                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_b images\{fwimg}.img')
                 insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
-                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_a images\"{fwimg}".img')
+                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_a images\{fwimg}.img')
                 insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
-                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_b images\"{fwimg}".img')
+                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_b images\{fwimg}.img')
                 insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
-                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_a images\"{fwimg}".img')
+                                  rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_a images\{fwimg}.img')
             else:
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
                                   f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_b images\\"{fwimg}".img')
