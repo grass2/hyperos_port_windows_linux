@@ -44,7 +44,7 @@ def zip_folder(folder_path):
 
 import PyInstaller.__main__
 
-PyInstaller.__main__.run(['-F', 'run.py', '--exclude-module=numpy', '-i', 'icon.ico'])
+PyInstaller.__main__.run(['-F', 'port.py', '--exclude-module=numpy', '-i', 'icon.ico'])
 
 if os.name == 'nt':
     if os.path.exists(local + os.sep + "dist" + os.sep + "run.exe"):
@@ -65,7 +65,7 @@ elif os.name == 'posix':
             continue
         shutil.rmtree(local + os.sep + "bin" + os.sep + "Linux" + os.sep + i)
 for i in os.listdir(local):
-    if i not in ['run', 'run.exe', 'bin', 'LICENSE', 'devices']:
+    if i not in ['port', 'port.exe', 'bin', 'LICENSE', 'devices']:
         print(f"Removing {i}")
         if os.path.isdir(local + os.sep + i):
             try:
