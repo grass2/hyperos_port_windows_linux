@@ -47,8 +47,8 @@ import PyInstaller.__main__
 PyInstaller.__main__.run(['-F', 'port.py', '--exclude-module=numpy'])
 
 if os.name == 'nt':
-    if os.path.exists(local + os.sep + "dist" + os.sep + "run.exe"):
-        shutil.move(local + os.sep + "dist" + os.sep + "run.exe", local)
+    if os.path.exists(local + os.sep + "dist" + os.sep + "port.exe"):
+        shutil.move(local + os.sep + "dist" + os.sep + "port.exe", local)
     if os.path.exists(local + os.sep + "bin" + os.sep + "Linux"):
         shutil.rmtree(local + os.sep + "bin" + os.sep + "Linux")
     if os.path.exists(local + os.sep + "bin" + os.sep + "Android"):
@@ -56,8 +56,8 @@ if os.name == 'nt':
     if os.path.exists(local + os.sep + "bin" + os.sep + "Darwin"):
         shutil.rmtree(local + os.sep + "bin" + os.sep + "Darwin")
 elif os.name == 'posix':
-    if os.path.exists(local + os.sep + "dist" + os.sep + "run"):
-        shutil.move(local + os.sep + "dist" + os.sep + "run", local)
+    if os.path.exists(local + os.sep + "dist" + os.sep + "port"):
+        shutil.move(local + os.sep + "dist" + os.sep + "port", local)
     if os.path.exists(local + os.sep + "bin" + os.sep + "Windows"):
         shutil.rmtree(local + os.sep + "bin" + os.sep + "Windows")
     for i in os.listdir(local + os.sep + "bin" + os.sep + "Linux"):
