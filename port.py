@@ -1443,7 +1443,7 @@ def main(baserom, portrom):
                                   '# firmware\n', f'fastboot flash {part} firmware-update/{fwimg}')
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat',
                                   'REM firmware\n',
-                                  f'bin\\windows\\fastboot.exe flash {part} %~dp0firmware-update\\{fwimg}')
+                                  rf'bin\windows\fastboot.exe flash {part} %~dp0firmware-update\{fwimg}')
         for i in find_files_mh(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', 'vbmeta.'):
             if i.endswith('.img'):
                 patch_vbmeta(i)
@@ -1517,14 +1517,14 @@ def main(baserom, portrom):
                 insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
                                   rf'META-INF\platform-tools-windows\fastboot --disable-verity --disable-verification flash {fwimg}_a images\{fwimg}.img')
             else:
-                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
-                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_b images\\"{fwimg}".img')
-                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
-                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_a images\\"{fwimg}".img')
-                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
-                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_b images\\"{fwimg}".img')
-                insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
-                                  f'META-INF\\platform-tools-windows\\fastboot flash "{fwimg}"_a images\\"{fwimg}".img')
+                insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
+                                  rf'META-INF\platform-tools-windows\fastboot flash {fwimg}_b images\{fwimg}.img')
+                insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_update.bat', 'rem\n',
+                                  rf'META-INF\platform-tools-windows\fastboot flash {fwimg}_a images\{fwimg}.img')
+                insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
+                                  rf'META-INF\platform-tools-windows\fastboot flash {fwimg}_b images\{fwimg}.img')
+                insert_after_line(rf'out/{os_type}_{device_code}_{port_rom_version}/flash_and_format.bat', 'rem\n',
+                                  rf'META-INF\platform-tools-windows\fastboot flash {fwimg}_a images\{fwimg}.img')
             insert_after_line(
                 f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/update-binary',
                 '#firmware\n', f'package_extract_file "images/{fwimg}.img" "/dev/block/bootdevice/by-name/{fwimg}_b"')
