@@ -448,6 +448,7 @@ def call(exe, kz='Y', out=0, shstate=False, sp=0):
                                stderr=subprocess.STDOUT, creationflags=conf)
         if ret.returncode != 0:
             out = 0
+            print(exe)
         for i in iter(ret.stdout.readline, b""):
             if out == 0:
                 try:
