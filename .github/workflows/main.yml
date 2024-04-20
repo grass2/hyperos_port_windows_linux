@@ -6,8 +6,6 @@ on:
   push:
     paths:
       - "build.py"
-  pull_request:
-  workflow_dispatch:
 jobs:
   build:
     needs: [build-win,build-linux]
@@ -17,12 +15,12 @@ jobs:
       - uses: actions/download-artifact@v3
       - name: Rename Tool
         run: |
-          cd TIK-win
-          move ./TIK-win.zip ../TIK-4-${{ github.run_number }}-win.zip
+          cd Hyperos_Port_Tool-win
+          move ./Hyperos_Port_Tool-win.zip ../Hyperos_Port_Tool-4-${{ github.run_number }}-win.zip
           cd ..
-          cd TIK-linux
+          cd Hyperos_Port_Tool-linux
           ls
-          move ./TIK-linux.zip ../TIK-4-${{ github.run_number }}-linux.zip
+          move ./Hyperos_Port_Tool-linux.zip ../Hyperos_Port_Tool-4-${{ github.run_number }}-linux.zip
           cd ..
       - name: Upload release
         uses: ncipollo/release-action@v1
@@ -30,7 +28,7 @@ jobs:
           allowUpdates: true
           omitBodyDuringUpdate: true
           removeArtifacts: true
-          name: "TIK-4.${{ github.run_number }}"
+          name: "Hyperos_Port_Tool-4.${{ github.run_number }}"
           tag: "CI_BUILD_${{ github.run_number }}"
           body: |
             Build times: ${{ github.run_number }}
@@ -60,8 +58,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v3
         with:
-          name: TIK-win
-          path: './TIK-win.zip'
+          name: Hyperos_Port_Tool-win
+          path: './Hyperos_Port_Tool-win.zip'
   build-linux:
     runs-on: ubuntu-20.04
     steps:
@@ -83,5 +81,5 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v3
         with:
-          name: TIK-linux
-          path: './TIK-linux.zip'
+          name: Hyperos_Port_Tool-linux
+          path: './Hyperos_Port_Tool-linux.zip'
