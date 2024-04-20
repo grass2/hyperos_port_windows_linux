@@ -28,7 +28,7 @@ from git import Repo
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 is_chinese_language = 'Chinese' in getlocale()[0]
-is_eu_rom: bool = False
+is_eu_rom= False
 
 def sdat2img(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     def rangeset(src):
