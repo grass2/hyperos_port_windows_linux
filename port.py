@@ -25,10 +25,12 @@ from locale import getlocale
 from rich.progress import track
 from dumper import Dumper
 from git import Repo
+
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 is_chinese_language = 'Chinese' in getlocale()[0]
-is_eu_rom= False
+is_eu_rom = False
+
 
 def sdat2img(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     def rangeset(src):
@@ -1260,7 +1262,9 @@ def main(baserom, portrom):
     # Add missing camera permission android.permission.TURN_SCREEN_ON
     # this missing permission will cause device stuck on boot with higher custom Camera(eg: 5.2.0.XX) integrated
     if port_rom_code == 'munch_cn':
-        sed("build/portrom/images/product/etc/permissions/privapp-permissions-product.xml", '<permission name="android.permission.SYSTEM_CAMERA" />', '<permission name="android.permission.SYSTEM_CAMERA" />\n\t\t<permission name="android.permission.TURN_SCREEN_ON" />')
+        sed("build/portrom/images/product/etc/permissions/privapp-permissions-product.xml",
+            '<permission name="android.permission.SYSTEM_CAMERA" />',
+            '<permission name="android.permission.SYSTEM_CAMERA" />\n\t\t<permission name="android.permission.TURN_SCREEN_ON" />')
     else:
         # FboNativeService
         fbo_native_service_bin = find_file('build/baserom/images/system/', 'FboNativeService')
@@ -1287,7 +1291,8 @@ def main(baserom, portrom):
             shutil.rmtree('icons/icons/com.xiaomi.scanner')
         except:
             pass
-        shutil.move('build/portrom/images/product/media/theme/default/icons', 'build/portrom/images/product/media/theme/default/icons.zip')
+        shutil.move('build/portrom/images/product/media/theme/default/icons',
+                    'build/portrom/images/product/media/theme/default/icons.zip')
         shutil.rmtree('build/portrom/images/product/media/theme/default/dynamicicons')
         os.makedirs('icons/res', exist_ok=True)
         os.makedirs('icons/res/drawable-xxhdpi', exist_ok=True)
@@ -1302,8 +1307,10 @@ def main(baserom, portrom):
         os.chdir('icons/themes/common/')
         call('zip -qr build/portrom/images/product/media/theme/default/dynamicicons.zip layer_animating_icons')
         os.chdir(old)
-        shutil.move('build/portrom/images/product/media/theme/default/icons.zip', 'build/portrom/images/product/media/theme/default/icons')
-        shutil.move('build/portrom/images/product/media/theme/default/dynamicicons.zip', 'build/portrom/images/product/media/theme/default/dynamicicons')
+        shutil.move('build/portrom/images/product/media/theme/default/icons.zip',
+                    'build/portrom/images/product/media/theme/default/icons')
+        shutil.move('build/portrom/images/product/media/theme/default/dynamicicons.zip',
+                    'build/portrom/images/product/media/theme/default/dynamicicons')
         try:
             shutil.rmtree('icons')
         except:
@@ -1490,7 +1497,8 @@ def main(baserom, portrom):
                             f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update', dirs_exist_ok=True)
             for fwimg in os.listdir(f'out/{os_type}_{device_code}_{port_rom_version}/firmware-update'):
                 part = {"uefi_sec.mbn": "uefisecapp", "qupv3fw.elf": "qupfw", "NON-HLOS.bin": "modem",
-                         "km4.mbn": "keymaster", "BTFM.bin": "bluetooth", "dspso.bin": "dsp"}.get(fwimg, fwimg.split('.')[0])
+                        "km4.mbn": "keymaster", "BTFM.bin": "bluetooth", "dspso.bin": "dsp"}.get(fwimg,
+                                                                                                 fwimg.split('.')[0])
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/mac_linux_flash_script.sh',
                                   '# firmware\n', f'fastboot flash {part} firmware-update/{fwimg}')
                 insert_after_line(f'out/{os_type}_{device_code}_{port_rom_version}/windows_flash_script.bat',
