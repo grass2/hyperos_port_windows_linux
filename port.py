@@ -1261,6 +1261,14 @@ def main(baserom, portrom):
     # this missing permission will cause device stuck on boot with higher custom Camera(eg: 5.2.0.XX) integrated
     if port_rom_code == 'munch_cn':
         sed("build/portrom/images/product/etc/permissions/privapp-permissions-product.xml", '<permission name="android.permission.SYSTEM_CAMERA" />', '<permission name="android.permission.SYSTEM_CAMERA" />\n\t\t<permission name="android.permission.TURN_SCREEN_ON" />')
+    else:
+        # FboNativeService
+        fbo_native_service_bin = find_file('build/baserom/images/system/', 'FboNativeService')
+        fbo_native_service_rc = find_file('build/baserom/images/system/', 'memory.fbo.native@1.0-service.rc')
+        if fbo_native_service_bin:
+            shutil.copy2(fbo_native_service_bin, 'build/portrom/images/system/system/bin/')
+        if fbo_native_service_rc:
+            shutil.copy2(fbo_native_service_rc, 'build/portrom/images/system/system/etc/init/')
     blue("去除avb校验", "Disable avb verification.")
     for root, dirs, files in os.walk('build/portrom/images/'):
         for file in files:
