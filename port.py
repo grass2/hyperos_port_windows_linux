@@ -446,6 +446,8 @@ def call(exe, kz='Y', out=0, shstate=False, sp=0):
     try:
         ret = subprocess.Popen(cmd, shell=shstate, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, creationflags=conf)
+        if ret.returncode != 0:
+            out = 0
         for i in iter(ret.stdout.readline, b""):
             if out == 0:
                 try:
