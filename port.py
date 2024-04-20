@@ -1466,6 +1466,8 @@ def main(baserom, portrom):
     blue("正在压缩 super.img", "Comprising super.img")
     call(exe='zstd --rm build/portrom/images/super.img -o build/portrom/images/super.zst',
          kz="N" if platform.system() == 'Darwin' else 'Y')
+    if os.path.isdir(f'out/{os_type}_{device_code}_{port_rom_version}'):
+        shutil.rmtree(f'out/{os_type}_{device_code}_{port_rom_version}')
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/META-INF/com/google/android/', exist_ok=True)
     os.makedirs(f'out/{os_type}_{device_code}_{port_rom_version}/bin/windows/', exist_ok=True)
     blue('正在生成刷机脚本", "Generating flashing script')
