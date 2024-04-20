@@ -473,7 +473,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
     targetfilefullpath = find_file('build/portrom/images', file)
     if os.path.isfile(targetfilefullpath):
         targetfilename = os.path.basename(targetfilefullpath)
-        yellow(f"正在修改 {targetfilename}\nModifying {targetfilename}")
+        yellow(f"正在修改 {targetfilename}", f"Modifying {targetfilename}")
         foldername = targetfilename.split(".")[0]
         try:
             shutil.rmtree(f'tmp/{foldername}/')
