@@ -28,7 +28,7 @@ from dumper import Dumper
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
 is_chinese_language = 'Chinese' in getlocale()[0]
-
+is_eu_rom: bool = False
 
 def sdat2img(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
     def rangeset(src):
@@ -483,7 +483,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
         for i in glob.glob(f'tmp/{foldername}/*.dex'):
             smalifname = os.path.basename(i).split('.')[0]
             os.system(
-                f'java -jar bin/apktool/baksmali.jar d --api {port_android_sdk} {i} -o tmp/{foldername}/{smalifname}')
+                f'java -jar bin/apktool/{"baksmali.jar" if not is_eu_rom else "baksmali-3.0.5.jar"} d --api {port_android_sdk} {i} -o tmp/{foldername}/{smalifname}')
         targetsmali = find_file(f'tmp/{foldername}', smail)
         if os.path.isfile(targetsmali):
             smalidir = 'classes'
@@ -501,7 +501,7 @@ def patch_smali(file, smail, old, new, port_android_sdk, regex=False):
             with open(targetsmali, 'w') as f:
                 f.write(content)
             if call(
-                    f'java -jar bin/apktool/smali.jar a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex',
+                    f'java -jar bin/apktool/{"smali.jar" if not is_eu_rom else "smali-3.0.5.jar"} a --api {port_android_sdk} tmp/{foldername}/{smalidir} -o tmp/{foldername}/{smalidir}.dex',
                     out=1, kz='N') != 0:
                 red('Smaling 失败', 'Smaling failed')
                 sys.exit()
@@ -553,6 +553,7 @@ def main(baserom, portrom):
             sys.exit()
     is_base_rom_eu: bool = False
     baserom_type: str = ''
+    global is_eu_rom
     is_eu_rom: bool = False
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'ColdWindScholar'
