@@ -806,6 +806,8 @@ def main(baserom, portrom):
         f"ROM 版本: 底包为 [{base_rom_version}], 移植包为 [{port_rom_version}]",
         f"ROM Version: BASEROM: [{base_rom_version}], PORTROM: [{port_rom_version}] ")
     base_rom_code = read_config('build/portrom/images/vendor/build.prop', 'ro.product.vendor.device')
+    if base_rom_code == 'mivendor':
+        base_rom_code = device_code.lower()
     green(
         f"机型代号: 底包为 [{base_rom_code}], 移植包为 [{port_rom_code}]",
         f"Device Code: BASEROM: [{base_rom_code}], PORTROM: [{port_rom_code}]")
