@@ -11,16 +11,16 @@ import subprocess
 import sys
 import time
 from _socket import gethostname
-from bin import downloader
-from bin.gettype import gettype
+import downloader
+from gettype import gettype
 import zipfile
-from bin.lpunpack import unpack as lpunpack, SparseImage
+from lpunpack import unpack as lpunpack, SparseImage
 from imgextractor import Extractor
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 import lxml.etree as ET2
-from bin.fspatch import main as fspatch
-from bin.contextpatch import main as context_patch
+from fspatch import main as fspatch
+from contextpatch import main as context_patch
 import locale
 from rich.progress import track
 from dumper import Dumper
