@@ -21,13 +21,13 @@ import xml.etree.ElementTree as ET
 import lxml.etree as ET2
 from fspatch import main as fspatch
 from contextpatch import main as context_patch
-import locale
+from locale import getlocale
 from rich.progress import track
 from dumper import Dumper
 
 javaOpts = "-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
 tools_dir = f'{os.getcwd()}/bin/{platform.system()}/{platform.machine()}/'
-is_chinese_language = 'Chinese' in locale.getlocale()[0]
+is_chinese_language = 'Chinese' in getlocale()[0]
 
 
 def sdat2img(TRANSFER_LIST_FILE, NEW_DATA_FILE, OUTPUT_IMAGE_FILE):
