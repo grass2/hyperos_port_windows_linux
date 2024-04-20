@@ -1276,7 +1276,7 @@ def main(baserom, portrom):
     #
     blue("Integrating perfect icons")
     try:
-        Repo.clone_from(url='git@github.com/pzcn/Perfect-Icons-Completion-Project.git', to_path='./icons')
+        Repo.clone_from(url='https://github.com/pzcn/Perfect-Icons-Completion-Project.git', to_path='./icons')
     except:
         pass
     else:
