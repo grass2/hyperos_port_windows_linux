@@ -696,6 +696,7 @@ def main(baserom, portrom):
     elif is_base_rom_eu:
         blue("开始分解底包 [super.img]", "Unpacking BASEROM [super.img]")
         super_list = get_parts("build/baserom/super.img")
+        super_list = [i.replace("_a", '') for i in super_list]
         lpunpack("build/baserom/super.img", 'build/baserom/images', super_list)
     elif baserom_type == 'br':
         super_list = []
