@@ -560,7 +560,6 @@ def main(baserom, portrom):
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
     build_user = 'ColdWindScholar'
     device_code = "YourDevice"
-    compatible_matrix_matches_enabled = read_config('bin/port_config', 'compatible_matrix_matches_check') == 'true'
     pack_type = 'EXT' if read_config('bin/port_config', 'repack_with_ext4') == 'true' else 'EROFS'
     if "miui_" in baserom:
         device_code = baserom.split('_')[1]
@@ -869,10 +868,7 @@ def main(baserom, portrom):
                     ".method public constructor <init>()V\n\t.registers 1\n\tinvoke-direct {p0}, Lcom/android/server/SystemServerStub;-><init>()V\n\n\treturn-void\n.end method",
                     port_android_sdk, regex=True)
     else:
-        if compatible_matrix_matches_enabled:
-            patch_smali("framework.jar", "Build.smali", ".method public static isBuildConsistent()Z",
-                        ".method public static isBuildConsistent()Z \n\n\t.registers 1 \n\n\tconst/4 v0,0x1\n\n\treturn v0\n.end method\n\n.method public static isBuildConsistent_bak()Z",
-                        port_android_sdk)
+
         os.makedirs('tmp', exist_ok=True)
         blue("开始移除 Android 签名校验", "Disalbe Android 14 Apk Signature Verfier")
         os.makedirs('tmp/services', exist_ok=True)
