@@ -14,7 +14,7 @@ from _socket import gethostname
 import downloader
 from gettype import gettype
 import zipfile
-from lpunpack import unpack as lpunpack, SparseImage
+from lpunpack import unpack as lpunpack, SparseImage, get_parts
 from imgextractor import Extractor
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
@@ -574,10 +574,8 @@ def main(baserom, portrom):
                           'product_dlkm', 'system_ext']
         elif [True for i in rom.namelist() if '.br' in i]:
             baserom_type = 'br'
-            super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
         elif [True for i in rom.namelist() if 'images/super.img' in i]:
             is_base_rom_eu = True
-            super_list = ['vendor', 'mi_ext', 'odm', 'system', 'product', 'system_ext']
         else:
             red("底包中未发现payload.bin以及br文件，请使用MIUI官方包后重试",
                 "payload.bin/new.br not found, please use HyperOS official OTA zip package.")
@@ -696,9 +694,17 @@ def main(baserom, portrom):
                 sys.exit()
     elif is_base_rom_eu:
         blue("开始分解底包 [super.img]", "Unpacking BASEROM [super.img]")
+        super_list = get_parts("build/baserom/super.img")
         lpunpack("build/baserom/super.img", 'build/baserom/images', super_list)
     elif baserom_type == 'br':
+        super_list = []
         blue("开始分解底包 [new.dat.br]", "Unpacking BASEROM[new.dat.br]")
+        if os.path.exists('build/baserom/dynamic_partitions_op_list'):
+            with open("build/baserom/dynamic_partitions_op_list", 'r', encoding='utf-8') as f:
+                for i in f.readlines():
+                    i = i.split()
+                    if i[0] == 'add':
+                        super_list.append(i[1])
         for i in track(super_list):
             call(f'brotli -d build/baserom/{i}.new.dat.br')
             sdat2img(f'build/baserom/{i}.transfer.list', f'build/baserom/{i}.new.dat', f'build/baserom/images/{i}.img')
@@ -706,6 +712,8 @@ def main(baserom, portrom):
                      glob.glob(f'build/baserom/{i}.transfer.list') + \
                      glob.glob(f'build/baserom/{i}.patch.*'):
                 os.remove(v)
+    else:
+        super_list = []
 
     for part in track(['system', 'system_dlkm', 'system_ext', 'product', 'product_dlkm', 'mi_ext']):
         img = f'build/baserom/images/{part}.img'
@@ -730,6 +738,16 @@ def main(baserom, portrom):
         source_file = f'build/baserom/images/{image}.img'
         if os.path.isfile(source_file):
             shutil.copy(source_file, f'build/portrom/images/{image}.img')
+    # Extract the partitions list that need to pack into the super.img
+    if os.path.exists('build/portrom/images/vendor/etc/fstab.qcom'):
+        with open('build/portrom/images/vendor/etc/fstab.qcom', 'r', encoding='utf-8') as f:
+            for i in f.readline():
+                i = i.split()
+                for i_s in ['#', '/', 'overlay']:
+                    if i_s in i:
+                        continue
+                super_list.append(i[0])
+                super_list = sorted(set(super_list))
     green("开始提取逻辑分区镜像", "Starting extract partition from img")
     for part in track(super_list):
         if part in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm'] and os.path.isfile(f"build/portrom/images/{part}.img"):
