@@ -659,6 +659,7 @@ def main(baserom, portrom):
             for i in glob.glob('build/baserom/firmware-update/cust.img.*'):
                 os.remove(i)
     # Extract PortRom Zip
+    super_list = []
     if is_eu_rom:
         blue("正在提取移植包 [super.img]" "Extracting files from PORTROM [super.img]")
         with zipfile.ZipFile(portrom) as rom:
@@ -712,8 +713,6 @@ def main(baserom, portrom):
                      glob.glob(f'build/baserom/{i}.transfer.list') + \
                      glob.glob(f'build/baserom/{i}.patch.*'):
                 os.remove(v)
-    else:
-        super_list = []
 
     for part in track(['system', 'system_dlkm', 'system_ext', 'product', 'product_dlkm', 'mi_ext']):
         img = f'build/baserom/images/{part}.img'
