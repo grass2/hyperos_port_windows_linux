@@ -741,13 +741,17 @@ def main(baserom, portrom):
     # Extract the partitions list that need to pack into the super.img
     if os.path.exists('build/portrom/images/vendor/etc/fstab.qcom'):
         with open('build/portrom/images/vendor/etc/fstab.qcom', 'r', encoding='utf-8') as f:
-            for i in f.readline():
+            for i in f.readlines():
                 i = i.split()
+                if not i:
+                    continue
                 for i_s in ['#', '/', 'overlay']:
-                    if i_s in i:
+                    if i[0].startswith(i_s):
+                        i = ["#"]
                         continue
+                if i[0] in ['#', '/', 'overlay']:
+                    continue
                 super_list.append(i[0])
-                super_list = sorted(set(super_list))
     green("开始提取逻辑分区镜像", "Starting extract partition from img")
     for part in track(super_list):
         if part in ['vendor', 'odm', 'vendor_dlkm', 'odm_dlkm'] and os.path.isfile(f"build/portrom/images/{part}.img"):
