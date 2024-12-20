@@ -237,9 +237,12 @@ def get_super_size(device):
     # Redmi Note 12 5G
     elif device == 'SUNSTONE':
         return 9122611200
-    # PAD6Max
-    elif device == 'YUDI':
+    # PAD6Max 15 15Pro
+    elif device in ['DADA', 'HAOTIAN', 'YUDI']:
         return 11811160064
+    #14 14Pro 14Ultra
+    elif device in ['AURORA', 'HOUJI', 'SHENNONG']:
+        return 8321499136
     # Others
     else:
         return 9126805504
@@ -558,14 +561,14 @@ def main(baserom, portrom):
     global is_eu_rom
     is_eu_rom = False
     port_partition = read_config('bin/port_config', 'partition_to_port').split()
-    build_user = 'ColdWindScholar'
+    build_user = 'ColdWinter'
     device_code = "YourDevice"
     pack_type = 'EXT' if read_config('bin/port_config', 'repack_with_ext4') == 'true' else 'EROFS'
     if "miui_" in baserom:
         device_code = baserom.split('_')[1]
     elif "xiaomi.eu_" in baserom:
         device_code = baserom.split('_')[2]
-    is_shennong_houji_port = device_code.upper() in ['SHENNONG', 'HOUJI']
+    is_aurora_shennong_houji_port = device_code.upper() in ['AURORA', 'SHENNONG', 'HOUJI']
     blue("正在检测ROM底包", "Validating BASEROM..")
     with zipfile.ZipFile(baserom) as rom:
         if "payload.bin" in rom.namelist():
@@ -877,7 +880,7 @@ def main(baserom, portrom):
                         dirs_exist_ok=True)
     # Apk
     blue("左侧挖孔灵动岛修复", "StrongToast UI fix")
-    if is_shennong_houji_port:
+    if is_aurora_shennong_houji_port:
         patch_smali("MiuiSystemUI.apk", "MIUIStrongToast$2.smali", "const/4 v7, 0x0",
                     "iget-object v7, v1, Lcom/android/systemui/toast/MIUIStrongToast;->mRLLeft:Landroid/widget/RelativeLayout;\n\tinvoke-virtual {v7}, Landroid/widget/RelativeLayout;->getLeft()I\n\tmove-result v7\n\tint-to-float v7,v7",
                     port_android_sdk)
@@ -892,7 +895,7 @@ def main(baserom, portrom):
     else:
 
         os.makedirs('tmp', exist_ok=True)
-        blue("开始移除 Android 签名校验", "Disalbe Android 14 Apk Signature Verfier")
+        blue("开始移除 Android 签名校验", "Disable Android 14 Apk Signature Verfier")
         os.makedirs('tmp/services', exist_ok=True)
         os.rename(
             'build/portrom/images/system/system/framework/services.jar',
